@@ -4,6 +4,139 @@
 <div class="thread" id="thread_{{ post.id }}" data-board="{{ board.uri }}">
 {% if not index %}<a id="{{ post.id }}" class="post_anchor"></a>{% endif %}
 
+
+{%if not index%} 
+
+{# check the thread flags for 1 5, this indicates a stream #}
+{% if post.post_flags is defined and bitwise_and(post.post_flags,32) %}
+	{% set stream = true %}
+{% else %}
+	{% set stream = false %}
+{% endif %}
+
+{% if stream %}
+<style>
+	#video-container {
+		position: fixed;
+		top: 20px;
+		right: 20px;
+		width: 50%;
+		min-width: 200px;
+		height: 300px;
+		min-height: 150px;
+		background-color: #000;
+		z-index: 1000;
+		cursor: move;
+		overflow: hidden;
+	}
+	
+	#video-player {
+		width: 100%;
+		height: 100%;
+		border: none;
+		pointer-events: none;
+	}
+	
+	#resize-handle {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: 10px;
+		height: 10px;
+		background-color: #444;
+		cursor: nwse-resize;
+	}
+	
+	#thread {
+		padding: 20px;
+		transition: margin-right 0.3s ease;
+	}
+	</style>
+	
+	<div id="video-container">
+		<div style="width:100%;height:20px"><p style="color:white">Stream</p> </div>
+		<iframe id="video-player" src="https://stream.soyak.party/embed/video" frameborder="0" allowfullscreen scrolling="no"></iframe>
+		<div id="resize-handle"></div>
+	</div>
+	
+	<script nonce="B13FF511DC4651B846CEDB57FAD24">
+	const thread = document.getElementsByClassName("thread")[0];
+	const videoContainer = document.getElementById('video-container');
+	const resizeHandle = document.getElementById('resize-handle');
+	const videoPlayer = document.getElementById('video-player');
+	
+	function updateThreadMargin() {
+		const rect = videoContainer.getBoundingClientRect();
+		const windowWidth = window.innerWidth;
+		const rightMargin = windowWidth - rect.left;
+		thread.style.marginRight = `${rightMargin}px`;
+	}
+	let isResizing = false;
+	let isDragging = false;
+	let dragStartX, dragStartY, initialLeft, initialTop;
+	
+	videoContainer.addEventListener('mousedown', startDragging);
+	resizeHandle.addEventListener('mousedown', startResizing);
+	document.addEventListener('mousemove', handleMouseMove);
+	document.addEventListener('mouseup', stopInteraction);
+	
+	function startDragging(e) {
+		if (e.target === resizeHandle) return;
+		isDragging = true;
+		dragStartX = e.clientX;
+		dragStartY = e.clientY;
+		initialLeft = videoContainer.offsetLeft;
+		initialTop = videoContainer.offsetTop;
+		videoPlayer.style.pointerEvents = 'none';
+	}
+	
+	function startResizing(e) {
+		isResizing = true;
+		e.stopPropagation();
+	}
+	
+	function handleMouseMove(e) {
+		if (isDragging) {
+			const dx = e.clientX - dragStartX;
+			const dy = e.clientY - dragStartY;
+			videoContainer.style.left = `${initialLeft + dx}px`;
+			videoContainer.style.top = `${initialTop + dy}px`;
+		} else if (isResizing) {
+			const newWidth = e.clientX - videoContainer.offsetLeft;
+			const newHeight = e.clientY - videoContainer.offsetTop;
+			videoContainer.style.width = `${newWidth}px`;
+			videoContainer.style.height = `${newHeight}px`;
+		}
+		updateThreadMargin();
+	}
+	
+	function stopInteraction() {
+		isDragging = false;
+		isResizing = false;
+		videoPlayer.style.pointerEvents = 'auto';
+		updateThreadMargin();
+	}
+		
+	function constrainToViewport() {
+		const rect = videoContainer.getBoundingClientRect();
+		if (rect.left < 0) videoContainer.style.left = '0px';
+		if (rect.top < 0) videoContainer.style.top = '0px';
+		if (rect.right > window.innerWidth) videoContainer.style.left = `${window.innerWidth - rect.width}px`;
+		if (rect.bottom > window.innerHeight) videoContainer.style.top = `${window.innerHeight - rect.height}px`;
+		updateThreadMargin();
+	}
+	
+	window.addEventListener('resize', constrainToViewport);
+	videoContainer.addEventListener('mouseup', constrainToViewport);
+	updateThreadMargin();
+		
+	</script>
+	
+{% endif %}
+
+
+{%endif%}
+
 {% endapply %}
 {% include 'post/fileinfo.html' %}
 <div class="post op" id="op_{{ post.id }}" {%if post.num_files > 1%}style='clear:both'{%endif%}><p class="intro">
@@ -12,14 +145,16 @@
 		
 		{% include 'post/subject.html' %}
 		{% include 'post/name.html' %}
-		{% include 'post/ip.html' %}
+		{% include 'post/festival_team.html' %}
 		{% include 'post/flag.html' %}
+		{% include 'post/ip.html' %}
 		{% include 'post/time.html' %}
 	</label>
 	{% apply spaceless %}
 	{% include 'post/poster_id.html' %}&nbsp;
-	<a class="post_no" id="post_no_{{ post.id }}" onclick="highlightReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('', '50') }}{% else %}{{ post.link }}{% endif %}">No.</a>
+	<a class="post_no" id="post_no_{{ post.id }}" onclick="highlightReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('', '50') }}{% else %}{{ post.link }}{% endif %}">№</a>
 	<a class="post_no" onclick="citeReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('q', '50') }}{% else %}{{ post.link('q') }}{% endif %}">{{ post.id }}</a>
+	{% include 'post/award.html' %}
 	{% if post.sticky %}
 		{% if config.font_awesome %}
 			<i class="fa fa-thumb-tack" title="Sticky"></i>
@@ -41,12 +176,28 @@
 			<img class="icon" title="Bumplocked" src="{{ config.image_bumplocked }}" alt="Bumplocked" />
 		{% endif %}
 	{% endif %}
+	{% if post.decryption_key is not null %}
+		<img class="icon encrypted-thread-icon" title="Restricted Thread" src="{{ config.image_encrypted }}" alt="restricted" />
+	{% endif %}
+	{%if post.images_only%}
+	{% if config.font_awesome %}
+		<i class="fa fa-anchor" title="Images Only"></i>
+		{% else %}
+		<img class="icon" title="Images Only" src="{{ config.image_imagesonly }}" alt="Images Only" />
+	{% endif %}
+	{%endif%}
+	{% if post.post_flags is defined and bitwise_and(post.post_flags,512) %}
+		<img class="icon" title="Desktop Only" src="{{ config.image_desktop }}" alt="desktop" />
+	{% endif %}
 	{% if post.cycle %}
 		{% if config.font_awesome %}
 			<i class="fa fa-refresh" title="Cyclical"></i>
 		{% else %}
-			<img class="icon" title="Cyclical" src="{{ config.image_sticky }}" alt="Cyclical" />
+			<img class="icon" title="Cyclical" src="{{ config.image_cyclical }}" alt="Cyclical" />
 		{% endif %}
+	{% endif %}
+	{% if post.invincible %}
+		<img class="icon" title="Loop" src="{{ config.image_loop }}" alt="loop" />
 	{% endif %}
 	{% if index %}
 		<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post) }}">[{% trans %}Reply{% endtrans %}]</a>
@@ -58,6 +209,15 @@
 		{% set lastcount = config.noko50_count %}
 		<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, true) }}">[{% trans %}Last 1 Post{% plural lastcount %}Last {{ count }} Posts{% endtrans %}]</a>
 	{% endif %}
+	{% if pages > 1 %}
+		{%for page in range(0, pages - 1)%}
+			<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]
+			</a>
+		{%endfor%}
+	{%endif%}
+	{% if config.item_shop %}<a class="post_award" href="javascript:void(0);" onclick="ItemShop.show({{ post.id }});">[Award]</a>{% endif %}
+	{% if config.user_vote_to_delete %}<a title="Vote to delete" href="/vote.php?board={{ board.uri }}&id={{ post.id }}">[Vote]</a>{% endif %}
+	{% if not index %}<a class="post_quote" href="javascript:void(0);" onclick="doQuote(this);">[Quote]</a>{% endif %}
 	{% include 'post/post_controls.html' %}
 	</p>
 	<div class="body">
@@ -96,3 +256,12 @@
 {% endfor %}
 <br class="clear"/>{% if hr %}<hr/>{% endif %}
 </div>
+{% if not index %}
+        {% if pages > 1 %}
+		<div>
+                {%for page in range(0, pages - 1)%}
+                        <a style="margin-right: 5px;" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]</a>
+		{%endfor%}
+		</div>
+        {%endif%}
+{% endif %}

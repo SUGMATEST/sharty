@@ -16,7 +16,13 @@
 		{% if mod|hasPermission(config.mod.show_ip, board.uri) %}
 			<tr>
 				<th>{% trans 'IP' %}</th>
-				<td>{{ ban.mask|cloak_mask }}</td>
+				<td><a class="ip-link" style="margin:0;" href="?/IP/{{ ban.mask|cloak_mask }}">{{ ban.mask|cloak_mask }}</a></td>
+			</tr>
+		{% endif %}
+		{% if mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+			<tr>
+				<th>{% trans 'Pass' %}</th>
+				<td>{% if ban.pass_id %}UID {{ ban.pass_id }}{% else %}N/A{% endif %}</td>
 			</tr>
 		{% endif %}
 		<tr>
@@ -91,6 +97,13 @@
 					<input type="hidden" name="appeal_id" value="{{ ban.id }}">
 					<input type="submit" name="unban" value="Unban"> 
 					<input type="submit" name="deny" value="Deny appeal">
+					<!--deny_reason/optional-->
+					<input type="text" name="deny_reason" placeholder="Deny reason">
+
+					<input type="checkbox" name="unappealable" id="unappealable-{{ ban.id }}">
+					<label for="unappealable-{{ ban.id }}">Prevent future appeals</label>
+					
+					<!--<input type="submit" name="edit_ban" value="{% trans 'Edit ban' %}">-->
 				</td>
 			</tr>
 		{% endif %}

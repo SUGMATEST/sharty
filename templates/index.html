@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">
 	  var
           {% if not no_post_form %}
               active_page = "index"
@@ -15,34 +15,31 @@
 
 	{% include 'header.html' %}
 	<title>{{ board.url }} - {{ board.title|e }}</title>
+	<meta name="description" content="{{ board.url }} - {{ board.title|e }} - {{ board.subtitle|e }}" />
 </head>
 <body class="8chan vichan {% if mod %}is-moderator{% else %}is-not-moderator{% endif %} active-{% if not no_post_form %}index{% else %}ukko{% endif %}" data-stylesheet="{% if config.default_stylesheet.1 != '' %}{{ config.default_stylesheet.1 }}{% else %}default{% endif %}">
 	{{ boardlist.top }}
 	
 	{% if pm %}<div class="top_notice">You have <a href="?/PM/{{ pm.id }}">an unread PM</a>{% if pm.waiting > 0 %}, plus {{ pm.waiting }} more waiting{% endif %}.</div><hr />{% endif %}
-	{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" {% if config.banner_width or config.banner_height %}style="{% if config.banner_width %}width:{{ config.banner_width }}px{% endif %};{% if config.banner_width %}height:{{ config.banner_height }}px{% endif %}" {% endif %}alt="" />{% endif %}
+	{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" style="max-width:300px" width="300" height="100" alt="A banner for soyjak.party" />{% endif %}
 	
-	<header>
-		<h1>{{ board.url }} - {{ board.title|e }}</h1>
-		<div class="subtitle">
-			{% if board.subtitle %}
-				{% if config.allow_subtitle_html %}
-					{{ board.subtitle }}
-				{% else %}
-					{{ board.subtitle|e }}
-				{% endif %}
-			{% endif %}
-			{% if mod %}<p><a href="?/">{% trans %}Return to dashboard{% endtrans %}</a></p>{% endif %}
-		</div>
-	</header>
+	{% include 'board_header.html' %}
+
+	{% if no_post_form %}
+	<h1>
+		<a id="reveal-post-form" href="javascript:void(0);" onclick="document.querySelector('#post-form-container').hidden = false; document.querySelector('#reveal-post-form').remove();">New Thread</a>
+	</h1>
+	<br>
+	{% endif %}
 
 	{% include 'attention_bar.html' %}
-
-	{{ config.ad.top }}
 
 	{% if not no_post_form %}
 		{% include 'post_form.html' %}
 	{% else %}
+		<div hidden id="post-form-container">
+			{% include 'post_form.html' %}
+		</div>
 		{% include 'boardlist.html' %}
 	{% endif %}
 
@@ -54,8 +51,13 @@
 			{{ btn.next }}
 		</div>
 	{% endif %}
+
+	{{ config.ad.top }}
+	
+	{% include 'board_banner.html' %}
 	
 	{% if config.global_message %}<hr /><div class="blotter">{{ config.global_message }}</div>{% endif %}
+	{% if mod %}{% endif %}
 	<hr />
 	{% if config.board_search %}
 	<!-- Start Search Form -->
@@ -89,7 +91,7 @@
 	{{ config.ad.bottom }}
 
 	{% include 'footer.html' %}
-	<script type="text/javascript">{% verbatim %}
+	<script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">{% verbatim %}
 		ready();
 	{% endverbatim %}</script>
 	

@@ -1,0 +1,15 @@
+{% if post.modifiers.award %}
+	<span class="awards" style="vertical-align:top;margin-left:8px;{% if post.thread %}float:right;margin-right:4px;{% endif %}">
+	{% for index, award in post.modifiers.award %}
+		 <img 
+			class="award" src="{{ award }}"
+			style="height:32px"
+
+			{% if post.modifiers['award alt'][index] %}
+				alt="{{ post.modifiers['award alt'][index] | e('html_attr') }}"
+				title="{{ post.modifiers['award alt'][index] | e('html_attr') }}"
+			{% endif %}
+		>
+	{% endfor %}
+	</span> 
+{% endif %}

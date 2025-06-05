@@ -1,0 +1,148 @@
+label:not(:has(span.capcode)) span.name {
+  color:#00BF3A !important;
+}
+
+form table tr th{
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+}
+
+div.boardlist {
+  border-radius: 35px;
+  border: 2px solid #8B8000;
+  padding: 12px;
+  opacity: 1;
+  font-size: 5px
+  color: #000;
+  font-style: italic;
+  font-style: oblique;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+}
+
+div.post {
+  color: #000;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  border-radius: 35px;
+  border: 2px solid #8B8000;
+  padding: 20px;
+  font-family: serif;
+  font-style: italic;
+  font-size: 16px
+}
+
+body {
+    cursor: url('/test/src/1726202249613s.png'), auto;
+}
+
+div.post.reply {
+  color: #000;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 86%,#C4B454 95%, #8B8000 100%);
+  border-radius: 15px;
+  border: 1px solid #8B8000;
+  padding: 3px;
+  font-family: serif;
+  font-style: italic;
+  font-size: 16px
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    background: #A0D1FF;
+    background-image: url('/static/anniversary/background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: bottom;
+    background-size: cover;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  body {
+    background: #A0D1FF;
+    background-image: url('/static/anniversary/background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: bottom;
+    background-size: cover;
+  }
+}
+
+div.post.reply.highlighted {
+  background: linear-gradient(137.9deg, rgb(78, 156, 226) 7.8%, rgb(62, 146, 69) 16%, rgb(251, 220, 23) 32.7%, rgb(242, 160, 35) 50.4%, rgb(253, 12, 12) 71.5%, rgb(192, 26, 129) 83.1%);
+}
+
+.boardlist {
+  background-color:#ffd045 !important
+  opacity: 0.75;
+}
+
+div.pages.top {
+  opacity: 0.75;
+  background: #ffd045;
+}
+
+div.pages {
+  opacity: 0.75;
+  background: #83BDD5;
+}
+
+h1 {
+  color: #111111; 
+  opacity: 0.75;
+  border-radius: 5px;
+  border: 1px solid #111111;
+  padding: 5px;
+  width="800%"
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 86%,#C4B454 95%, #8B8000 100%);
+  width: fit-content;
+  margin: auto;
+}
+
+img {
+  border: 3px solid #8B8000; /* Adjust the color to match your theme */
+  padding: 5px; /* Adds spacing between the image and the border */
+  border-radius: 35px; /* Optional: to make the corners rounded */
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 1); /* Optional: adds a shadow effect */
+}
+
+div#news {
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  border-radius: 25px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+div.blotter {
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  width: fit-content;
+  margin: auto;
+}
+
+div.mix {
+  border: 1px solid #111111;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 22%,#F8DE7E 28%,#FBEC5D 60%,#FADA5E 71%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  border-radius: 11px;
+  box-shadow: 5px 5px 8px rgba(0, 0, 0, 15);
+}
+
+body, div.post, div.post.reply, div.post.reply.highlighted, div#news, div.blotter, div.mix, div.subtitle {
+  color: #000000 !important;
+}
+
+a {
+  cursor: url('/test/src/1726201445554k-0.png') 10 10, pointer;
+}
+
+body::before {
+  content: ""; /* Required for ::before to work */
+  position: fixed;
+  bottom: -48px; /* Position from the bottom */
+  right: -63px; /* Position from the right */
+  width: 280px; /* Width of the GIF */
+  height: 280px; /* Height of the GIF */
+  background-image: url('/static/anniversary/4-years-award.gif'); /* The URL of your GIF */
+  background-size: contain; /* Resize background to fit the container */
+  background-repeat: no-repeat; /* Don't repeat the GIF */
+  pointer-events: none;
+  z-index: 1000; /* Make sure it appears above other elements */
+}

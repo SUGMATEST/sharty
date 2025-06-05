@@ -14,9 +14,35 @@
 <body>
 	{{ boardlist.top }}
 	<header>
+	    <center><img src="/static/front-page//soyberg.png" width="100px"></center>
 		<h1>{{ settings.title }}</h1>
 		<div class="subtitle">{{ settings.subtitle }}</div>
 	</header>
+
+	<div class="box-wrap">
+		<div class="box middle">
+	<h2>Soyjak.party</h2>
+	<ul>
+		<li>Soyjak.party, (or just "the party") is an imageboard dedicated to the creation, posting, and sharing of soyjaks. As the site has grown, its expanded to encompass many other topics as well. Please read the <a href="/rules.html">rules</a> before posting. Serving <b>{{ stats.total_posts }}</b> posts!</li><br />
+		<center>
+			<a class="bl" href="/o/">Overboard</a> -  
+			<a class="bl" href="/soy/">Soyjaks</a> - 
+			<a class="bl" href="/qa/">Question and Answer</a> - 
+			<a class="bl" href="/raid/">RAID: SHADOW LEGENDS</a> - 
+			<a class="bl" href="/craft/">Minecraft</a> - 
+			<a class="bl" href="/tttt/">Trouble in Terrorist Town Talk</a> - 
+			<a class="bl" href="/a/">Anime</a> - 
+			<a class="bl" href="/g/">Generals</a> - 
+			<a class="bl" href="/mtv/">Music, Television, Video Games</a> - 
+			<a class="bl" href="/r/">Requests & Soy Art</a> - 
+			<a class="bl" href="/sude/">Soychan 2004</a> - 
+			<a class="bl" href="/tech/">Technology</a> - 
+			<a class="bl" href="/int/">International</a> - 
+			<a class="bl" href="/pol/">Politics</a> - 
+			<a class="bl" href="/q/">Soyjak Party Meta</a>
+		</center>
+	</ul>
+</div>
 	
 	<div class="box-wrap">
 		<div class="box left">
@@ -45,7 +71,7 @@
 			</ul>
 		</div>
 		<div class="box right">
-			<h2>Stats</h2>
+			<h2>Statistics</h2>
 			<ul>
 				<li>Total posts: {{ stats.total_posts }}</li>
 				<li>Unique posters: {{ stats.unique_posters }}</li>

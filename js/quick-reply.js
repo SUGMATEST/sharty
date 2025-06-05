@@ -125,6 +125,8 @@
 	};
 	
 	var show_quick_reply = function(){
+		if (typeof openPostForm != 'undefined')
+			openPostForm();
 		if($('div.banner').length == 0)
 			return;
 		if($('#quick-reply').length != 0)
@@ -135,6 +137,15 @@
 		var $postForm = $('form[name="post"]').clone();
 		
 		$postForm.clone();
+
+
+		$postForm.find('*').each(function(x) 
+		{
+		var elem = $(this);
+		if (elem.attr('name') == "captcha-container")
+		elem.remove();
+		}
+		);
 		
 		$dummyStuff = $('<div class="nonsense"></div>').appendTo($postForm);
 		
@@ -178,22 +189,22 @@
 						.removeAttr('id')
 						.removeAttr('style')
 						.addClass('recaptcha_image')
-						.click(function() {
-							$('#recaptcha_reload').click();
+						.on('click', function() {
+							$('#recaptcha_reload').trigger('click');
 						});
 					
 					// When we get a new captcha...
-					$('#recaptcha_response_field').focus(function() {
+					$('#recaptcha_response_field').on('focus', function() {
 						if ($captchaimg.attr('src') != $('#recaptcha_image img').attr('src')) {
 							$captchaimg.attr('src', $('#recaptcha_image img').attr('src'));
 							$postForm.find('input[name="recaptcha_challenge_field"]').val($('#recaptcha_challenge_field').val());
-							$postForm.find('input[name="recaptcha_response_field"]').val('').focus();
+							$postForm.find('input[name="recaptcha_response_field"]').val('').trigger('focus');
 						}
 					});
 					
-					$postForm.submit(function() {
+					$postForm.on('submit', function() {
 						setTimeout(function() {
-							$('#recaptcha_reload').click();
+							$('#recaptcha_reload').trigger('click');
 						}, 200);
 					});
 					
@@ -260,7 +271,7 @@
 				// Remove mod controls, because it looks shit.
 				if ($td.find('input[type="checkbox"]').length) {
 					var tr = this;
-					$td.find('input[type="checkbox"]').each(function() {
+					$td.find('input[type="checkbox"]:not(.tmb-flag *)').each(function() {
 						if ($(this).attr('name') == 'spoiler') {
 							$td.find('label').remove();
 							$(this).attr('id', 'q-spoiler-image');
@@ -281,7 +292,7 @@
 		
 		$postForm.find('textarea[name="body"]').removeAttr('id').removeAttr('cols').attr('placeholder', _('Comment'));
 	
-		$postForm.find('textarea:not([name="body"]),input[type="hidden"]:not(.captcha_cookie)').removeAttr('id').appendTo($dummyStuff);
+		$postForm.find('textarea:not([name="body"]),input[type="hidden"]:not(.captcha_cookie):not([name="x"]):not([name="y"]):not([name="guid"])').appendTo($dummyStuff);
 	
 		$postForm.find('br').remove();
 		$postForm.find('table').prepend('<tr><th colspan="2">\
@@ -303,11 +314,11 @@
 		$postForm.find('textarea[name="body"]').on('change input propertychange', function() {
 			$origPostForm.find('textarea[name="body"]').val($(this).val());
 		});
-		$postForm.find('textarea[name="body"]').focus(function() {
+		$postForm.find('textarea[name="body"]').on('focus', function() {
 			$origPostForm.find('textarea[name="body"]').removeAttr('id');
 			$(this).attr('id', 'body');
 		});
-		$origPostForm.find('textarea[name="body"]').focus(function() {
+		$origPostForm.find('textarea[name="body"]').on('focus', function() {
 			$postForm.find('textarea[name="body"]').removeAttr('id');
 			$(this).attr('id', 'body');
 		});
@@ -318,7 +329,18 @@
 		$postForm.find('input[type="text"],select').on('change input propertychange', function() {
 			$origPostForm.find('[name="' + $(this).attr('name') + '"]').val($(this).val());
 		});
-
+		/*				<select name="festival_team">
+					<option value="">None</option>
+					{% for team, data in config.splatfest_teams %}
+						<option value="{{ team }}">{{ team }}</option>
+					{% endfor %}
+				</select>*/
+		// Synchronise festival teams (if they exist)
+		$origPostForm.find('select[name="festival_team"]').on('change input propertychange', function() {
+			$postForm.find('select[name="festival_team"]').val($(this).val());
+		});
+		//update it to the new form
+		$postForm.find('select[name="festival_team"]').val($origPostForm.find('select[name="festival_team"]').val());
 		if (typeof $postForm.draggable != 'undefined') {	
 			if (localStorage.quickReplyPosition) {
 				var offset = JSON.parse(localStorage.quickReplyPosition);
@@ -348,7 +370,7 @@
 			$postForm.find('th .handle').css('cursor', 'move');
 		}
 		
-		$postForm.find('th .close-btn').click(function() {
+		$postForm.find('th .close-btn').on('click', function() {
 			$origPostForm.find('textarea[name="body"]').attr('id', 'body');
 			$postForm.remove();
 			floating_link();
@@ -363,14 +385,14 @@
 	
 		$(window).ready(function() {
 			if (settings.get('hide_at_top', true)) {
-				$(window).scroll(function() {
+				$(window).on('scroll', function() {
 					if ($(this).width() <= 400)
 						return;
 					if ($(this).scrollTop() < $origPostForm.offset().top + $origPostForm.height() - 100)
 						$postForm.fadeOut(100);
 					else
 						$postForm.fadeIn(100);
-				}).scroll();
+				}).trigger('scroll');
 			} else {
 				$postForm.show();
 			}
@@ -389,7 +411,7 @@
 			return;
 		show_quick_reply();
 		if (with_link) {
-			$(document).ready(function() {
+			$(function() {
 				if ($('#' + id).length) {
 					highlightReply(id);
 					$(document).scrollTop($('#' + id).offset().top);
@@ -399,7 +421,7 @@
 				// Same for the "tmp" variable stuff you see inside here:
 				setTimeout(function() {
 					var tmp = $('#quick-reply textarea[name="body"]').val();
-					$('#quick-reply textarea[name="body"]').val('').focus().val(tmp);
+					$('#quick-reply textarea[name="body"]').val('').trigger('focus').val(tmp);
 				}, 1);
 			});
 		}
@@ -409,7 +431,7 @@
 		if (!settings.get('floating_link', false))
 			return;
 		$('<a href="javascript:void(0)" class="quick-reply-btn">'+_('Quick Reply')+'</a>')
-			.click(function() {
+			.on('click', function() {
 				show_quick_reply();
 				$(this).remove();
 			}).appendTo($('body'));
@@ -439,14 +461,14 @@
 			if (settings.get('hide_at_top', true)) {
 				$('.quick-reply-btn').hide();
 				
-				$(window).scroll(function() {
+				$(window).on('scroll', function() {
 					if ($(this).width() <= 400)
 						return;
 					if ($(this).scrollTop() < $('form[name="post"]:first').offset().top + $('form[name="post"]:first').height() - 100)
 						$('.quick-reply-btn').fadeOut(100);
 					else
 						$('.quick-reply-btn').fadeIn(100);
-				}).scroll();
+				}).trigger('scroll');
 			}
 		});
 	}

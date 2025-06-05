@@ -11,10 +11,24 @@
 
 +function(){
 
+var apply_css = function() {
+  $('.user-css').remove();
+  $('link[rel="stylesheet"]')
+    .last()
+    .after($("<style></style>")
+      .addClass("user-css")
+      .text(localStorage.user_css)
+    );
+};
+
+if (localStorage.user_css) {
+  apply_css();
+}
+
 var tab = Options.add_tab("user-css", "css3", _("User CSS"));
 
 var textarea = $("<textarea></textarea>").css({
-  "font-size": 12,
+  "font-size": "12px",
   position: "absolute",
   top: 35, bottom: 35,
   width: "calc(100% - 20px)", margin: 0, padding: "4px", border: "1px solid black",
@@ -25,20 +39,10 @@ var submit = $("<input type='button' value='"+_("Update custom CSS")+"'>").css({
   height: 25, bottom: 5,
   width: "calc(100% - 10px)",
   left: 5, right: 5
-}).click(function() {
+}).on('click', function() {
   localStorage.user_css = textarea.val();
   apply_css();
 }).appendTo(tab.content);
-
-var apply_css = function() {
-  $('.user-css').remove();
-  $('link[rel="stylesheet"]')
-    .last()
-    .after($("<style></style>")
-      .addClass("user-css")
-      .text(localStorage.user_css)
-    );
-};
 
 var update_textarea = function() {
   if (!localStorage.user_css) {

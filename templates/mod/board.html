@@ -29,6 +29,23 @@
 				<input size="25" type="text" name="subtitle" value="{{ board.subtitle|e }}" autocomplete="off">
 			</td>
 		</tr>
+		{% if new %}
+			<tr>
+				<th>{% trans 'Grant access to' %}</th>
+				<td>
+					<ul style="padding:5px 8px;list-style:none">
+						{% for group_value, group_name in config.mod.groups %}
+							{% if group_name != 'Disabled' and group_name != 'None' %}
+								<li>
+									<input type="radio" name="group" id="group_{{ group_name }}" value="{{ group_value }}">
+									<label for="group_{{ group_name }}">{{ group_name|trans }}</label>
+								</li>
+							{% endif %}
+						{% endfor %}
+					</ul>
+				</td>
+			</tr>
+		{% endif %}
 	</table>
 	
 	<ul style="padding:0;text-align:center;list-style:none">

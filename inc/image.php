@@ -16,6 +16,8 @@ class Image {
 
 		if ($config['thumb_method'] == 'imagick') {
 			$classname = 'ImageImagick';
+		} elseif ($config['thumb_method'] == 'libvips') {
+			$classname = 'ImageConvertVIPS';
 		} elseif (in_array($config['thumb_method'], array('convert', 'convert+gifsicle', 'gm', 'gm+gifsicle'))) {
 			$classname = 'ImageConvert';
 		} else {
@@ -46,6 +48,8 @@ class Image {
 			$classname = 'ImageImagick';
 		} elseif ($config['thumb_method'] == 'convert') {
 			$classname = 'ImageConvert';
+		} elseif ($config['thumb_method'] == 'libvips') {
+			$classname = 'ImageConvertVIPS';
 		} elseif ($config['thumb_method'] == 'convert+gifsicle') {
 			$classname = 'ImageConvert';
 			$gifsicle = true;
@@ -317,7 +321,7 @@ class ImageConvert extends ImageBase {
 		
 		if ($this->format == 'gif' && ($config['thumb_ext'] == 'gif' || $config['thumb_ext'] == '') && $config['thumb_keep_animation_frames'] > 1) {
 			if ($this->gifsicle) {
-				if (($error = shell_exec("gifsicle -w --unoptimize -O2 --resize {$this->width}x{$this->height} < " .
+				if (($error = shell_exec("gifsicle -w --loopcount --unoptimize -O2 --resize {$this->width}x{$this->height} < " .
 						escapeshellarg($this->src . '') . " \"#0-{$config['thumb_keep_animation_frames']}\" -o " .
 						escapeshellarg($this->temp))) || !file_exists($this->temp)) {
 					$this->destroy();
@@ -445,20 +449,116 @@ class ImageConvert extends ImageBase {
 	}
 }
 
-class ImagePNG extends ImageBase {
+
+class ImageConvertVIPS extends ImageBase {
+	public $width, $height, $temp;
+	
+	public function init() {
+		global $config;
+		$this->temp = false;
+	}
+	public function get_size($src, $try_gd_first = true) {
+		if ($try_gd_first) {
+			if ($size = @getimagesize($src))
+				return $size;
+		}
+		$size = shell_exec_error('vipsheader -f width -f height ' . escapeshellarg($src . '[0]'));
+		if (preg_match('/^(\d+)\n(\d+)$/', $size, $m))
+			return array($m[1], $m[2]);
+		return false;
+	}
 	public function from() {
-		$this->image = @imagecreatefrompng($this->src);
+		if ($this->width > 0 && $this->height > 0) {
+			$this->image = true;
+			return;
+		}
+		$size = $this->get_size($this->src, false);
+		if ($size) {
+			$this->width = $size[0];
+			$this->height = $size[1];
+			
+			$this->image = true;
+		} else {
+			// mark as invalid
+			$this->image = false;
+		}
 	}
 	public function to($src) {
 		global $config;
-		imagepng($this->image, $src);
+		
+		if (!$this->temp) {
+			$importargs = '[n=-1] ';
+			if (!preg_match('/^(\d+)$/', shell_exec_error('vipsheader -f n-pages ' . escapeshellarg($this->src))))
+				$importargs = ' ';
+
+			if ($config['strip_exif']) {
+				if($error = shell_exec_error('vips autorot ' . escapeshellarg($this->src) . $importargs . escapeshellarg($src) . '[strip]')) {
+					$this->destroy();
+					error(_('Failed to redraw image!'), null, $error);
+				}
+			} else {
+				if($error = shell_exec_error('vips autorot ' . escapeshellarg($this->src) . $importargs . escapeshellarg($src))) {
+					$this->destroy();
+					error(_('Failed to redraw image!'), null, $error);
+				}
+			}
+		} else {
+			rename($this->temp, $src);
+			chmod($src, 0664);
+		}
+	}
+	public function width() {
+		return $this->width;
+	}
+	public function height() {
+		return $this->height;
+	}
+	public function destroy() {
+		@unlink($this->temp);
+		$this->temp = false;
 	}
 	public function resize() {
-		$this->GD_create();
-		imagecolortransparent($this->image, imagecolorallocatealpha($this->image, 0, 0, 0, 0));
-		imagesavealpha($this->image, true);
-		imagealphablending($this->image, false);
-		$this->GD_copyresampled();
+		global $config;
+		
+		if ($this->temp) {
+			// remove old
+			$this->destroy();
+		}
+		
+		$this->temp = tempnam($config['tmp'], 'vips') . ($config['thumb_ext'] == '' ? '' : '.' . $config['thumb_ext']);
+		
+		$config['thumb_keep_animation_frames'] = (int)$config['thumb_keep_animation_frames'];
+		
+		if ($this->format == 'gif' && ($config['thumb_ext'] == 'webp' || $config['thumb_ext'] == 'gif' || $config['thumb_ext'] == '') && $config['thumb_keep_animation_frames'] > 1) {
+			if (($error = shell_exec("vips thumbnail " .
+					escapeshellarg($this->src . '') . "[n=-1] " .
+					escapeshellarg($this->temp) . "[strip,Q=50] {$this->width} --height {$this->height}"
+				)) || !file_exists($this->temp)) {
+				$this->destroy();
+				error(_('Failed to resize image!'), null, $error);
+			}
+		} else {
+			if (($error = shell_exec_error('vips thumbnail ' . escapeshellarg($this->src) . ' ' . escapeshellarg($this->temp) .
+				"[strip,Q=50] {$this->width} --height {$this->height}")) || !file_exists($this->temp)) {
+					$this->destroy();
+					error(_('Failed to resize image!'), null, $error);
+			}
+			if ($size = $this->get_size($this->temp)) {
+				$this->width = $size[0];
+				$this->height = $size[1];
+			}
+		}
+	}
+}
+
+
+class ImageWEBP extends ImageBase {
+	public function from() {
+		$this->image = @imagecreatefromwebp($this->src);
+	}
+	public function to($src) {
+		global $config;
+		imagewebp($this->image, $src);
 	}
 }
 
@@ -495,9 +595,4 @@ class ImageBMP extends ImageBase {
 	public function to($src) {
 		imagebmp($this->image, $src);
 	}
-}
-
-
-if (PHP_MAJOR_VERSION <= 7 && PHP_MINOR_VERSION < 2) {
-	include 'inc/image/bmp.php';
 }

@@ -1,0 +1,100 @@
+<p>
+    This page allows you to manage filters. You can view existing filters, create new ones, and specify actions for matching posts.
+</p>
+
+<h2>Existing Filters</h2>
+{% if filters|length %}
+    <table class="mod filter-editor">
+        <tr>
+            <th>{% trans 'Filter' %}</th>
+            <th>{% trans 'Action' %}</th>
+            <th>{% trans 'Duration' %}</th>
+            <th>{% trans 'Message' %}</th>
+            <th>{% trans 'Board' %}</th>
+            <th>{% trans 'Options' %}</th>
+        </tr>
+        {% for filter in filters %}
+            <tr>
+                <td>{{ filter.regex|e }}</td>
+                <td>{{ filter.action|e }}</td>
+                <td>{{ filter.duration|e }}</td>
+                <td>{{ filter.message|e }}</td>
+                <td>{{ filter.board|e }}</td>
+                <td>
+                    <a href="?/edit-filter/{{ filter.id }}">{% trans 'Edit' %}</a>
+                    <a href="?/delete-filter/{{ filter.id }}">{% trans 'Delete' %}</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p class="unimportant">({% trans 'No filters found.' %})</p>
+{% endif %}
+
+<h2>Create New Filter</h2>
+<form method="post" action="?/filters">
+    <input type="hidden" name="token" value="{{ token }}">
+    <table>
+        <tr>
+            <th>
+                <label for="filter_regex">{% trans 'Filter (Regex or Substring)' %}</label>
+            </th>
+            <td>
+                <input type="text" name="filter_regex" id="filter_regex" required>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="filter_action">{% trans 'Action' %}</label>
+            </th>
+            <td>
+                <select name="filter_action" id="filter_action" required>
+                    <option value="move">{% trans 'Move to Board' %}</option>
+                    <option value="ban">{% trans 'Ban User' %}</option>
+                    <option value="reject">{% trans 'Reject Post' %}</option>
+                </select>
+            </td>
+        </tr>
+        <tr id="move_board_row">
+            <th>
+                <label for="move_board">{% trans 'Target Board' %}</label>
+            </th>
+            <td>
+                <select name="move_board" id="move_board">
+                    {% for board in boards %}
+                        <option value="{{ board.uri }}">{{ config.board_abbreviation|sprintf(board.uri) }} - {{ board.title|e }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+        <tr id="ban_duration_row" style="display:none;">
+            <th>
+                <label for="ban_duration">{% trans 'Ban Duration' %}</label>
+            </th>
+            <td>
+                <input type="text" name="ban_duration" id="ban_duration" placeholder="e.g. 2d1h30m">
+            </td>
+        </tr>
+        <tr id="reject_message_row" style="display:none;">
+            <th>
+                <label for="reject_message">{% trans 'Reject Message' %}</label>
+            </th>
+            <td>
+                <input type="text" name="reject_message" id="reject_message">
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input class="bigredbutton" type="submit" value="{% trans 'Create Filter' %}"></td>
+        </tr>
+    </table>
+</form>
+
+<script>
+    document.getElementById('filter_action').addEventListener('change', function() {
+        var action = this.value;
+        document.getElementById('move_board_row').style.display = action === 'move' ? '' : 'none';
+        document.getElementById('ban_duration_row').style.display = action === 'ban' ? '' : 'none';
+        document.getElementById('reject_message_row').style.display = action === 'reject' ? '' : 'none';
+    });
+</script>

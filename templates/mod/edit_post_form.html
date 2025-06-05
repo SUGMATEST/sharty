@@ -35,6 +35,15 @@
 				<textarea name="body" id="body" rows="8" cols="35">{% if raw %}{{ post.body }}{% else %}{{ post.body_nomarkup }}{% endif %}</textarea>
 			</td>
 		</tr>
+		<tr>
+			<th>
+				Time
+			</th>
+			<td>
+				<input type="checkbox" name="update_timestamp" id="update_timestamp" value="1">
+				<label for="update_timestamp">Update timestamp to current time</label>
+			</td>
+		</tr>
 	</table>
 	<p style="text-align:center">
 		{% if raw %}

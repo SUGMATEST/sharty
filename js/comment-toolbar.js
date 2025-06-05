@@ -252,7 +252,7 @@ if (active_page == 'thread' || active_page == 'index') {
 		if (!localStorage.formatText_rules) localStorage.formatText_rules = JSON.stringify(self.rules);
 		
 		// setup code to be ran when page is ready (work around for main.js compilation).
-		$(document).ready(function(){
+		$(function(){
 			// Add settings to Options panel general tab
 			if (window.Options && Options.get_tab('general')) {
 				var s1 = '#formatText_keybinds>input', s2 = '#formatText_toolbar>input', e = 'change';

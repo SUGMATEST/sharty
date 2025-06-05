@@ -1,0 +1,26 @@
+<?php
+
+
+// Changes made via web editor by "trunk" @ Mon, 04 Dec 2023 17:37:20 -0500:
+$config['board_locked'] = true;
+
+
+// Changes made via web editor by "trunk" @ Tue, 05 Dec 2023 00:38:45 -0500:
+$config['board_locked'] = false;
+
+
+// Changes made via web editor by "trunk" @ Tue, 05 Dec 2023 01:08:35 -0500:
+$config['maximum_lines'] = 15;
+
+
+// Changes made via web editor by "trunk" @ Tue, 05 Dec 2023 02:59:42 -0500:
+$config['board_locked'] = true;
+
+
+// Changes made via web editor by "trunk" @ Tue, 05 Dec 2023 18:10:15 -0500:
+$config['board_locked'] = false;
+
+
+// Changes made via web editor by "doll" @ Sun, 04 Feb 2024 14:25:37 -0500:
+$config['max_threads_per_hour'] = 5;
+

@@ -8,7 +8,7 @@
  *   $config['additional_javascript'][] = 'js/thread-stats.js';
  */
 if (active_page == 'thread') {
-$(document).ready(function(){
+$(function(){
 	//check if page uses unique ID
 	var IDsupport = ($('.poster_id').length > 0);
 	var thread_id = (document.location.pathname + document.location.search).split('/');
@@ -36,10 +36,10 @@ $(document).ready(function(){
 		}).length);
 		// unique ID count
 		if (IDsupport) {
-			var opID = op.find('> .intro > .poster_id').text();
+			var opID = op.find('> .intro .poster_id').text();
 			var ids = {};
 			replies.each(function(){
-				var cur = $(this).find('> .intro > .poster_id');
+				var cur = $(this).find('> .intro .poster_id');
 				var curID = cur.text();
 				if (ids[curID] === undefined) {
 					ids[curID] = 0;
@@ -68,7 +68,7 @@ $(document).ready(function(){
 			$('#thread_stats_uids').text(size(ids));
 		}
 		var board_name = $('input[name="board"]').val();
-		$.getJSON('//'+ document.location.host +'/'+ board_name +'/threads.json').success(function(data){
+		$.getJSON('//'+ document.location.host +'/'+ board_name +'/threads.json').done(function(data){
 			var found, page = '???';
 			for (var i=0;data[i];i++){
 				var threads = data[i].threads;
@@ -90,7 +90,7 @@ $(document).ready(function(){
 	// uses ajax call so it gets loaded on a delay (depending on network resources available)
 	var thread_stats_page_timer = setInterval(function(){
 		var board_name = $('input[name="board"]').val();
-		$.getJSON('//'+ document.location.host +'/'+ board_name +'/threads.json').success(function(data){
+		$.getJSON('//'+ document.location.host +'/'+ board_name +'/threads.json').done(function(data){
 			var found, page = '???';
 			for (var i=0;data[i];i++){
 				var threads = data[i].threads;
@@ -110,7 +110,7 @@ $(document).ready(function(){
 	},30000);
 		$('body').append('<style>.posts_by_id{display:none;}.poster_id:hover+.posts_by_id{display:initial}</style>');
 		update_thread_stats();
-		$('#update_thread').click(update_thread_stats);
+		$('#update_thread').on('click', update_thread_stats);
 		$(document).on('new_post',update_thread_stats);
 });
 }

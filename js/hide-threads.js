@@ -12,7 +12,7 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	if (active_page != "index" && active_page != "ukko")
 		return; // not index
 		
@@ -50,7 +50,7 @@ $(document).ready(function(){
 	
 		$('<a class="hide-thread-link" style="float:left;margin-right:5px" href="javascript:void(0)">[–]</a><span> </span>')
 			.insertBefore(thread_container.find(':not(h2,h2 *):first'))
-			.click(function() {
+			.on('click', function() {
 				hidden_data[board][id] = Math.round(Date.now() / 1000);
 				store_data();
 				
@@ -64,7 +64,7 @@ $(document).ready(function(){
 				
 				$('<a class="unhide-thread-link" style="float:left;margin-right:5px;margin-left:0px;" href="javascript:void(0)">[+]</a><span> </span>')
 					.insertBefore(hidden_div.find(':first'))
-					.click(function() {
+					.on('click', function() {
 						delete hidden_data[board][id];
 						store_data();
 						thread_container.find(fields_to_hide).show();
@@ -76,7 +76,7 @@ $(document).ready(function(){
 				hidden_div.insertAfter(thread_container.find(':not(h2,h2 *):first'));
 			});
 		if (hidden_data[board][id])
-			thread_container.find('.hide-thread-link').click();
+			thread_container.find('.hide-thread-link').trigger('click');
 	}
 
 	$('div.post.op').each(do_hide_threads);

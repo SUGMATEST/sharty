@@ -100,7 +100,11 @@
 		{% for log in logs %}
 			<tr>
 				<td class="minimal">
+					{% if post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+					<a href="?/IP/{{ log.ip }}">{{ log.ip }}</a>
+					{% else %}
 					<a href="?/IP/{{ log.ip|cloak_ip }}">{{ log.ip|cloak_ip }}</a>
+					{% endif %}
 				</td>
 				<td class="minimal">
 					<span title="{{ log.time|date(config.post_date) }}">{{ log.time|ago }}</span>

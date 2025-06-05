@@ -1,4 +1,4 @@
-{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" {% if config.banner_width or config.banner_height %}style="{% if config.banner_width %}width:{{ config.banner_width }}px{% endif %};{% if config.banner_width %}height:{{ config.banner_height }}px{% endif %}" {% endif %}alt="" />{% endif %}
+{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" style="max-width:300px" width="300" height="100" alt="A banner for soyjak.party" />{% endif %}
 <fieldset>
 	<legend>{% trans 'Boards' %}</legend>
 	
@@ -22,6 +22,9 @@
 				{% endif %}
 				{% if mod|hasPermission(config.mod.edit_pages) %}
 					 <a href="?/edit_pages/{{ board.uri }}"><small>[{% trans 'pages' %}]</small></a>
+				{% endif %}
+				{% if mod|hasPermission(config.mod.deleteboard) %}
+					 <a href="?/wipe-board/{{ board.uri }}"><small>[{% trans 'wipe' %}]</small></a>
 				{% endif %}
 			</li>
 		{% endfor %}
@@ -67,6 +70,7 @@
 			<li><a href="?/noticeboard">{% trans 'View all noticeboard entries' %}</a></li>
 		{% endif %}
 		<li><a href="?/edit_news">{% trans 'News' %}</a></li>
+		<li><a href="?/guidelines">{% trans 'Moderation Guidelines' %}</a></li>
 		<li>
 			<a href="?/inbox">
 				{% trans 'PM inbox' %} 
@@ -87,11 +91,29 @@
 				{% if reports > 0 %}</strong>{% endif %}
 			</li>
 		{% endif %}
+		{% if mod|hasPermission(config.mod.reports) %}
+			<li>
+				{% if file_approvals > 0 %}<strong>{% endif %}
+					<a href="?/file_approval">{% trans 'File approval' %} ({{ file_approvals }})</a>
+				{% if file_approvals > 0 %}</strong>{% endif %}
+			</li>
+		{% endif %}
+		{% if mod|hasPermission(config.mod.view_ban_requests) %}
+			<li>
+				{% if ban_requests > 0 %}<strong>{% endif %}
+					<a href="?/ban-requests">{% trans 'Ban requests' %} ({{ ban_requests }})</a>
+				{% if ban_requests > 0 %}</strong>{% endif %}
+			</li>
+		{% endif %}
 		{% if mod|hasPermission(config.mod.view_banlist) %}
 			<li><a href="?/bans">{% trans 'Ban list' %}</a></li>
 		{% endif %}
 		{% if config.ban_appeals and mod|hasPermission(config.mod.view_ban_appeals) %}
-			<li><a href="?/ban-appeals">{% trans 'Ban appeals' %}</a></li>
+			<li>
+				{% if ban_appeals > 0 %}<strong>{% endif %}
+					<a href="?/ban-appeals">{% trans 'Ban appeals' %} ({{ ban_appeals }})</a>
+				{% if ban_appeals > 0 %}</strong>{% endif %}
+			</li>
 		{% endif %}
 		{% if mod|hasPermission(config.mod.manageusers) %}
 			<li><a href="?/users">{% trans 'Manage users' %}</a></li>
@@ -116,7 +138,42 @@
 		{% if mod|hasPermission(config.mod.edit_config) %}
 			<li><a href="?/config">{% trans 'Configuration' %}</a></li>
 		{% endif %}
+		{% if mod|hasPermission(config.mod.edit_config) %}
+			<li><a href="?/reboot_captcha">{% trans 'Reboot Captcha Service' %}</a></li>
+		{% endif %}
+		{% if mod|hasPermission(config.mod.edit_config) %}
+			<li><a href="?/repair_tables">{% trans 'Repair Tables' %}</a></li>
+		{% endif %}
+		{% if mod|hasPermission(config.mod.panic_button) %}
+			<li><a href="?/panic_button">{% trans '[Panic Button] Use if bots have made it through' %}  
+				 
+				{%if config.mandate_soy_history%}
+				Currently ON
+				{%else%}
+				Currently OFF
+				{%endif%}
+				
+			
+			</a></li>
+		{% endif %}
+		{% if mod|hasPermission(config.mod.panic_button) %}
+		<li>
+			<a href="?/lockout">Lockout - Use in case of rogue moderator</a>
+			<script>
+				var confirmed = false;
+				document.querySelector('a[href="?/lockout"]').addEventListener('click', function(e) {
+					if (!confirmed) {
+						e.preventDefault();
+						if (confirm('Are you sure you want to lockout the site? This will shut it down and is a serious action. ')) {
+							confirmed = true;
+							this.click();
+						}
+					}
+				});
+			</script>
+		</li>
 		
+		{% endif %}
 	</ul>
 </fieldset>
 

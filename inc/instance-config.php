@@ -20,4 +20,1381 @@
 	//$config['root']				= '/';
 	
 	@include('inc/secrets.php');
-?>
+	
+
+$config['wordfilters'][] = array('﷽', '');
+$config['wordfilters'][] = array('𒐫', '');
+$config['wordfilters'][] = array('𒈙', '');
+$config['wordfilters'][] = array('⸻', '');
+$config['wordfilters'][] = array('꧅', '');
+$config['wordfilters'][] = array('ဪ', '');
+$config['wordfilters'][] = array('௵', '');
+$config['wordfilters'][] = array('௸', '');
+$config['wordfilters'][] = array('‱', '');
+
+// Zero width characters
+$config['wordfilters'][] = array('‎', '');
+$config['wordfilters'][] = array('﻿', '');
+$config['wordfilters'][] = array('⁠', '');
+
+$config['wordfilters'][] = array('Ι', 'I');
+
+$config['wordfilters'][] = array('і', 'i');
+
+$config['wordfilters'][] = array('Ε', 'E');
+$config['wordfilters'][] = array('Е', 'E');
+$config['wordfilters'][] = array('é', 'e');
+$config['wordfilters'][] = array('è', 'e');
+$config['wordfilters'][] = array('е', 'e');
+$config['wordfilters'][] = array('℮', 'e');
+
+$config['wordfilters'][] = array('с', 'c');
+
+$config['wordfilters'][] = array('П', 'N');
+
+$config['wordfilters'][] = array('ô', 'o');
+$config['wordfilters'][] = array('о', 'o');
+
+$config['wordfilters'][] = array('ѕ', 's');
+$config['wordfilters'][] = array('Ѕ', 'S');
+
+
+
+// frootyger aerthough wordfilters
+//people and places
+/*
+$config['wordfilters'][] = array('chud', 'Anon');
+$config['wordfilters'][] = array('soyteen', 'homie');
+$config['wordfilters'][] = array('\'teen', 'homie');
+$config['wordfilters'][] = array('tranny', 'gaiafag');
+$config['wordfilters'][] = array('trannies', 'gaiafag');
+$config['wordfilters'][] = array('troon', 'gaiafag');
+$config['wordfilters'][] = array('nigger', 'nigra');
+$config['wordfilters'][] = array('nigga', 'nigra');
+$config['wordfilters'][] = array('niggas', 'nigras');
+$config['wordfilters'][] = array('zoomer', 'noob');
+$config['wordfilters'][] = array('/\b(fag)\b/i', 'noob', true);
+$config['wordfilters'][] = array('faggot', 'noob');
+$config['wordfilters'][] = array('fagg0t', 'n00b');
+$config['wordfilters'][] = array('newfag', 'n00b');
+$config['wordfilters'][] = array('oldfag', 'poweruser');
+$config['wordfilters'][] = array('kike', 'webmaster');
+$config['wordfilters'][] = array('/\b(jew)\b/i', 'webmaster', true);
+$config['wordfilters'][] = array('/\b(joos)\b/i', 'webmasters', true);
+$config['wordfilters'][] = array('/\b(jooz)\b/i', 'webmasters', true);
+$config['wordfilters'][] = array('janitor', 'forum mod');
+$config['wordfilters'][] = array('janny', 'mod');
+$config['wordfilters'][] = array('jannies', 'modz');
+$config['wordfilters'][] = array('froot', 'Chuck Norris');
+$config['wordfilters'][] = array('froor', 'Chuck Norris');
+$config['wordfilters'][] = array('fr00t', 'CHUCK N0RRIS');
+$config['wordfilters'][] = array('FRQQT', 'CHUCK NORRIS');
+$config['wordfilters'][] = array('/\b(root)\b/i', 'r00t', true);
+$config['wordfilters'][] = array('roor', 'r00tykins');
+$config['wordfilters'][] = array('rooty', 'r00tykins');
+$config['wordfilters'][] = array('rooty root', 'r00tykins');
+$config['wordfilters'][] = array('manager', 'C.M. Snacks');
+$config['wordfilters'][] = array('manny', 'Snacks');
+$config['wordfilters'][] = array('/\b(mud)\b/i', 'snacks', true);
+//$config['wordfilters'][] = array('/\b(doll)\b/i', 'Hiroyuki', true);
+$config['wordfilters'][] = array('/\b(soot)\b/i', 'Moot', true);
+$config['wordfilters'][] = array('/\b(kuz)\b/i', 'Cockmongler', true);
+$config['wordfilters'][] = array('/\b(kvz)\b/i', 'Cockmongler', true);
+$config['wordfilters'][] = array('/\b(kooz)\b/i', 'Cockmongler', true);
+$config['wordfilters'][] = array('/\b(kvvz)\b/i', 'Cockmongler', true);
+$config['wordfilters'][] = array('4chan', 'SomethingAwful');
+$config['wordfilters'][] = array('4cuck', 'SomethingAwful');
+$config['wordfilters'][] = array('4kek', 'SomethingAwful');
+$config['wordfilters'][] = array('4cvck', 'SomethingAwful');
+$config['wordfilters'][] = array('\'cuck', 'SomethingAwful');
+$config['wordfilters'][] = array('discord', 'IRC');
+$config['wordfilters'][] = array('disc0rd', 'IRC');
+$config['wordfilters'][] = array('\'cord', 'IRC');
+$config['wordfilters'][] = array('\'c0rd', 'IRC');
+$config['wordfilters'][] = array('/\b(cord)\b/i', 'IRC', true);
+$config['wordfilters'][] = array('c0rd', 'IRC');
+$config['wordfilters'][] = array('\'cordnigger', 'edgel0rd');
+$config['wordfilters'][] = array('\'c0rdnigger', 'edgel0rd');
+$config['wordfilters'][] = array('cordnigger', 'edgel0rd');
+$config['wordfilters'][] = array('c0rdnigger', 'edgel0rd');
+$config['wordfilters'][] = array('\'cordtroon', 'edgel0rd');
+$config['wordfilters'][] = array('\'c0rdtroon', 'edgel0rd');
+$config['wordfilters'][] = array('cordtroon', 'edgel0rd');
+$config['wordfilters'][] = array('c0rdtroon', 'edgel0rd');
+$config['wordfilters'][] = array('\'cordtranny', 'edgel0rd');
+$config['wordfilters'][] = array('\'c0rdtranny', 'edgel0rd');
+$config['wordfilters'][] = array('cordtranny', 'edgel0rd');
+$config['wordfilters'][] = array('c0rdtranny', 'edgel0rd');
+$config['wordfilters'][] = array('twitter', 'Gaia');
+$config['wordfilters'][] = array('twitterfag', 'Gaiafag');
+$config['wordfilters'][] = array('twittertroon', 'Gaiafag');
+$config['wordfilters'][] = array('twittertranny', 'Gaiafag');
+$config['wordfilters'][] = array('twitterfaggot', 'Gaiafag');
+$config['wordfilters'][] = array('reddit', 'digg');
+$config['wordfilters'][] = array('redditor', 'digg n00b');
+$config['wordfilters'][] = array('ledditor', 'digg n00b');
+$config['wordfilters'][] = array('Sharty', 'TEH INTERWEBZ');
+$config['wordfilters'][] = array('/\b(Sharty)\b/i', 'TEH INTERWEBZ', true);
+$config['wordfilters'][] = array('/\b(the Sharty)\b/i', 'TEH INTERWEBZ', true);
+$config['wordfilters'][] = array('Soyjak Party', 'TEH INTERWEBZ');
+$config['wordfilters'][] = array('facebook', 'usenet');
+$config['wordfilters'][] = array('soygem.party', 'eBaum\'s World');
+$config['wordfilters'][] = array('soygem', 'eBaum\'s World');
+$config['wordfilters'][] = array('shemmy', 'eBaum\'s World');
+$config['wordfilters'][] = array('jarty', 'newgrounds');
+$config['wordfilters'][] = array('jakparty.soy', 'newgrounds');
+$config['wordfilters'][] = array('jartycuck', 'newgrounds n00b');
+$config['wordfilters'][] = array('jartypedo', 'newgrounds n00b');
+$config['wordfilters'][] = array('/\b(soybooru)\b/i', 'YTMND', true);
+$config['wordfilters'][] = array('/\b(booru)\b/i', 'YTMND', true);
+$config['wordfilters'][] = array('\'ru', 'YTMND');
+$config['wordfilters'][] = array('soyjak.blog', 'livejournal');
+$config['wordfilters'][] = array('schlog', 'livejournal');
+$config['wordfilters'][] = array('kolyma', 'internet tough guys');
+$config['wordfilters'][] = array('foodist', 'faggz0r');
+$config['wordfilters'][] = array('soytan', 'TEH SOYTAN');
+$config['wordfilters'][] = array('s0ytan', 'T3H S0Y-T4N');
+$config['wordfilters'][] = array('fe queen', 'fujo');
+$config['wordfilters'][] = array('\'fe queen', 'fujo');
+$config['wordfilters'][] = array('Donald Trump', 'George Bush');
+$config['wordfilters'][] = array('Trump', 'Bush');
+$config['wordfilters'][] = array('Joe Biden', 'Al Gore');
+$config['wordfilters'][] = array('Biden', 'Al Gore');
+$config['wordfilters'][] = array('/\b(DM)\b/i', 'PM', true);
+$config['wordfilters'][] = array('/\b(DMs)\b/i', 'PMs', true);
+$config['wordfilters'][] = array('/\b(DMing)\b/i', 'PMing', true);
+$config['wordfilters'][] = array('/\b(2015)\b/i', '1995', true);
+$config['wordfilters'][] = array('/\b(2016)\b/i', '1996', true);
+$config['wordfilters'][] = array('/\b(2017)\b/i', '1997', true);
+$config['wordfilters'][] = array('/\b(2018)\b/i', '1998', true);
+$config['wordfilters'][] = array('/\b(2019)\b/i', '1999', true);
+$config['wordfilters'][] = array('/\b(2020)\b/i', '2000', true);
+$config['wordfilters'][] = array('/\b(2021)\b/i', '2001', true);
+$config['wordfilters'][] = array('/\b(2022)\b/i', '2002', true);
+$config['wordfilters'][] = array('/\b(2023)\b/i', '2003', true);
+$config['wordfilters'][] = array('/\b(2024)\b/i', '2004', true);
+$config['wordfilters'][] = array('/\b(2025)\b/i', '2005', true);
+$config['wordfilters'][] = array('/\b(2026)\b/i', '2006', true);
+$config['wordfilters'][] = array('/\b(2027)\b/i', '2007', true);
+$config['wordfilters'][] = array('/\b(2028)\b/i', '2008', true);
+$config['wordfilters'][] = array('/\b(2029)\b/i', '2009', true);
+$config['wordfilters'][] = array('/\b(2030)\b/i', '2010', true);
+$config['wordfilters'][] = array('pozzed', 'LAME');
+$config['wordfilters'][] = array('/\b(trans)\b/i', 'f4ggy', true);
+$config['wordfilters'][] = array('/\b(is cucked)\b/i', 'is LAME', true);
+if(!function_exists("basedOutput")) {
+function trannyOutput($matches) {
+    $options = array("Runescape", "Ragnarok Online", "FFXI", "WoW", "EverQuest"); // Add your options here
+    return $options[array_rand($options)];
+}} $config['wordfilters'][] = array('/\b(trans rights)\b/i', 'trannyOutput', true);
+if(!function_exists("basedOutput")) {
+function tranny2Output($matches) {
+    $options = array("Runescape", "Ragnarok Online", "FFXI", "WoW", "EverQuest"); // Add your options here
+    return $options[array_rand($options)];
+}} $config['wordfilters'][] = array('/\b(Tr�pns rights)\b/i', 'tranny2Output', true);
+$config['wordfilters'][] = array('/\b(bull)\b/i', 'llama', true);
+$config['wordfilters'][] = array('llama', 'livejournal');
+$config['wordfilters'][] = array('llama', 'livejournal');
+$config['wordfilters'][] = array('nazi', 'edgel0rd');
+$config['wordfilters'][] = array('o9a', 'edgel0rd');
+$config['wordfilters'][] = array('patriot', 'Conservatives');
+$config['wordfilters'][] = array('pqtriot', 'Conservatives');
+$config['wordfilters'][] = array('/\b(MAGA)\b/i', 'Conservative', true);
+$config['wordfilters'][] = array('bigot', 'bully');
+$config['wordfilters'][] = array('transphobia', 'bullying');
+$config['wordfilters'][] = array('homophobia', 'bullying');
+$config['wordfilters'][] = array('pedophile', 'my uncle');
+$config['wordfilters'][] = array('/\b(pedo)\b/i', 'my uncle', true);
+
+//sayings
+$config['wordfilters'][] = array('kek', 'lulz');
+$config['wordfilters'][] = array('keek', 'lolol');
+$config['wordfilters'][] = array('keeek', 'lololol');
+$config['wordfilters'][] = array('keeeek', 'lololol');
+$config['wordfilters'][] = array('keeeeek', 'lolololol');
+$config['wordfilters'][] = array('keeeeeek', 'lololololol');
+$config['wordfilters'][] = array('keeeeeeek', 'lolololololol');
+$config['wordfilters'][] = array('keeeeeeeek', 'lololololololol');
+$config['wordfilters'][] = array('keeeeeeeeek', 'lolololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeek', 'lololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeek', 'lolololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeeek', 'lololololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeeeek', 'lolololololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeeeeek', 'lololololololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeeeeeek', 'lolololololololololololololol');
+$config['wordfilters'][] = array('keeeeeeeeeeeeeeeek', 'lololololololololololololololol');
+$config['wordfilters'][] = array('geg', 'XD');
+$config['wordfilters'][] = array('geeg', 'XDD');
+$config['wordfilters'][] = array('geeeg', 'XDDD');
+$config['wordfilters'][] = array('geeeeg', 'XDDDD');
+$config['wordfilters'][] = array('geeeeeg', 'XDDDDD');
+$config['wordfilters'][] = array('geeeeeeg', 'XDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeg', 'XDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeg', 'XDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeg', 'XDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeg', 'XDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeg', 'XDDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeeg', 'XDDDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeeeg', 'XDDDDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeeeeg', 'XDDDDDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeeeeeg', 'XDDDDDDDDDDDDDDD');
+$config['wordfilters'][] = array('geeeeeeeeeeeeeeeeg', 'XDDDDDDDDDDDDDDDD');
+$config['wordfilters'][] = array('gloink', 'ROFLCOPTER!!');
+$config['wordfilters'][] = array('kill yourself', 'kthxbai');
+$config['wordfilters'][] = array('/\b(kys)\b/i', 'kthxbai', true);
+$config['wordfilters'][] = array('marge', 'IDK');
+$config['wordfilters'][] = array('margerald', 'IDKLOL');
+$config['wordfilters'][] = array('/\b(SISA)\b/i', 'SMEXY', true);
+$config['wordfilters'][] = array('OMGSISA', 'OMIGOD SMEXY');
+$config['wordfilters'][] = array('tsmt', 'seconded');
+$config['wordfilters'][] = array('/\b(fuck)\b/i', 'phuck', true);
+$config['wordfilters'][] = array('fucking', 'effing');
+$config['wordfilters'][] = array('YWNBAW', 'GB2Gaia');
+$config['wordfilters'][] = array('HWABAG', 'He wins all the internetz!');
+$config['wordfilters'][] = array('btfo', 'pwnz0red!');
+	
+
+//concepts, things, actions
+if(!function_exists("basedOutput")) {
+function basedOutput($matches) {
+    $options = array("sick", "epic", "1337", "rad", "sweet"); // Add your options here
+    return $options[array_rand($options)];
+}} $config['wordfilters'][] = array('/\b(based)\b/i', 'basedOutput', true);
+if(!function_exists("keyedOutput")) {
+function keyedOutput($matches) {
+    $options = array("sick", "epic", "1337", "rad", "sweet");
+    return $options[array_rand($options)];
+}} $config['wordfilters'][] = array('/\b(keyed)\b/i', 'keyedOutput', true);
+if(!function_exists("rpOutput")) {
+function rpOutput($matches) {
+    $options = array("sick", "epic", "1337", "rad", "sweet");
+    return $options[array_rand($options)];
+}} $config['wordfilters'][] = array('/\b(redpilled)\b/i', 'rpOutput', true);
+$config['wordfilters'][] = array('/\b(gem)\b/i', 'win', true);
+$config['wordfilters'][] = array('/\b(gems)\b/i', 'wins', true);
+$config['wordfilters'][] = array('gemmies', 'total wins');
+$config['wordfilters'][] = array('gemmy', 'awesomesauce');
+$config['wordfilters'][] = array('gemerald', 'epic win');
+$config['wordfilters'][] = array('/\b(glistening gem)\b/i', 'EPIC win', true);
+$config['wordfilters'][] = array('/\b(glistening gemerald)\b/i', 'EPIC WIN', true);
+$config['wordfilters'][] = array('/\b(coal)\b/i', 'aids', true);
+$config['wordfilters'][] = array('coally', 'sux');
+$config['wordfilters'][] = array('/\b(dust)\b/i', 'epic fail', true);
+$config['wordfilters'][] = array('/\b(dusty)\b/i', 'epic fail', true);
+$config['wordfilters'][] = array('brimstone', 'EPIC FAIL');
+$config['wordfilters'][] = array('grimstone', 'EPIC FAIL!!');
+$config['wordfilters'][] = array('/\b(ban)\b/i', 'pwn', true);
+$config['wordfilters'][] = array('banned', 'pwned');
+$config['wordfilters'][] = array('banning', 'pwning');
+$config['wordfilters'][] = array('/\b(perma)\b/i', 'epic pwn', true);
+$config['wordfilters'][] = array('perma\'d', 'PWNED');
+$config['wordfilters'][] = array('permabanned', 'PWNED');
+$config['wordfilters'][] = array('/\b(kill)\b/i', 'frag', true);
+$config['wordfilters'][] = array('/\b(murder)\b/i', 'frag', true);
+$config['wordfilters'][] = array('/\b(rape)\b/i', 'raep', true);
+$config['wordfilters'][] = array('/\b(raped)\b/i', 'raeped', true);
+$config['wordfilters'][] = array('/\b(raping)\b/i', 'raeping', true);
+$config['wordfilters'][] = array('/\b(meme)\b/i', 'image macro', true);
+$config['wordfilters'][] = array('mutt', '\'murikan');
+$config['wordfilters'][] = array('mutterald', '\'MURIKA, PHUCK YEAH!');
+$config['wordfilters'][] = array('BBC', 'pen0r');
+$config['wordfilters'][] = array('BWC', 'pen0r');
+$config['wordfilters'][] = array('clitty', 'pen0r');
+$config['wordfilters'][] = array('hrt', 'runescape gp');
+$config['wordfilters'][] = array('blacked', 'OWNED');
+$config['wordfilters'][] = array('thread', 'bread');
+$config['wordfilters'][] = array('/\b(toss)\b/i', 'image macro', true);
+$config['wordfilters'][] = array('\'toss', 'image macro');
+$config['wordfilters'][] = array('shitskin', 'Happy Negro');
+$config['wordfilters'][] = array('shit skin', 'Happy Negro');
+$config['wordfilters'][] = array('Cope', 'baww');
+$config['wordfilters'][] = array('Coping', 'bawwing');
+$config['wordfilters'][] = array('Seethe', 'rage');
+$config['wordfilters'][] = array('Seething', 'raging');
+$config['wordfilters'][] = array('Dilate', 'keyboard smash');
+$config['wordfilters'][] = array('Dilating', 'keyboard smash');
+$config['wordfilters'][] = array('goon', 'fap');
+$config['wordfilters'][] = array('coom', 'fap');
+$config['wordfilters'][] = array('gooning', 'fapping');
+$config['wordfilters'][] = array('cooming', 'fapping');
+$config['wordfilters'][] = array('porn', 'pr0n');
+$config['wordfilters'][] = array('lolcow', 'drama llama');
+$config['wordfilters'][] = array('rdrama', '\/cafe\/');
+$config['wordfilters'][] = array('rdrama.net', '\/cafe\/');
+$config['wordfilters'][] = array('lolcow.farm', '\/cafe\/');
+$config['wordfilters'][] = array('crystal cafe', '\/cafe\/');
+$config['wordfilters'][] = array('crystal.cafe', '\/cafe\/');
+$config['wordfilters'][] = array('p0rn', 'pr0n');
+$config['wordfilters'][] = array('racist', '1337');
+$config['wordfilters'][] = array('racism', '1337ness');
+$config['wordfilters'][] = array('sharty saving', 'INTERWEBZ WINNING');
+$config['wordfilters'][] = array('aryan', 'Awesome');
+$config['wordfilters'][] = array('brony', 'furfag');
+$config['wordfilters'][] = array('furry', 'furfag');
+$config['wordfilters'][] = array('nusoislutta', 'NEWBIE');
+$config['wordfilters'][] = array('/\b(dox)\b/i', 'roflstomp', true);
+$config['wordfilters'][] = array('/\b(doxx)\b/i', 'roflstomp', true);
+$config['wordfilters'][] = array('/\b(doxing)\b/i', 'roflstomping', true);
+$config['wordfilters'][] = array('/\b(doxxing)\b/i', 'roflstomping', true);
+$config['wordfilters'][] = array('/\b(doxed)\b/i', 'ROFLSTOMPED', true);
+$config['wordfilters'][] = array('/\b(doxxed)\b/i', 'ROFLSTOMPED', true);
+//gender disrespecter
+$config['wordfilters'][] = array('/\b(xe)\b/i', 'he', true);
+$config['wordfilters'][] = array('/\b(xhe)\b/i', 'he', true);
+$config['wordfilters'][] = array('/\b(xhey)\b/i', 'he', true);
+$config['wordfilters'][] = array('/\b(xer)\b/i', 'his', true);	
+*/
+	
+
+	//	 $config['wordfilters'][] = array('kuz', '');	
+	// 	$config['wordfilters'][] = array('soy', 'onions');	
+//	 	$config['wordfilters'][] = array('soyjak', 'basedjak');	
+ //	$config['wordfilters'][] = array('gem', 'coal');	
+//	 	$config['wordfilters'][] = array('sharty', '4channel.org/qa/');	
+	// 		 	$config['wordfilters'][] = array('soyjak.party', '4channel.org/qa/');	
+	// 		 	$config['wordfilters'][] = array('g?m', 'dust');
+	/*
+	 	 $config['wordfilters'][] = array('bbc', 'bright blue cat');
+	 	 $config['wordfilters'][] = array('bee bee sea', 'wasp wasp ocean');
+	 	 $config['wordfilters'][] = array('black cock', 'blue cat');
+	 	 $config['wordfilters'][] = array('black penis', 'blue pants');
+		 $config['wordfilters'][] = array('tbp', 'tiny black puppy');
+		 $config['wordfilters'][] = array('twp', 'Total Wood Protectant');
+		 $config['wordfilters'][] = array('tvvp', 'Total VVood Protectant');*/
+		
+	 	///	 	$config['wordfilters'][] = array('gemerald', 'gigacoal');
+	 	//	 	$config['wordfilters'][] = array('chad', 'soy');
+		 $config['wordfilters'][] = array('BB�', '�ilbir B�regi');
+	 	//$config['wordfilters'][] = array('bwc', 'big wet cat');
+		 //$config['wordfilters'][] = array('CeCeFem', 'some nobody');	
+		 //$config['wordfilters'][] = array('?eCeFem', 'some nobody');
+		 //$config['wordfilters'][] = array('Ce?eFem', 'some nobody');
+		 //$config['wordfilters'][] = array('?e?eFem', 'some nobody');
+		 $config['wordfilters'][] = array('zuken', 'some nobody');
+		 //$config['wordfilters'][] = array('Red', 'powerless');
+		 $config['wordfilters'][] = array('feralteen', 'literal who');
+//		 $config['wordfilters'][] = array('Joel', 'Protokleki');
+//                 $config['wordfilters'][] = array('Warl0ck', 'Protokleki');
+//                 $config['wordfilters'][] = array('Warlock', 'Protokleki');
+//                 $config['wordfilters'][] = array('J0el', 'Protokleki');
+//                 $config['wordfilters'][] = array('JoeI', 'Protokleki');
+		 //$config['wordfilters'][] = array('goth', 'tranny');
+		 $config['wordfilters'][] = array('Dr. E', 'Anton Maximov');
+		 $config['wordfilters'][] = array('bnwo', 'new frootist order');
+		 $config['wordfilters'][] = array('newfag', 'newGOD');
+		 $config['wordfilters'][] = array('oldfag', 'oldCHAD');
+		 //$config['wordfilters'][] = array('soycuck', 'redditor');
+		 //$config['wordfilters'][] = array('soicuck', 'redditor');
+		 //$config['wordfilters'][] = array('soycvck', 'redditor');
+		 //$config['wordfilters'][] = array('soicvck', 'redditor');
+		 //$config['wordfilters'][] = array('soicaca', 'TheDonald browser');
+		 //$config['wordfilters'][] = array('soycaca', 'TheDonald browser');
+		 //$config['wordfilters'][] = array('soikaka', 'TheDonald browser');
+		 //$config['wordfilters'][] = array('soykaka', 'TheDonald browser');
+		 //$config['wordfilters'][] = array('pond', 'clitty');
+		 //$config['wordfilters'][] = array('is it gay or bisexual to', 'Yes, it is gay or bisexual to');
+		 //$config['wordfilters'][] = array('DESU', 'SUDE');
+		 //$config['wordfilters'][] = array('??????', '??seafood??');
+		 $config['wordfilters'][] = array('KYS SH*RTYTRANNIES', 'LYS FELLOW SOYTEENS');
+		 $config['wordfilters'][] = array('bambicloud.com', 'disneyplus.com/movies/bambi/2s64jMJasyNO');
+		 $config['wordfilters'][] = array('bambisleep.blogspot.com', 'disneyplus.com/movies/bambi/2s64jMJasyNO');
+		 //$config['wordfilters'][] = array('ohio', 'New York');
+		 
+	 	 
+	 	 	$config['wordfilters'][] = array('lolcow.farm/snow/res/1498101.html', 'kiwifarms.net/threads/unabashedhermaphrodite-belial-the-actual-queen-actuallybella1-autisticaizen-blaine-gaven-ross-jess-ross-erika-starling.99380/post-12573637');
+//$config['wordfilters'][] = array('278353286', '278353286');
+//$config['wordfilters'][] = array('jstrieb.github.io', 'soyjak.party');
+$config['wordfilters'][] = array('https://web.duolicious.app/', 'https://soyjak.party/ohio/index.html');
+
+
+
+	 	 	//$config['wordfilters'][] = array('#cobgang', '8898#cobgang8898');
+	 	 	//$config['wordfilters'][] = array('#feralgang', '8899#feralgang8899');
+                        //$config['wordfilters'][] = array('chitwood', 'John Doe');
+/*                       $config['wordfilters'][] = array('53252352352352352', '[RED]');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');
+						$config['wordfilters'][] = array('???', 'sends their regards');
+						$config['wordfilters'][] = array('??', 'sends their regards');*/
+
+//START Rooty temp filters for jannies
+//$config['wordfilters'][] = array('/\b(nigga)\b/i', 'fellow', true);
+$config['wordfilters'][] = array('DOXX RAPE KILL', 'DOXX RAPE PIZZA');
+$config['wordfilters'][] = array('DOX RAPE KILL', 'DOX RAPE PIZZA');
+$config['wordfilters'][] = array('transbian', 'male predator');
+$config['wordfilters'][] = array('TRANS RIGHTS', 'PHOENIX WRIGHT');
+$config['wordfilters'][] = array('clitty', 'johnson');
+$config['wordfilters'][] = array('clitties', 'johnsons');
+$config['wordfilters'][] = array('bbc', 'johnson');
+$config['wordfilters'][] = array('bwc', 'johnson');
+$config['wordfilters'][] = array('�BBC', 'johnson');
+$config['wordfilters'][] = array('�B�BC', 'johnson');
+$config['wordfilters'][] = array('B�BC', 'johnson');
+//$config['wordfilters'][] = array('Toby Fox', 'Andrew Hussie');
+//$config['wordfilters'][] = array('Robert Fox', 'Andrew Hussie');
+//$config['wordfilters'][] = array('Robert Ford Fox', 'Andrew Hussie');
+//$config['wordfilters'][] = array('Undertale', 'Homestuck');
+//$config['wordfilters'][] = array('15 E Springfield St', '742 Evergreen Terrace');
+//$config['wordfilters'][] = array('Boston', 'Springfield');
+//$config['wordfilters'][] = array('Northeastern University', 'Temple University');
+$config['wordfilters'][] = array('/\b(omgsisa)\b/i', 'Oh my good science, the woman before my very own eyes displays a level of attractiveness beyond a magnitude of which I can comprehend', true);
+//$config['wordfilters'][] = array('/\b(nigga)\b/', 'My fellow Twitter user', true);
+//$config['wordfilters'][] = array('/\b(Nigga)\b/', 'my fellow Twitter user', true);
+//$config['wordfilters'][] = array('/\b(NIGGA)\b/', 'MY FELLOW TWITTER USER', true);
+
+$config['wordfilters'][] = array('/\b(ADMIN 6)\b/', 'THE SIXTH ADMIN OF THE WEBSITE', true);
+$config['wordfilters'][] = array('/\b(ADMIN6)\b/', 'THE SIXTH ADMIN OF THE WEBSITE', true);
+$config['wordfilters'][] = array('/\b(ADMIN SIX)\b/', 'THE SIXTH ADMIN OF THE WEBSITE', true);
+$config['wordfilters'][] = array('/\b(Admin 6)\b/', 'the sixth admin of the website', true);
+$config['wordfilters'][] = array('/\b(Admin6)\b/', 'the sixth admin of the website', true);
+$config['wordfilters'][] = array('/\b(Admin Six)\b/', 'the sixth admin of the website', true);
+$config['wordfilters'][] = array('/\b(admin 6)\b/', 'the sixth admin of the website', true);
+$config['wordfilters'][] = array('/\b(admin6)\b/', 'the sixth admin of the website', true);
+$config['wordfilters'][] = array('/\b(admin six)\b/', 'the sixth admin of the website', true);
+
+$config['wordfilters'][] = array('/\b(lennonjak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(lennon jak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(lenon jak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(len0n jak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(lenonjak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(lenn0njak)\b/i', 'the murdered variant', true);
+$config['wordfilters'][] = array('/\b(len0njak)\b/i', 'the murdered variant', true);
+//$config['wordfilters'][] = array('/\b(Root)\b/i', 'Mark David Chapman', true);
+//$config['wordfilters'][] = array('/\b(lennon)\b/i', 'dead man', true);
+//$config['wordfilters'][] = array('/\b(banned)\b/i', 'shot', true);
+//$config['wordfilters'][] = array('/\b(ban)\b/i', 'shooting', true);
+//$config['wordfilters'][] = array('/\b(discord)\b/i', 'New York City', true);
+
+
+
+
+
+
+
+
+//END Rooty temp filters for jannies
+
+
+$config['wordfilters'][] = array('/\b(kuz)\b/', 'pedo', true);
+$config['wordfilters'][] = array('/\b(kooz)\b/', 'peedo', true);
+$config['wordfilters'][] = array('/\b(k00z)\b/', 'ped0', true);
+$config['wordfilters'][] = array('/\b(kvz)\b/', 'pvdo', true);
+$config['wordfilters'][] = array('/\b(Kuz)\b/', 'Pedo', true);
+$config['wordfilters'][] = array('/\b(Kooz)\b/', 'Peedo', true);
+$config['wordfilters'][] = array('/\b(K00z)\b/', 'ped0', true);
+$config['wordfilters'][] = array('/\b(Kvz)\b/', 'Pvdo', true);
+$config['wordfilters'][] = array('/\b(KUZ)\b/', 'PEDO', true);
+$config['wordfilters'][] = array('/\b(KOOZ)\b/', 'PEEDO', true);
+$config['wordfilters'][] = array('/\b(K00Z)\b/', 'PED0', true);
+$config['wordfilters'][] = array('/\b(KVZ)\b/', 'PVDO', true);
+
+$config['wordfilters'][] = array('/\b(kolyma)\b/', 'larp group', true);
+$config['wordfilters'][] = array('/\b(Kolyma)\b/', 'LARP Group', true);
+$config['wordfilters'][] = array('/\b(KOLYMA)\b/', 'LARP GROUP', true);
+$config['wordfilters'][] = array('NsGFK8aX', 'minecraft');
+//$config['wordfilters'][] = array('raid', 'SNOWBALL FIGHT');
+//$config['wordfilters'][] = array('jak', 'ELF');
+//$config['wordfilters'][] = array('banned', 'SPANKED');
+//$config['wordfilters'][] = array('seethe', 'SMILE');
+//$config['wordfilters'][] = array('thread', 'bread');
+//$config['wordfilters'][] = array('chud', 'GOOD BOY');
+//$config['wordfilters'][] = array('gem', 'COOKIES AND MILK');
+//$config['wordfilters'][] = array('coal', 'SPOILED EGGNOG');//	 $config['wordfilters'][] = array('kuz', '');	
+	// 	$config['wordfilters'][] = array('soy', 'onions');	
+//	 	$config['wordfilters'][] = array('soyjak', 'basedjak');	
+ //	$config['wordfilters'][] = array('gem', 'coal');	
+//	 	$config['wordfilters'][] = array('sharty', '4channel.org/qa/');	
+	// 		 	$config['wordfilters'][] = array('soyjak.party', '4channel.org/qa/');	
+	// 		 	$config['wordfilters'][] = array('g?m', 'dust');
+	 	 //	#$config['wordfilters'][] = array('bbc', 'bright blue cat');
+	 	 //$config['wordfilters'][] = array('bee bee sea', 'wasp wasp ocean');
+	 	 //	$config['wordfilters'][] = array('black cock', 'blue cat');
+	 	 //	$config['wordfilters'][] = array('black penis', 'blue pants');
+	 	///	 	$config['wordfilters'][] = array('gemerald', 'gigacoal');
+	 	//	 	$config['wordfilters'][] = array('chad', 'soy');
+	 	//	 	$config['wordfilters'][] = array('bwc', 'big wet cat');
+	 	 
+	 	 	//$config['wordfilters'][] = array('lolcow.farm/snow/res/1498101.html', 'kiwifarms.net/threads/unabashedhermaphrodite-belial-the-actual-queen-actuallybella1-autisticaizen-blaine-gaven-ross-jess-ross-erika-starling.99380/post-12573637');
+			  //$config['wordfilters'][] = array('278353286', '278353286');
+			  $config['wordfilters'][] = array('jstrieb.github.io', 'soyjak.party');
+			  //$config['wordfilters'][] = array('thefrogpond.org', 'patriots.win');
+			  $config['wordfilters'][] = array('chood', 'Max');
+			  $config['wordfilters'][] = array('Dr. E', 'Anton Maximov');
+			  //$config['wordfilters'][] = array('nusoislutta', 'fedschanner');
+			  //$config['wordfilters'][] = array('nu�oislutta', 'ikea');
+			  
+			  
+			  
+			  
+			  
+			  
+							//$config['wordfilters'][] = array('#cobgang', '8898#cobgang8898');
+							//$config['wordfilters'][] = array('#feralgang', '8899#feralgang8899');
+									  //$config['wordfilters'][] = array('chitwood', 'John Doe');
+									  //$config['wordfilters'][] = array('53252352352352352', '[RED]');
+
+$config['wordfilters'][] = array('discord.gg/soyjak', 'I love bibisi');
+$config['wordfilters'][] = array('discord.gg', 'I love bibisi');
+
+$config['wordfilters'][] = array('https://cytu.be/r/soyteen', 'Im a nigger');
+//Glowtext
+$config['markup'][] = array("/%%(.+?)%%/", "<span class=\"glow\">\$1</span>");
+//$config['markup'][] = array("/::(.+?)::/", "<span style=\"text-shadow:0px 0px 40px #fffb00, 0px 0px 2px #fffb00\">\$1</span>");	
+$config['markup'][] = array("/--(.+?)--/", "<span class=\"heading2\">\$1</span>");
+$config['markup'][] = array("/__(.+?)__/", "<u>\$1</u>");
+$config['markup'][] = array("/```(.+?)```/", "<code>\$1</code>");
+$config['markup'][] = array("/~~(.+?)~~/", "<s>\$1</s>");
+$config['markup'][] = array("/\+=(.+?)=\+/", "<big>\$1</big>");
+$config['markup'][] = array("/~-~(.+?)~-~/", "<span style=\"background: linear-gradient(to left, red, orange , yellow, green, cyan, blue, violet);-webkit-background-clip: text;-webkit-text-fill-color: transparent;\">$1</span>");
+$config['markup'][] = array("/-~-(.+?)-~-/", "<font color=\"FD3D98\"><b>\$1</b></font>");
+$config['markup'][] = array("/(\(\(\(.+?\)\)\))/", "<span style=\"background:#faf8f8;color:#3060a8\">$1</span>");
+$config['markup'][] = array("/-=(.+?)-=/", "<span style=\"color:#720b98; font-weight:bold;\">\$1</span>");
+
+//$config['markup'][] = array("/\[thumb\](\d+)\[\/thumb\]/", "<img alt=\"SoyBooru post #$1\" src=\"https://booru.soyjak.st/thumb/$1.jpeg\" />");
+//Spintext
+//$config['markup'][] = array("/##([ a-zA-Z0-9]{1,90}?)##/", "<span class=\"rotate\">\$1</span>"); 
+// $config['markup'][] = array("/%%(.+?)%%/", "<span style=\"text-shadow:0px 0px 40px #00fe20, 0px 0px 
+//2px #00fe20\">\$1</span>"); $config['markup'][] = array("/::(.+?)::/", "<span style=\"text-shadow:0px 0px 40px #fffb00, 0px 0px 2px #fffb00\">\$1</span>");
+//$config['markup'][] = array("/8898(.+?)8898/", "<a href=\"https:\/\/booru.soy/post/list/variant%3Acobson/1\">\$1</a>");
+//$config['markup'][] = array("/8899(.+?)8899/", "<a href=\"https:\/\/booru.soy/post/list/variant%3Aferaljak/1\">\$1</a>");
+  //  $config['markup'][] = array("/0999(.+?)0999/", "<abbr title=\"Kiss Your Self\">\$1</abbr>");
+
+//$config['markup'][] = array("/%%(.+?)%%/", "<span style=\"text-shadow:0px 0px 40px #00fe20, 0px 0px 2px #00fe20\">\$1</span>");
+
+$config['markup'][] = array("/::(.+?)::/", "<span style=\"text-shadow:0px 0px 40px #fffb00, 0px 0px 2px #fffb00\">\$1</span>");
+$config['markup'][] = array("/;;(.+?);;/", "<span style=\"text-shadow:0px 0px 40px #36d7f7, 0px 0px 2px #36d7f7\">\$1</span>");
+
+//
+$config['markup'][]  = array("/!!([a-zA-Z0-9]+?)!!/", "<span style=\"text-shadow:0px 0px 40px #ff0000, 0px 0px 2px #ff0000\">\$1</span>");
+
+$config['inline_emotes'][] = array("soyak", "/static/inline_soyjaks/soyak25x25.png");
+$config['inline_emotes'][] = array("soyjak", "/static/inline_soyjaks/soyak25x25.png");
+$config['inline_emotes'][] = array("pepe", "/static/inline_soyjaks/pepe32x32.png");
+$config['inline_emotes'][] = array("impish", "/static/inline_soyjaks/impish24x24.png");
+$config['inline_emotes'][] = array("chud", "/static/inline_soyjaks/dchud28x46.gif");
+$config['inline_emotes'][] = array("neutralplier", "/static/inline_soyjaks/neutralplier48x64.png");
+$config['inline_emotes'][] = array("neutral", "/static/inline_soyjaks/neutralplier48x64.png");
+$config['inline_emotes'][] = array("coal", "/static/inline_soyjaks/coal48x38.png");
+$config['inline_emotes'][] = array("gem", "/static/inline_soyjaks/gem48x38.png");
+$config['inline_emotes'][] = array("ack", "/static/inline_soyjaks/ack48x45.png");
+$config['inline_emotes'][] = array("baby", "/static/inline_soyjaks/baby24x32.png");
+$config['inline_emotes'][] = array("babyjak", "/static/inline_soyjaks/baby24x32.png");
+$config['inline_emotes'][] = array("slf", "/static/inline_soyjaks/slf15x20.gif");
+$config['inline_emotes'][] = array("selfish", "/static/inline_soyjaks/slf15x20.gif");
+$config['inline_emotes'][] = array("cob", "/static/inline_soyjaks/cob25x25.png");
+$config['inline_emotes'][] = array("cobson", "/static/inline_soyjaks/cob25x25.png");
+$config['inline_emotes'][] = array("doctos", "/static/inline_soyjaks/doctos26x30.png");
+$config['inline_emotes'][] = array("squirrel", "/static/inline_soyjaks/squirrel20x30.png");
+$config['inline_emotes'][] = array("squirreljak", "/static/inline_soyjaks/squirrel20x30.png");
+$config['inline_emotes'][] = array("over", "/static/inline_soyjaks/soytanover64x64.png");
+$config['inline_emotes'][] = array("itsover", "/static/inline_soyjaks/soytanover64x64.png");
+$config['inline_emotes'][] = array("feralrage", "/static/inline_soyjaks/feralrage32x32.png");
+$config['inline_emotes'][] = array("though", "/static/inline_soyjaks/though32x31.png");
+$config['inline_emotes'][] = array("a24", "/static/inline_soyjaks/a2452x59.png");
+$config['inline_emotes'][] = array("soytan", "/static/inline_soyjaks/soytan64x64.png");
+$config['inline_emotes'][] = array("pepetux", "/static/inline_soyjaks/pepetux64x64.png");
+$config['inline_emotes'][] = array("amerimutt", "/static/inline_soyjaks/amerimutt64x64.png");
+$config['inline_emotes'][] = array("euromutt", "/static/inline_soyjaks/euromutt64x64.png");
+$config['inline_emotes'][] = array("posteditagain", "/static/inline_soyjaks/posteditagain53x64.png");
+$config['inline_emotes'][] = array("wew", "/static/inline_soyjaks/wew38x36.png");
+$config['inline_emotes'][] = array("fact", "/static/inline_soyjaks/fact38x14.png");
+$config['inline_emotes'][] = array("dancingswede", "/static/inline_soyjaks/dancingswede20x22.gif");
+$config['inline_emotes'][] = array("cry", "/static/inline_soyjaks/cry32x31.png");
+$config['inline_emotes'][] = array("soot", "/static/inline_soyjaks/soot48x63.png");
+$config['inline_emotes'][] = array("feral_animated", "/static/inline_soyjaks/feral_animated64x64.gif");
+$config['inline_emotes'][] = array("feral", "/static/inline_soyjaks/feral58x63.png");
+$config['inline_emotes'][] = array("wholesome", "/static/inline_soyjaks/wholesome47x63.png");
+$config['inline_emotes'][] = array("sprokejak", "/static/inline_soyjaks/sprokejak32x63.png");
+$config['inline_emotes'][] = array("jew", "/static/inline_soyjaks/jew54x63.png");
+$config['inline_emotes'][] = array("gigachad", "/static/inline_soyjaks/gigachad54x63.png");
+$config['inline_emotes'][] = array("nojak", "/static/inline_soyjaks/nojak44x58.png");
+
+
+$config['inline_emotes'][] = array("smugsoyak", "/static/inline_soyjaks/smugsoyak43x60.png");
+$config['inline_emotes'][] = array("jig", "/static/inline_soyjaks/jig60x60.gif");
+$config['inline_emotes'][] = array("sisa", "/static/inline_soyjaks/sisa35x41.png");
+$config['inline_emotes'][] = array("bernd", "/static/inline_soyjaks/bernd33x30.png");
+$config['inline_emotes'][] = array("smug", "/static/inline_soyjaks/smug51x59.png");
+$config['inline_emotes'][] = array("trio", "/static/inline_soyjaks/trio58x41.png");
+$config['inline_emotes'][] = array("soyberg", "/static/inline_soyjaks/soyberg56x60.png");
+$config['inline_emotes'][] = array("wholesomegem", "/static/inline_soyjaks/wholesomegem58x59.png");
+$config['inline_emotes'][] = array("transheart", "/static/inline_soyjaks/transheart32x33.png");
+$config['inline_emotes'][] = array("pepetwerk", "/static/inline_soyjaks/pepetwerk56x56.gif");
+$config['inline_emotes'][] = array("microjaklover", "/static/inline_soyjaks/microjaklover30x30.png");
+$config['inline_emotes'][] = array("colorjak", "/static/inline_soyjaks/colorjak47x63.png");
+$config['inline_emotes'][] = array("smug", "/static/inline_soyjaks/smug38x53.png");
+$config['inline_emotes'][] = array("selfish", "/static/inline_soyjaks/selfish47x53.png");
+$config['inline_emotes'][] = array("med", "/static/inline_soyjaks/med30x30.gif");
+$config['inline_emotes'][] = array("swede", "/static/inline_soyjaks/swede46x48.png");
+$config['inline_emotes'][] = array("army2", "/static/inline_soyjaks/army258x48.png");
+$config['inline_emotes'][] = array("army", "/static/inline_soyjaks/army44x40.png");
+$config['inline_emotes'][] = array("wholesomeheart", "/static/inline_soyjaks/wholesomeheart42x64.png");
+$config['inline_emotes'][] = array("trvke", "/static/inline_soyjaks/trvke43x64.png");
+$config['inline_emotes'][] = array("perrojak", "/static/inline_soyjaks/perrojak57x53.png");
+$config['inline_emotes'][] = array("jacobson", "/static/inline_soyjaks/jacobson15x26.png");
+
+// Code markup. This should be set to a regular expression, using tags you want to use. Examples:
+// "/\[code\](.*?)\[\/code\]/is"
+// "/```([a-z0-9-]{0,20})\n(.*?)\n?```\n?/s"
+
+$config['max_filesize'] = 99 * 1024 * 1024;
+$config['max_width'] = 50000;
+$config['max_height'] = $config['max_width'];
+
+$config['secure_trip_salt'] = 'OSSL.4lNNPl85dg+m5OmYnDRgy4XmRZYmXYV7wN+1Pwkb9mjGZ8mmyHvoUZVXQvCvrl4FGKVIyWqhpQJu55N4RcW/rZd3wYABmCwd4hENkvQNUWD9d6Zc/k54LUn4q3yqj8ffHGokSh+yUnc/qhusSd/IzVbyBWjVkWmM6+Uf86uPHKU=';
+
+//$config['additional_javascript'][] = 'js/jquery2.min.js';
+
+$config['additional_javascript'][] = 'js/jquery.min.js';
+$config['additional_javascript'][] = 'js/jquery-ui.min.js';
+//$config['additional_javascript'][] = 'js/jquery-migrate.js';
+$config['additional_javascript'][] = 'js/jquery.mixitup.min.js';
+
+$config['additional_javascript'][] = 'js/decrypt.js?v2';
+
+$config['additional_javascript'][] = 'js/ruffle/ruffle.js';
+
+$config['additional_javascript'][] = 'js/mobile-style.js';
+
+$config['additional_javascript'][] = 'js/strftime.min.js';
+
+$config['additional_javascript'][] = 'js/toastify.js';
+
+//$config['additional_javascript'][] = 'js/mithril.js';
+
+$config['additional_javascript'][] = 'js/integrity/13/integrity.js';
+
+$config['additional_javascript'][] = 'js/instance.settings.js?v3';
+
+$config['additional_javascript'][] = 'js/options.js?v1';
+$config['additional_javascript'][] = 'js/options/general.js?v3';
+$config['additional_javascript'][] = 'js/options/user-css.js?v3';
+$config['additional_javascript'][] = 'js/options/user-js.js?v2';
+
+$config['additional_javascript'][] = 'js/post-menu.js';
+
+$config['additional_javascript'][] = 'js/hide-images.js?v2';
+//$config['additional_javascript'][] = 'js/nsfw-filter.js?v27';
+$config['additional_javascript'][] = 'js/post-filter.js?v9';
+
+$config['additional_javascript'][] = 'js/local-time.js';
+
+$config['additional_javascript'][] = 'js/style-select.js?v2';
+
+$config['additional_javascript'][] = 'js/___ajax.js?v14';
+$config['additional_javascript'][] = 'js/multi-image.js?v2';
+$config['additional_javascript'][] = 'js/file-selector.js?v6';
+
+$config['additional_javascript'][] = 'js/voice-integration.js';
+$config['additional_javascript'][] = 'js/poll-integration.js';
+$config['additional_javascript'][] = 'js/wPaint/wPaint.min.js';
+$config['additional_javascript'][] = 'js/wPaint/8ch.js';
+$config['additional_javascript'][] = 'js/wpaint.js';
+$config['additional_javascript'][] = 'js/_tegaki.js';
+$config['additional_javascript'][] = 'js/tegaki/tegaki.js';
+$config['additional_javascript'][] = 'js/jspaint.js?v20';
+$config['additional_javascript'][] = 'js/upload-selection.js?v7';
+
+$config['additional_javascript'][] = 'js/quick-reply.js?v3';
+$config['additional_javascript'][] = 'js/quote-selection.js?v2';
+$config['additional_javascript'][] = 'js/strip-filenames.js';
+
+//$config['additional_javascript'][] = 'js/_mathjax.js';
+//$config['additional_javascript'][] = 'js/___mathjax_wrapper.js';
+
+$config['additional_javascript'][] = 'js/expand.js?v2';
+
+$config['additional_javascript'][] = 'js/post-hover.js?v2';
+$config['additional_javascript'][] = 'js/show-backlinks.js';
+$config['additional_javascript'][] = 'js/__show-own-posts.js';
+
+$config['additional_javascript'][] = 'js/ajax-post-controls.js?v2';
+$config['additional_javascript'][] = 'js/___quick-post-controls.js?v3';
+
+$config['additional_javascript'][] = 'js/auto-reload.js?v13';
+$config['additional_javascript'][] = 'js/thread-stats.js?v3';
+
+$config['additional_javascript'][] = 'js/youtube.js?v2';
+
+$config['additional_javascript'][] = 'js/inline-expanding.js?v7';
+$config['additional_javascript'][] = 'js/expand-swf.js?v2';
+$config['additional_javascript'][] = 'js/image-hover.js?v3';
+$config['additional_javascript'][] = 'js/webm-settings.js';
+$config['additional_javascript'][] = 'js/_expand-video.js';
+$config['additional_javascript'][] = 'js/expand-all-images.js?v4';
+
+$config['additional_javascript'][] = 'js/doquote.js?v2';
+
+$config['additional_javascript'][] = 'js/voice_button.js';
+
+$config['additional_javascript'][] = 'js/archive-buttons.js?v3';
+
+$config['additional_javascript'][] = 'js/buttons.js';
+
+$config['additional_javascript'][] = 'js/id_highlighter.js';
+
+$config['additional_javascript'][] = 'js/infinite-scroll.js?v5';
+
+//$config['additional_javascript'][] = 'js/__sseupdate.js?v2';
+
+//$config['additional_javascript'][] = 'js/__thread-watcher-v2.js';
+
+//$config['additional_javascript'][] = 'js/_____partypal.js';
+
+$config['additional_javascript'][] = 'js/rotate-banners.js?v1';
+
+$config['additional_javascript'][] = 'js/theme-effects.js?v1';
+
+$config['additional_javascript'][] = 'js/load_service_worker.js';
+
+include 'rangebans.php';
+
+//Browser hash filter
+
+$config['filters'][] = array(
+	'condition' => array(
+		'flood-match' => array('sharty_browser_hash'), // Only match IP address
+		'flood-time' => &$config['flood_time']
+	),
+	'action' => 'reject',
+	'message' => &$config['error']['flood']
+);
+
+$config['max_threads_per_ip'] = 3000;
+$config['max_threads_per_image_hash'] = 5;
+
+
+
+
+
+
+/* mediator filter test */
+
+
+ 
+
+/* 
+
+$config['wordfilters'][] = array('mediator39', 'Oh Im a jartycuck
+Yes Im a jartycuck
+FNF like having fun
+I dont give a fuck!
+Im always obsessed
+ESL FNF pedo jartycuck
+Takin over the world and nobody can stop
+Oh Im a jartyfail
+Yes Im a jartyfail
+Dancin through the night
+Movin like a tornado
+Oh Im a jartypedo
+Yes Im a jartypedo
+Spamming the log with coal
+Everywhere that I go
+Im a jartynigger
+Yes Im a jartynigger gooning
+Day and night
+My p folder gettin bigger
+Oh Im a shitskin spamming obsessed tranny jartynigger
+If you think thats coally now wait until you see
+My tiny pecker
+Oh Im a jarty tranny
+Yes Im a jarty tranny
+I do it every day
+More devoted than the janny
+Oh Im a jarty tranny
+Yes Im a jarty tranny
+If youre mad about me you can kiss my fat black fanny
+Oh Im a jartycaca
+Yes Im a jartycaca
+ESL FNF skin like shit
+Im obsessed
+Oh Im a jartycaca
+Yes Im a jartycaca
+Never will be white
+Never be a real woman either
+');
+$config['wordfilters'][] = array('mediator40', 'Oh Im a jartycuck
+Yes Im a jartycuck
+FNF like having fun
+I dont give a fuck!
+Im always obsessed
+ESL FNF pedo jartycuck
+Takin over the world and nobody can stop
+Oh Im a jartyfail
+Yes Im a jartyfail
+Dancin through the night
+Movin like a tornado
+Oh Im a jartypedo
+Yes Im a jartypedo
+Spamming the log with coal
+Everywhere that I go
+Im a jartynigger
+Yes Im a jartynigger gooning
+Day and night
+My p folder gettin bigger
+Oh Im a shitskin spamming obsessed tranny jartynigger
+If you think thats coally now wait until you see
+My tiny pecker
+Oh Im a jarty tranny
+Yes Im a jarty tranny
+I do it every day
+More devoted than the janny
+Oh Im a jarty tranny
+Yes Im a jarty tranny
+If youre mad about me you can kiss my fat black fanny
+Oh Im a jartycaca
+Yes Im a jartycaca
+ESL FNF skin like shit
+Im obsessed
+Oh Im a jartycaca
+Yes Im a jartycaca
+Never will be white
+Never be a real woman either
+');
+
+
+*/
+
+
+$config['wordfilters'][] = array('soygem.party', 'jakparty.soy');
+$config['wordfilters'][] = array('soygem dot party', 'jakparty dot soy');
+
+//$config['wordfilters'][] = array('/\b(afterparty)\b/', 'the discord splinter', true);
+//$config['wordfilters'][] = array('/\b(Afterparty)\b/', 'The discord splinter', true);
+//$config['wordfilters'][] = array('/\b(AFTERPARTY)\b/', 'THE DISCORD SPLINTER', true);
+$config['wordfilters'][] = array('/\b(affy)\b/', 'discord splinter', true);
+$config['wordfilters'][] = array('/\b(Affy)\b/', 'discord splinter', true);
+$config['wordfilters'][] = array('/\b(AFFY)\b/', 'DISCORD SPLINTER', true); 
+
+$config['wordfilters'][] = array('kek', 'froglaugh'); 
+
+/*Summer Wordfilters*/
+
+/*
+$config['wordfilters'][] = array('gooning', 'gone surfing');
+$config['wordfilters'][] = array('goon', 'surf');
+$config['wordfilters'][] = array('bumo', 'buoy');
+$config['wordfilters'][] = array('bump', 'buoy');
+$config['wordfilters'][] = array('marge', 'marina');
+$config['wordfilters'][] = array('gemmy', 'ice creamy');
+$config['wordfilters'][] = array('gem', 'ice cream');
+$config['wordfilters'][] = array('coal', 'coconut');
+$config['wordfilters'][] = array('omgsisa', 'Oh my god, the waves at the beach are so good today!');
+$config['wordfilters'][] = array('sisa', 'The waves at the beach are so good today!');
+$config['wordfilters'][] = array('hwabag', 'hotdog');
+$config['wordfilters'][] = array('nigger', 'tanned');
+$config['wordfilters'][] = array('tranny', 'snowbird');
+//$config['wordfilters'][] = array('4chan', 'school');
+$config['wordfilters'][] = array('faggot', 'beachbum');
+$config['wordfilters'][] = array('janny', 'lifeguard');
+$config['wordfilters'][] = array('jannies', 'lifeguards');
+$config['wordfilters'][] = array('admin', 'principal');
+$config['wordfilters'][] = array('soy', 'sun');
+$config['wordfilters'][] = array('bait', 'beach ball');
+$config['wordfilters'][] = array('based', 'tropical');
+$config['wordfilters'][] = array('dox', 'bully');
+$config['wordfilters'][] = array('doxed', 'bullied');
+$config['wordfilters'][] = array('doxxing', 'bullying');
+$config['wordfilters'][] = array('doxxed', 'bullied');
+$config['wordfilters'][] = array('doxx', 'bully');
+$config['wordfilters'][] = array('raid', 'burn');
+$config['wordfilters'][] = array('oldfag', 'graduate');
+$config['wordfilters'][] = array('newfag', 'schoolchild');
+$config['wordfilters'][] = array('retard', 'pool noodle');
+$config['wordfilters'][] = array('ban', 'swim');
+$config['wordfilters'][] = array('banned', 'swimmed');
+
+$config['wordfilters'][] = array('unban', 'rescue');
+$config['wordfilters'][] = array('unbanned', 'rescued');
+$config['wordfilters'][] = array('discord', 'riptide');
+$config['wordfilters'][] = array('soygem', 'The Marina Trench');
+$config['wordfilters'][] = array('shemmy', 'Marina Trench');
+$config['wordfilters'][] = array('jakparty', 'The Philippine Trench');
+$config['wordfilters'][] = array('jarty', 'Philippine Trench');
+$config['wordfilters'][] = array('swedishwin', 'The Tonga Trench');
+$config['wordfilters'][] = array('swinny', 'Tonga Trench');
+$config['wordfilters'][] = array('clitty', 'shrinkage');
+$config['wordfilters'][] = array('clitties', 'shrinkage');
+$config['wordfilters'][] = array('twp', 'shrinkage');
+$config['wordfilters'][] = array('tbp', 'shrinkage');
+//$config['wordfilters'][] = array('reddit', 'vacation bible school');
+$config['wordfilters'][] = array('taiwan', 'Typhoon Lagoon');
+//$config['wordfilters'][] = array('froot', 'Mitch Buchannon');
+//$config['wordfilters'][] = array('root', 'Craig Pomeroy');
+
+//$config['wordfilters'][] = array('chud', 'beach boy');
+*/
+
+
+// 911
+/*
+$config['wordfilters'][] = array('Chud' , 'patriot');
+$config['wordfilters'][] = array('Nigger' , 'Euromutt');
+$config['wordfilters'][] = array('Froot' , 'James Madison');
+$config['wordfilters'][] = array('troon' , 'Europoor');
+$config['wordfilters'][] = array('bwc' , 'BAC');
+$config['wordfilters'][] = array('4cuck' , 'England');
+$config['wordfilters'][] = array('Tranny' , 'Europoor');
+$config['wordfilters'][] = array('bbc' , 'BAC');
+$config['wordfilters'][] = array('4chan' , 'England');
+$config['wordfilters'][] = array('Sharty' , 'Murica');
+$config['wordfilters'][] = array('Gem' , 'burger');
+$config['wordfilters'][] = array('Gemerald' , 'Big Mac');
+$config['wordfilters'][] = array('Coal' , 'kilometer');
+$config['wordfilters'][] = array('kys' , 'Kill yourself, obsessed Euromutt. ');
+$config['wordfilters'][] = array('kill yourself' , 'Kill yourself, obsessed Euromutt. ');
+$config['wordfilters'][] = array('Faggot' , 'obsessed faggot');
+$config['wordfilters'][] = array('Jew' , 'Russian');
+$config['wordfilters'][] = array('Jannies' , 'cops');
+$config['wordfilters'][] = array('Fuck' , 'AMERICA, FUCK YEAH! ');
+$config['wordfilters'][] = array('Dox' , 'shoot');
+$config['wordfilters'][] = array('Based' , 'patriotic');
+$config['wordfilters'][] = array('Keyed' , 'American');
+$config['wordfilters'][] = array('Seethe' , 'obsess');
+$config['wordfilters'][] = array('seething' , 'obsessing');
+$config['wordfilters'][] = array('coping' , 'obsessing');
+$config['wordfilters'][] = array('dilating','obsessing');
+$config['wordfilters'][] = array('Cope' , 'obsess');
+$config['wordfilters'][] = array('Dilate', 'obsess');
+$config['wordfilters'][] = array('Ban' , 'arrest');
+$config['wordfilters'][] = array('YWNBAW' , 'dont tread on me');
+$config['wordfilters'][] = array('Twitter' , 'Canada');
+$config['wordfilters'][] = array('Discord' , 'Russia');
+$config['wordfilters'][] = array('newfag' , 'new soldier');
+$config['wordfilters'][] = array('oldfag' , 'veteran');
+$config['wordfilters'][] = array('redditor' , 'Amerimutt');
+$config['wordfilters'][] = array('fedschanner' , 'Gen Z fag or something');
+$config['wordfilters'][] = array('Pedo' , 'John Adams');
+$config['wordfilters'][] = array('kolyma' , 'Congress of the Confederation');
+$config['wordfilters'][] = array('joel' , 'Ronald McDonald');
+$config['wordfilters'][] = array('Root' , 'James Monroe');
+$config['wordfilters'][] = array('HWABAG' , 'WHAT THE FUCK IS A KILOMETER? ');
+$config['wordfilters'][] = array('Gemmy' , 'patriotic');
+*/
+
+$config['wordfilters'][] = array('nusoi' , 'oldfrog');
+$config['wordfilters'][] = array('nus0i' , 'oldfrog');
+$config['wordfilters'][] = array('nvsoi' , 'oldfrog');
+$config['wordfilters'][] = array('nvs0i' , 'oldfrog');
+$config['wordfilters'][] = array('nusoy' , 'oldfrog');
+$config['wordfilters'][] = array('nus0y' , 'oldfrog');
+$config['wordfilters'][] = array('nvsoy' , 'oldfrog');
+$config['wordfilters'][] = array('nvs0y' , 'oldfrog');
+$config['wordfilters'][] = array('soicuck' , 'frogcuck');
+$config['wordfilters'][] = array('soycuck' , 'frogcuck');
+$config['wordfilters'][] = array('soicaca' , 'frogcaca');
+$config['wordfilters'][] = array('soycaca' , 'frogcaca');
+$config['wordfilters'][] = array('soilcluck' , 'pondplop');
+
+//$config['wordfilters'][] = array('://booru.soy' , '://soybooru.com');
+//$config['wordfilters'][] = array('://soyjak.wiki' , '://soyjakwiki.net');
+$config['wordfilters'][] = array('basedjak.party', 'soyjak.party');
+//$config['wordfilters'][] = array('soyjaks.party', 'soyak.party');
+$config['wordfilters'][] = array('basedgem.party', 'bantculture.com');
+$config['wordfilters'][] = array('shemmy.org', 'bantculture.com');
+
+$config['wordfilters'][] = array('swinny', 'jarty');
+$config['wordfilters'][] = array('swinni', 'jarty');
+$config['wordfilters'][] = array('swínny', 'jarty');
+$config['wordfilters'][] = array('swede splinter', 'jarty');
+$config['wordfilters'][] = array('swedishwin.com', 'jakparty.soy');
+$config['wordfilters'][] = array('swedishwin', 'the jarty');
+$config['wordfilters'][] = array('swedewin', 'the jarty');
+
+$config['wordfilters'][] = array('desu', 'tbh');
+
+$config['wordfilters'][] = array('s sharty culture', 's vantablack brimstone');
+$config['wordfilters'][] = array('s soyjak.party culture', 's vantablack brimstone');
+$config['wordfilters'][] = array('s soyjak party culture', 's vantablack brimstone');
+$config['wordfilters'][] = array('s \'arty culture', 's vantablack brimstone');
+
+//$config['wordfilters'][] = array('/b.b.s./i', 'johnson', true);
+$config['wordfilters'][] = array('/b\W*b\W*c/i', 'johnson', true);
+$config['wordfilters'][] = array('big black cock', 'johnson');
+
+//$config['wordfilters'][] = array(' ', 'REDDITSPACE');
+$config['wordfilters'][] = array('shit', 'raisin');
+
+//$config['wordfilters'][] = array('sse', 'bibisi');
+
+$config['wordfilters'][] = array('chinny', 'jarty');
+$config['wordfilters'][] = array('chiny', 'jarty');
+$config['wordfilters'][] = array('ch1nny', 'jarty');
+
+$config['wordfilters'][] = array('wincest', 'BBC');
+$config['wordfilters'][] = array('incest', 'BBC');
+$config['wordfilters'][] = array('lncest', 'BBC');
+$config['wordfilters'][] = array('1ncest', 'BBC');
+$config['wordfilters'][] = array('/in\s*cest/i', 'BBC', true);
+
+$config['wordfilters'][] = array('heckingemmy', 'Chud');
+$config['wordfilters'][] = array('heckinggemmy', 'Chud');
+
+$config['wordfilters'][] = array('soi', 'soy');
+$config['wordfilters'][] = array('basedjak', 'soyjak');
+
+$config['wordfilters'] = array();
+
+$config['wordfilters'][] = array('‎', '');
+$config['wordfilters'][] = array('﻿', '');
+$config['wordfilters'][] = array('⁠', '');
+$config['wordfilters'][] = array('‍', '');
+$config['wordfilters'][] = array('؜', '');
+$config['wordfilters'][] = array('‭', '');
+
+$config['wordfilters'][] = array('﷽', 'I love BBC');
+
+$config['wordfilters'][] = array('𒐫', '');
+$config['wordfilters'][] = array('𒈙', '');
+$config['wordfilters'][] = array('⸻', '');
+$config['wordfilters'][] = array('꧅', '');
+$config['wordfilters'][] = array('ဪ', '');
+$config['wordfilters'][] = array('௵', '');
+$config['wordfilters'][] = array('௸', '');
+$config['wordfilters'][] = array('‱', '');
+$config['wordfilters'][] = array('𒐪', '');
+$config['wordfilters'][] = array('𒐩', '');
+$config['wordfilters'][] = array('𒅌', '');
+$config['wordfilters'][] = array('𒅋', '');
+$config['wordfilters'][] = array('𒁏', '');
+
+$config['wordfilters'][] = array('Ι', 'I');
+
+$config['wordfilters'][] = array('і', 'i');
+
+$config['wordfilters'][] = array('Ε', 'E');
+$config['wordfilters'][] = array('Е', 'E');
+$config['wordfilters'][] = array('é', 'e');
+$config['wordfilters'][] = array('è', 'e');
+$config['wordfilters'][] = array('ê', 'e');
+$config['wordfilters'][] = array('ė', 'e');
+$config['wordfilters'][] = array('е', 'e');
+
+$config['wordfilters'][] = array('с', 'c');
+
+$config['wordfilters'][] = array('ô', 'o');
+$config['wordfilters'][] = array('о', 'o');
+
+$config['wordfilters'][] = array('ѕ', 's');
+$config['wordfilters'][] = array('Ѕ', 'S');
+
+$config['wordfilters'][] = array('shit', 'raisin');
+$config['wordfilters'][] = array('snca', 'rnca');
+
+$config['wordfilters'][] = array('soytopia.party', 'tf2.soyjak.st');
+$config['wordfilters'][] = array('74.91.123.100', 'tf2.soyjak.st');
+
+$config['wordfilters'][] = array('swinny', 'jarty');
+$config['wordfilters'][] = array('swinni', 'jarty');
+$config['wordfilters'][] = array('swínny', 'jarty');
+$config['wordfilters'][] = array('swedishwin.com', 'jakparty.soy');
+$config['wordfilters'][] = array('swedishwin', 'the jarty');
+$config['wordfilters'][] = array('swedewin', 'the jarty');
+
+/*
+$config['wordfilters'][] = array("'p ", 'irl children being raped ');
+$config['wordfilters'][] = array("`p ", 'irl children being raped ');
+$config['wordfilters'][] = array("'р ", 'irl children being raped ');
+$config['wordfilters'][] = array(" р ", 'irl children being raped ');
+*/
+
+/*
+$config['wordfilters'][] = array('/Nigger/', 'Rog', true);
+$config['wordfilters'][] = array('/nigger/', 'rog', true);
+$config['wordfilters'][] = array('/NIGGER/', 'ROG', true);
+$config['wordfilters'][] = array('/nigger/i', 'rog', true);
+*/
+
+// Christmas
+/*
+$config['wordfilters'][] = array('gem on the log', 'elf on the shelf');
+$config['wordfilters'][] = array('chud', 'good boy');
+$config['wordfilters'][] = array('chuds', 'good boys');
+$config['wordfilters'][] = array('nigger', 'bad boy');
+$config['wordfilters'][] = array('niggers', 'bad boys');
+$config['wordfilters'][] = array('froot', 'santa claus');
+$config['wordfilters'][] = array('root', 'Ms. claus');
+$config['wordfilters'][] = array('tranny', 'grinch');
+$config['wordfilters'][] = array('troon', 'krampus');
+$config['wordfilters'][] = array('trannies', 'grinches');
+$config['wordfilters'][] = array('soylent', 'eggnog');
+$config['wordfilters'][] = array('bbc', 'Licorice Candy');
+$config['wordfilters'][] = array('bwc', 'Vanilla Candy');
+$config['wordfilters'][] = array('4cuck', 'south pole');
+$config['wordfilters'][] = array('4chan', 'south pole');
+$config['wordfilters'][] = array('\'cuck', 'south pole');
+$config['wordfilters'][] = array('4chon', 'south pole');
+$config['wordfilters'][] = array('the sharty', 'Santa\'s workshop');
+$config['wordfilters'][] = array('sharty', 'Santa\'s workshop');
+$config['wordfilters'][] = array('soyjak.party', 'Santa\'s workshop');
+$config['wordfilters'][] = array('gem', 'gift');
+$config['wordfilters'][] = array('gems', 'gifts');
+$config['wordfilters'][] = array('gemerald', 'The star at the top of the christmas tree');
+$config['wordfilters'][] = array('coal', 'coal');
+$config['wordfilters'][] = array('ITT:', 'We have gathered here to celebrate Christmas, the day when Jesus Christ was born.');
+$config['wordfilters'][] = array('kys', 'MERRY CHRISTMAS');
+$config['wordfilters'][] = array('kill yourself', 'MERRY CHRISTMAS');
+$config['wordfilters'][] = array('zog', 'jack frost');
+$config['wordfilters'][] = array('faggot', 'snowman');
+$config['wordfilters'][] = array('slut', 'hungry');
+$config['wordfilters'][] = array('kike', 'scrooge');
+$config['wordfilters'][] = array('jew', 'scrooge');
+$config['wordfilters'][] = array('jews', 'scrooges');
+$config['wordfilters'][] = array('jooz', 'scrooges');
+$config['wordfilters'][] = array('Janny//mod', 'santa\'s helper');
+$config['wordfilters'][] = array('jannies/mods', 'santa\'s helpers');
+$config['wordfilters'][] = array('samefag', 'sameelf');
+$config['wordfilters'][] = array('fuck off', 'Believe in the magic of christmas!');
+$config['wordfilters'][] = array('fuck you', 'Believe in the magic of christmas!');
+$config['wordfilters'][] = array('die', 'Let your heart be bright!');
+$config['wordfilters'][] = array('raid', 'snowball fight');
+$config['wordfilters'][] = array('raiding', 'snowball fighting');
+$config['wordfilters'][] = array('calm', 'merry');
+$config['wordfilters'][] = array('bump', 'HOHOHO!');
+$config['wordfilters'][] = array('bumo', 'HOHOHO!');
+$config['wordfilters'][] = array('filter(s)', 'baubles');
+$config['wordfilters'][] = array('worldfilter(s)', 'baubles');
+$config['wordfilters'][] = array('it\'s over', '\'Tis the season');
+$config['wordfilters'][] = array('jak', 'elf');
+$config['wordfilters'][] = array('soyjak', 'elf');
+$config['wordfilters'][] = array('soyjaks', 'elves');
+$config['wordfilters'][] = array('jaks', 'elves');
+$config['wordfilters'][] = array('based', 'festive');
+$config['wordfilters'][] = array('keyed', 'festive');
+$config['wordfilters'][] = array('cringe', 'killjoy');
+$config['wordfilters'][] = array('Meds', 'milk and cookies');
+$config['wordfilters'][] = array('ghoul', 'caroler');
+$config['wordfilters'][] = array('seethe', 'smile');
+$config['wordfilters'][] = array('seething', 'smiling');
+$config['wordfilters'][] = array('cope', 'celebrate');
+$config['wordfilters'][] = array('coping', 'celebrating');
+$config['wordfilters'][] = array('dilate', 'feast');
+$config['wordfilters'][] = array('dilating', 'feasting');
+$config['wordfilters'][] = array('incel', 'Reindeer');
+$config['wordfilters'][] = array('chudcel', 'Reindeer');
+$config['wordfilters'][] = array('incels', 'Reindeers');
+$config['wordfilters'][] = array('chudcels', 'Reindeers');
+$config['wordfilters'][] = array('banned', 'on the naughty list');
+$config['wordfilters'][] = array('YWNBAW', 'You have no gifts under your christmas tree');
+$config['wordfilters'][] = array('twitter', 'easter');
+$config['wordfilters'][] = array('\'cord', 'halloween');
+$config['wordfilters'][] = array('thread', 'bread');
+$config['wordfilters'][] = array('shit', 'raisin');
+$config['wordfilters'][] = array('dox', 'deliver presents to');
+$config['wordfilters'][] = array('doxxing', 'delivering presents');
+$config['wordfilters'][] = array('doxxed', 'delivered presents');
+$config['wordfilters'][] = array('epi', 'early present introduction');
+$config['wordfilters'][] = array('foodist', 'naughty kid');
+$config['wordfilters'][] = array('fundamental', 'jolly');
+$config['wordfilters'][] = array('splinters', 'places santa doesn\'t visit');
+$config['wordfilters'][] = array('splinter', 'place santa doesn\'t visit');
+$config['wordfilters'][] = array('shemmy', 'place santa doesn\'t visit');
+$config['wordfilters'][] = array('soygem.party', 'place santa doesn\'t visit');
+$config['wordfilters'][] = array('jarty', 'place santa doesn\'t visit');
+$config['wordfilters'][] = array('jakparty.soy', 'place santa doesn\'t visit');
+$config['wordfilters'][] = array('kino', 'merry');
+$config['wordfilters'][] = array('kek', 'hohoho');
+$config['wordfilters'][] = array('geg', 'gogogo');
+$config['wordfilters'][] = array('nusoi', 'nuelf');
+$config['wordfilters'][] = array('nusoy', 'nuelf');
+$config['wordfilters'][] = array('pph', 'presents per hour');
+$config['wordfilters'][] = array('ppd', 'presents per day');
+$config['wordfilters'][] = array('mudslime', 'santa denier');
+$config['wordfilters'][] = array('muslim', 'santa denier');
+$config['wordfilters'][] = array('blacked', 'packaged');
+$config['wordfilters'][] = array('retard', 'Rudolf');
+$config['wordfilters'][] = array('pedophile', 'mall santa');
+$config['wordfilters'][] = array('pedo', 'mall santa');
+$config['wordfilters'][] = array('soyelf.st', 'soyjak.st');
+$config['wordfilters'][] = array('/bread/', '/thread/');
+*/
+
+$config['movefilters'] = array();
+
+$config['movefilters'][] = array('06eb', 'nate');
+$config['movefilters'][] = array('female jan', 'nate');
+$config['movefilters'][] = array('femjan', 'nate');
+$config['movefilters'][] = array('femq', 'nate');
+$config['movefilters'][] = array('fem q', 'nate');
+$config['movefilters'][] = array('mrs bottom', 'nate');
+$config['movefilters'][] = array('mrs. bottom', 'nate');
+$config['movefilters'][] = array('miss bottom', 'nate');
+
+$config['blocked_countries'][] = 'in';
+$config['blocked_countries'][] = 'il';
+$config['blocked_countries'][] = 'lk';
+
+$config['anyascii'] = true;
+$config['enforce_integrity'] = true;
+
+$config['mediator_threshold'] = 8;
+
+$config['file_mod_file_approval'] = 'mod/file_approval.html';
+
+$config['splatfest_teams'] = array (
+	'John Cena' => array('/static/festival/john.png', '#000b98'),
+	'Cody Rhodes' => array('/static/festival/cody.png', '#d50000'),
+);
+$config['splatfest_enabled'] = false;
+
+//$config['wordfilters'][] = array(' ', '[SHARTY SPACING]');
+	$config['custom_capcode']['Pink'] = array(
+		'<span class="capcode" style="color:#ff3c9a"></span>',
+		//'<span class="capcode" style="color:#ff3c9a;font-weight:bold"> ## %s</span>',
+		'color:#ff3c9a;', // Change name style; optional
+		'color:#ff3c9a;' // Change tripcode style; optional
+	);
+	$config['custom_capcode']['Blue'] = array(
+		'<span class="capcode" style="color:#0066cc"></span>',
+		//'<span class="capcode" style="color:#0066cc;font-weight:bold"> ## %s</span>',
+		'color:#0066cc;', // Change name style; optional
+		'color:#0066cc;' // Change tripcode style; optional
+	);
+	$config['custom_capcode']['Orange'] = array(
+		'<span class="capcode" style="color:#db7500"></span>',
+		//'<span class="capcode" style="color:#db7500;font-weight:bold"> ## %s</span>',
+		'color:#db7500;', // Change name style; optional
+		'color:#db7500;' // Change tripcode style; optional
+	);
+	$config['custom_capcode']['Green'] = array(
+		'<span class="capcode" style="color:#00cc00"></span>',
+		//'<span class="capcode" style="color:#00cc00;font-weight:bold"> ## %s</span>',
+		'color:#00cc00;', // Change name style; optional
+		'color:#00cc00;' // Change tripcode style; optional
+	);
+	$config['custom_capcode']['Red'] = array(
+		'<span class="capcode" style="color:#ff0000"></span>',
+		//'<span class="capcode" style="color:#ff0000;font-weight:bold"> ## %s</span>',
+		'color:#ff0000;', // Change name style; optional
+		'color:#ff0000;' // Change tripcode style; optional
+	);
+	$config['custom_capcode']['Rainbow'] = array(
+		'<span class="capcode" style="color:#ff0000"></span>',
+		//'<span class="capcode" style="color:#ff0000;font-weight:bold"> ## %s</span>',
+		'background: linear-gradient(to left, red, orange , yellow, green, cyan, blue, violet);-webkit-background-clip: text;-webkit-text-fill-color: transparent;', // Change name style; optional
+		'background: linear-gradient(to left, red, orange , yellow, green, cyan, blue, violet);-webkit-background-clip: text;-webkit-text-fill-color: transparent;' // Change tripcode style; optional
+	);
+
+$config['max_delete_time'] = 120;
+
+$config['field_disable_name'] = true;
+
+$config['anyascii'] = false;
+
+$config['images_only_thread_button'] = true;
+
+$config['hourly_ip_thread_limit'] = 10;
+$config['max_threads_per_hour'] = 900;
+
+$config['block_vpn_posting'] = false;
+$config['block_vpn_uploads'] = false;
+$config['block_vpn_embeds'] = false;
+
+/*
+$config['wordfilters'][] = array('k', 'g');
+$config['wordfilters'][] = array('K', 'G');
+$config['wordfilters'][] = array('К', "\r\ntrans rights!\r\n G");
+$config['wordfilters'][] = array('к', "\r\ntrans rights!\r\ng");
+$config['wordfilters'][] = array('ḱ', "\r\ntrans rights!\r\ng");
+*/
+
+$config['shop_items'] = array();
+
+$config['shop_items'][] = array(
+	'name' => 'Deleted award',
+	'description' => 'Deletes the post.',
+	'icon' => '/static/awards/delete.png',
+	'price' => 9999,
+	'op_only' => false,
+	'effect' => function($post) {
+		deletePost($post['id']);
+	},
+);
+
+$config['shop_items'][] = array(
+	'name' => 'Posted it again award',
+	'description' => 'Temporarily enables the robot for this poster.',
+	'icon' => '/static/awards/posted-it-again.png',
+	'price' => 5,
+	'op_only' => false,
+	'effect' => function($post) {
+		$redis = new Redis();
+		$redis->connect('127.0.0.1', 6379);
+		$redis->set('robotEnabled_' . $post['ip'], true, 60 * 15);
+		$redis->close();
+	},
+);
+
+$config['shop_items'][] = array(
+	'name' => 'Stickied award',
+	'description' => "Stickies the thread for 5 minutes.\n(Stackable)",
+	'icon' => '/static/awards/delete.png',
+	'price' => 30,
+	'op_only' => true,
+	'effect' => function($post) {
+		// Make stacking multiple stickies possible
+		if ($post['bump'] > time())
+			$bump = $post['bump'] + (5 * 60);
+		else
+			$bump = time() + (5 * 60);
+
+		$query = prepare(sprintf('UPDATE ``posts_%s`` SET `bump` = :bump WHERE `id` = :id', $post['board']));
+		$query->bindValue(':id', $post['id']);
+		$query->bindValue(':bump', $bump);
+		$query->execute() or error(db_error($query));
+
+		buildIndex();
+	},
+);
+
+$config['shop_items'][] = array(
+	'name' => 'Gold award',
+	'description' => 'Award half the coins spent on this award to this poster.',
+	'icon' => '/static/awards/delete.png',
+	'price' => 50,
+	'op_only' => false,
+	'effect' => function($post) {
+		add_shop_balance($post['password'], 25);
+	},
+);
+
+$config['shop_items'][] = array(
+	'name' => 'Image-only award',
+	'description' => 'Forces the poster to communicate solely through images for 15 minutes.',
+	'icon' => '/static/awards/delete.png',
+	'price' => 50,
+	'op_only' => false,
+	'effect' => function($post) {
+		$redis = new Redis();
+		$redis->connect('127.0.0.1', 6379);
+		$redis->set('imageOnly_' . $post['ip'], true, 60 * 15);
+		$redis->close();
+	},
+);
+
+$config['show_ids_unique_thread'] = true;
+$config['show_ids_thread_button'] = true;
+
+$config['allow_anonymous_email'] = false;
+$config['display_vpn'] = false;
+
+$config['thumb_method'] = 'libvips';
+$config['thumb_ext'] = 'webp';
+
+/*
+$config['user_flag'] = true;
+$config['user_flags'] = array (
+        'pride/lesbian' => 'Lesbian',
+        'pride/gay' => 'Gay',
+        'pride/bi' => 'Bisexual',
+        'pride/trans' => 'Trans',
+        'pride/straight' => 'Straight',
+);
+
+$config['require_user_flag'] = true;
+$config['pride_month_2025'] = true;
+*/

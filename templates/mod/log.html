@@ -26,7 +26,9 @@
 				{% endif %}
 			</td>
 			<td class="minimal">
-				{% if mod|hasPermission(config.mod.show_ip_modlog) %}
+				{% if mod|hasPermission(config.mod.show_ip_modlog) and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+				<a href="?/IP/{{ log.ip }}">{{ log.ip }}</a>
+				{% elseif mod|hasPermission(config.mod.show_ip_modlog) %}
 					<a href="?/IP/{{ log.ip|cloak_ip }}">{{ log.ip|cloak_ip }}</a>
 				{% else %}
 					<em>hidden</em>

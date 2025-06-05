@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Vote on poll</title>
+	<style>body { font-family: arial, helvetica, sans-serif; font-size: 10pt; } body::before { display: none !important; }</style>
+	<script type="text/javascript" src="/_main.js?v5"></script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/options/user-css.js?v2"></script>
+	<style>
+		body, body::after { 
+			background:none transparent !important;
+			background-image: none;
+		}
+		body {
+			margin: 0px;
+			padding: 0px;
+			text-align:center;
+		}
+		li { 
+			display: inline-block;
+		}
+		ul { 
+			padding: 0px;
+			margin-top: 0px;
+		}
+	</style>
+</head>
+<body>
+	<form name="vote" action="/poll.php" method="post">
+        <input type="hidden" name="poll-id" value="{{ poll.poll_id }}">
+        <ul>
+            {% for option in options %}
+                <li>
+                    <input name="choices[]" type="{% if poll.multiple_choice %}checkbox{% else %}radio{% endif %}" id="{{ option.option_id }}" value="{{ option.option_id }}">
+                    <label for="{{ option.option_id }}">{{ option.option_text|e }}</label>
+                </li>
+            {% endfor %}
+        </ul>
+        {% include 'poll/expiration.html' %}
+        <div>
+            <input {% if (poll.expires and time() >= poll.expires) or voted %}disabled{% endif %} type="submit" name="vote" value="Vote">
+            <a href="?id={{ poll.poll_id }}&results"><input type="button" value="Results"></input></a>
+            {% if poll.multiple_choice %}
+            <br>
+            <span style="font-size: 80%;">(Multiple choice)</span>
+            {% endif %}
+            {% if voted %}
+            <br>
+            <span style="font-size: 80%;">(You have already voted on this poll)</span>
+            {% endif %}
+        </div>
+    </form>
+</body>
+</html>

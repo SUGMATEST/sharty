@@ -26,7 +26,7 @@
  *   $config['additional_javascript'][] = 'js/jquery.min.js';
  *   $config['additional_javascript'][] = 'js/post-menu.js';
  */
-$(document).ready(function () {
+$(function () {
 
 var List = function (menuId, text) {
 	this.id = menuId;

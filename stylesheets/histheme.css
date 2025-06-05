@@ -1,0 +1,180 @@
+/* my theme */
+
+label:not(:has(span.capcode)) span.name {
+color:#FA9C1B !important;
+ 
+}
+
+form table tr th{
+  background: linear-gradient(to bottom, #F05E16 0%,#F05E16 50%,#F05E16 100%);
+}
+div.post {
+  color: #FA9C1B;
+  background: linear-gradient(to bottom, #F05E16 0%,#F58216 25%,#FA9C1B 50%,#FFB347 51%,#F7BE6D);border-radius: 15px;
+  border-radius: 15px;
+  border: 2px solid #FA9C1B;
+  padding: 20px;
+  color: 000000;
+  box-shadow: 0 0 15px orange;
+  font-family: "Tahoma", "Tahoma", italic;
+  font-size: 14px
+}
+
+div.banner {
+	background-color: #FA9C1B;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+
+.intro span.subject {
+	color: #000000;
+}
+
+div.post.reply {
+  color: #000;
+  background: linear-gradient(to bottom, #F05E16 0%,#F58216 10%,#FA9C1B 25%,#FFB347 83%,#F7BE6D 100%);border-radius: 15px;
+  border: 2.5px solid #;
+  padding: 7px;
+  color: #000000;
+  font-family: "Tahoma", "Tahoma", bold;
+  font-size: 12.5px
+}
+
+header div.subtitle,
+h1 {
+	color: #000000;
+	text-align: center;
+}
+
+body {
+    background: url(https://soybooru.com/_images/2034bb9042c67fe56735c35ac6842fc8/55310%20-%20SoyBooru.png) no-repeat center fixed;
+background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    font-family: Sans-serif;
+    font-size: 14px;
+    margin: 0;
+    color: #FA9C1B;
+    margin: 0 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+			.bl {
+				text-decoration: none;
+				color: #FA9C1B;
+			}
+
+			.box.middle {
+				background: #FA9C1B;
+				color: #FFFFFF;
+				border: 1px solid #FA9C1B;
+				width: inherit;
+			}
+
+			.box.middle h2 {
+				background: #FA9C1B;
+				color: #FA9C1B;
+			}
+
+}
+.bl {
+  text-decoration: none;
+  color: #FA9C1B;
+}
+
+.pages.top {
+  background-color: #FA9C1B;
+  color: !important;
+}
+
+label:not(:has(span.capcode)) span.name {color:#000000!important;}
+
+.name,
+a {
+  color: #000000!important;
+}
+
+div.post.reply.highlighted {
+     background: linear-gradient(to bottom, #F05E16 0%,#FA9C1B 50%,#FFB347 51%,#F7BE6D 100%);
+}
+
+.boardlist {
+    background-color:#F05E16 !important
+}
+
+div.pages.top {
+    background: #F05E16;
+}
+
+div.pages {
+
+    background: #F05E16;
+}
+
+h1 {
+  color: #F05E16; 
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: black;
+  width: fit-content;
+  margin: auto;
+}
+
+div.dropzone-wrap {
+background: linear-gradient(to bottom, #F05E16 51%,#FFB347 100%);
+}
+
+div#news {
+background: linear-gradient(to bottom, #F05E16 50%,#FA9C1B 50%,#FA9C1B 51%,#FA9C1B 100%);
+border-radius: 25px;
+}
+
+div.blotter {
+width: fit-content;
+margin: auto;
+}
+
+div.mix {
+background: linear-gradient(#F05E16 50%,#FFB347 %50);
+}
+
+
+td#upload_selection {
+background: linear-gradient(to bottom, #F05E16 0%,FFB347 50%,#FFB347 51%,#FFB347 100%);
+}
+
+div.boardlist {
+	color: black;
+    background-color: rgba(255%, 154%, 0%, 0.10);
+}
+
+/* options.js */
+#options_div, #alert_div {
+	background: #FFB347;
+}
+.options_tab_icon {
+	color: #000000;
+}
+.options_tab_icon.active {
+	color: #000000;
+}
+textarea {
+  border: 2px solid #000000!important;
+}
+textarea, input {background-color: #FFB347; color: #000000;}
+.quote, 
+{
+  color: #000000!important;
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #000000!important;
+}
+span.omitted {
+	display: block;
+	margin-top: 1em;
+	color: #000000;
+}

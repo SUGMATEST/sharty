@@ -1,7 +1,11 @@
-{% if post and board %}
+{% if post and board and not ban_request %}
 	{% set action = '?/' ~ board ~ '/ban/' ~ post %}
+{% elseif ban_request %}
+	{% set action = '?/' ~ board ~ '/ban-request/' ~ post %}
 {% elseif edit_ban %}
 	{% set action = '' %}
+{% elseif request_id %}
+	{% set action = '?/accept-ban-request/' ~ request_id %}
 {% else %}
 	{% set action = '?/ban' %}
 {% endif %}
@@ -11,12 +15,13 @@
 	{% if redirect %}
 		<input type="hidden" name="redirect" value="{{ redirect|e }}">
 	{% endif %}
-	{% if post and board %}
+	{% if post and board and not ban_request %}
 		<input type="hidden" name="delete" value="{% if delete %}1{% else %}0{% endif %}">
 	{% endif %}
+<center>	<input class="bigredbutton" name="new_ban" type="submit" value="{% trans 'New Ban' %}"><br /></center>
 	
 	<table>
-	{% if not edit_ban %}
+	{% if not edit_ban and not ban_request %}
 		<tr>
 			<th>
 				<label for="ip">{% trans 'IP' %} <span class="unimportant">{% trans '(or subnet)' %}</span></label>
@@ -34,20 +39,45 @@
 			<th>
 				<label for="reason">{% trans 'Reason' %}</label>
 			</th>
+			<style>.bigredbutton {
+				font-size: larger;
+				background-color: #F00;
+				color: white;
+				cursor: pointer;
+				border-style: none;
+				border-width: 3px;
+				outline: none;
+				font-weight: bold;
+				font-family: Verdana, Tahoma, Arial;
+			}</style>
 			<td>
-				<textarea name="reason" id="reason" rows="5" cols="30">{{ reason|e }}</textarea>
-			</td>
+				
+				<textarea name="reason" id="reason" rows="5" cols="30" >{{ reason|e }}</textarea>
+				{% if not ban_request %}
+					{% for preset in config.mod.ban_presets %}
+						{% for length in preset[2] %}
+							<input type="button" onClick="insertThisInThere('{{ preset[1]|escape('js') }}','reason'); insertThisInThere('{{ length }}','length');" value="{% if loop.first %}{{ preset[0] }}{% elseif length == '' %}Perma{% else %}{{ length }}{% endif %}" />
+						{% endfor %}
+						<br />
+					{% endfor %}
+				{% else %}
+					{% for preset in config.mod.ban_presets %}
+						<input type="button" onClick="insertThisInThere('{{ preset[1]|escape('js') }}','reason');" value="{{ preset[0] }}" />
+						<br />
+					{% endfor %}				
+				{% endif %}
+</td>
 		</tr>
-		{% if post and board and not delete %}
+		{% if post and board and not delete and not ban_request %}
 			<tr>
 				<th>
 					<label for="reason">{% trans 'Message' %}</label>
 				</th>
 				<td>
 					<input type="checkbox" id="public_message" name="public_message"{% if config.mod.check_ban_message %} checked{% endif %}> 
-					<input type="text" name="message" id="message" size="35" maxlength="200" value="{{ config.mod.default_ban_message|e }}"> 
+					<input type="text" name="message" id="message" size="35" value="{{ config.mod.default_ban_message|e }}"> 
 					<span class="unimportant">({% trans 'public; attached to post' %})</span>
-					<script type="text/javascript">
+					<script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">
 						document.getElementById('message').disabled = !document.getElementById('public_message').checked;
 						document.getElementById('public_message').onchange = function() {
 							document.getElementById('message').disabled = !this.checked;
@@ -56,14 +86,61 @@
 				</td>
 			</tr>
 		{% endif %}
+		{% if ((post and board) or request_id) and (delete or not ban_request) %}
+		<!-- Hashban checkbox -->
+		<tr>
+			<th>
+				<label for="hashban" style="color:red">Hashban</label>
+			</th>
+			<td>
+				<input type="checkbox" name="hashban" id="hashban" value="1">
+				<label for="hashban" style="color:red">Hashban</label>
+			</td>
+		</tr>
+		{%endif%}
+		{% if ((post and board) or request_id) and not ban_request %}
+		<tr>
+			<th>
+				<label for="integrity">Integrity</label>
+			</th>
+			<td>
+				<input type="checkbox" name="integrity_ban" id="integrity" value="1">
+				<label for="integrity">Apply integrity ban (Use when banning [VPN] posters)</label>
+			</td>
+		</tr>
+		<tr>
+			<th>
+				<label for="hidebanlist">Hide Post</label>
+			</th>
+			<td>
+				<input type="checkbox" name="hidebanlist" id="hidebanlist" value="1">
+				<label for="hidebanlist">Don't display attached post on the public ban list</label>
+			</td>
+		</tr>
+		{%endif%}
+		{% if ban_request and temp_ban %}
+		<tr>
+			<th>
+				<label for="temp-ban">{% trans 'Temp ban' %}</label>
+			</th>
+			<td>
+				<input type="checkbox" checked=true name="temp-ban" id="temp-ban"> 
+				<span class="unimportant">(Applies a short ban as a stopgap)</span>
+			</td>
+		</tr>
+		{% endif %}
+		{% if not ban_request %}
 		<tr>
 			<th>
 				<label for="length">{% trans 'Length' %}</label>
 			</th>
 			<td>
 				<input type="text" name="length" id="length" size="20" maxlength="40"> 
-					<span class="unimportant">(eg. "2d1h30m" or "2 days")</span></td>
-			</tr>
+				<span class="unimportant">(eg. "2d1h30m" or "2 days")</span>
+			</td>
+		</tr>
+		{% endif %}
+		{% if not ban_request or temp_ban %}
 		<tr>
 			<th>{% trans 'Board' %}</th>
 			<td>
@@ -86,9 +163,10 @@
 				</ul>
 			</td>
 		</tr>
+		{% endif %}
 		<tr>
 			<td></td>
-			<td><input name="new_ban" type="submit" value="{% if edit_ban %}{% trans 'Edit Ban' %}{% else %}{% trans 'New Ban' %}{% endif %}"></td>
+			<td><input class="bigredbutton" name="new_ban" type="submit" value="{% trans 'New Ban' %}"></td>
 		</tr>
 	</table>
 </form>

@@ -5,19 +5,28 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<script type='text/javascript'>
 		var active_page = "catalog"
-		  , board_name = "{{ board }}";
+		  , board_name = "{{ board.uri }}";
 	</script>
 	{% include 'header.html' %}
-	<title>{{ board }} - Catalog</title>
+	<title>/{{ board.uri }}/ - {% if board.uri == 'caca' %}Cacalog{% else %}Catalog{% endif %}</title>
 </head>
 <body class="8chan vichan {% if mod %}is-moderator{% else %}is-not-moderator{% endif %} theme-catalog active-catalog" data-stylesheet="{% if config.default_stylesheet.1 != '' %}{{ config.default_stylesheet.1 }}{% else %}default{% endif %}">
-	{{ boardlist.top }}
-	<header>
-		<h1>{{ settings.title }} (<a href="{{link}}">/{{ board }}/</a>)</h1>
-		<div class="subtitle">{{ settings.subtitle }}
-			{% if mod %}<p><a href="?/">{% trans %}Return to dashboard{% endtrans %}</a></p>{% endif %}
-		</div>
-	</header>
+    {% endapply %}
+    {{ boardlist.top }}
+    {% apply spaceless %}
+    {% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" style="max-width:300px" width="300" height="100" alt="A banner for soyjak.party" />{% endif %}
+
+    {% include 'board_header.html' %}
+
+	<h1><a id="reveal-post-form" href="javascript:void(0);" onclick="document.querySelector('#post-form-container').hidden = false; document.querySelector('#reveal-post-form').remove();">New Thread</a></h1>
+	<br>
+	<div hidden id="post-form-container">
+		{% include 'post_form.html' %}
+	</div>
+
+    {% include 'board_banner.html' %}
+    
+    {% if config.global_message %}<hr /><div class="blotter">{{ config.global_message }}</div><hr />{% endif %}
 
         <span>{% trans 'Sort by' %}: </span>
         <select id="sort_by" style="display: inline-block">
@@ -25,14 +34,17 @@
                 <option value="time:desc">{% trans 'Creation date' %}</option>
                 <option value="reply:desc">{% trans 'Reply count' %}</option>
                 <option value="random:desc">{% trans 'Random' %}</option>
-        </select>
+        </select> 
  
         <span>{% trans 'Image size' %}: </span>
         <select id="image_size" style="display: inline-block">
                 <option value="vsmall">{% trans 'Very small' %}</option>
-                <option selected value="small">{% trans 'Small' %}</option>
-                <option value="large">{% trans 'Large' %}</option>
+                <option value="small">{% trans 'Small' %}</option>
+                <option selected value="large">{% trans 'Large' %}</option>
         </select>
+
+	<hr />
+
         <div class="threads">
                 <div id="Grid">
                 {% for post in recent_posts %}
@@ -44,12 +56,14 @@
 				 data-sticky="{% if post.sticky %}true{% else %}false{% endif %}"
 				 data-locked="{% if post.locked %}true{% else %}false{% endif %}"
 			>
-                                <div class="thread grid-li grid-size-small">  
+                                <div class="thread grid-li grid-size-large">  
+					<span hidden class="nsfw-prob">{{ post.nsfw_prob|default(0) }}</span>
+					<span hidden class="file-dimensions">{{ post.file_dimensions|default("255x255") }}</span>
                                         <a href="{{post.link}}">  
 						{% if post.youtube %}
-							<img src="//img.youtube.com/vi/{{ post.youtube }}/0.jpg" 
+							<img loading="lazy" src="//img.youtube.com/vi/{{ post.youtube }}/0.jpg" 
 						{% else %}
-							<img src="{{post.file}}" 
+							<img loading="lazy" src="{{post.file}}" 
 						{% endif %}
                                                  id="img-{{ post.id }}" data-subject="{% if post.subject %}{{ post.subject|e }}{% endif %}" data-name="{{ post.name|e }}" data-muhdifference="{{ post.muhdifference }}" class="{{post.board}} thread-image" title="{{post.bump|date('%b %d %H:%M')}}">
                                         </a>
@@ -75,13 +89,6 @@
 	
 	<hr/>
 	{% include 'footer.html' %}
-	<script type="text/javascript">{% verbatim %}
-		var styles = {
-			{% endverbatim %}
-			{% for name, uri in config.stylesheets %}{% verbatim %}'{% endverbatim %}{{ name|addslashes }}{% verbatim %}' : '{% endverbatim %}/stylesheets/{{ uri|addslashes }}{% verbatim %}',
-			{% endverbatim %}{% endfor %}{% verbatim %}
-		}; onready(init);
-	{% endverbatim %}</script>
 
 	<script type="text/javascript">{% verbatim %}
 		ready();

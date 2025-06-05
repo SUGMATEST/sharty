@@ -135,9 +135,11 @@ function destroyCookies() {
 
 function modLog($action, $_board=null) {
 	global $mod, $board, $config;
+	$modid = (isset($mod['id']) ? $mod['id'] : -1);
 	$query = prepare("INSERT INTO ``modlogs`` VALUES (:id, :ip, :board, :time, :text)");
-	$query->bindValue(':id', (isset($mod['id']) ? $mod['id'] : -1), PDO::PARAM_INT);
-	$query->bindValue(':ip', $_SERVER['REMOTE_ADDR']);
+	$query->bindValue(':id', $modid, PDO::PARAM_INT);
+	$ip = $_SERVER['REMOTE_ADDR'];
+	$query->bindValue(':ip', $ip);
 	$query->bindValue(':time', time(), PDO::PARAM_INT);
 	$query->bindValue(':text', $action);
 	if (isset($_board))
@@ -146,6 +148,11 @@ function modLog($action, $_board=null) {
 		$query->bindValue(':board', $board['uri']);
 	else
 		$query->bindValue(':board', null, PDO::PARAM_NULL);
+	$query->execute() or error(db_error($query));
+
+	//Delete any logs older than a week
+	$query = prepare("DELETE FROM ``modlogs`` WHERE `time` < :time");
+	$query->bindValue(':time', time() - (86400 * 7), PDO::PARAM_INT);
 	$query->execute() or error(db_error($query));
 	
 	if ($config['syslog'])

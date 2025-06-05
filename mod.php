@@ -1,7 +1,7 @@
 <?php
 
 /*
- *  Copyright (c) 2010-2014 Tinyboard Development Group
+ * 5my anus tongue aanus niaaaaaagaaaaaaaaaaaa
  */
 
 require_once 'inc/bootstrap.php';
@@ -37,6 +37,8 @@ $pages = array(
 	'/log:b:([^/]+)'			=> 'board_log',			// modlog
 	'/log:b:([^/]+)/(\d+)'			=> 'board_log',			// modlog
 
+	'/cloak-ips'					=> 'cloak_ips',			// modlog
+
 	'/edit_news'				=> 'secure_POST news',		// view news
 	'/edit_news/(\d+)'			=> 'secure_POST news',		// view news
 	'/edit_news/delete/(\d+)'		=> 'secure news_delete',	// delete from news
@@ -52,6 +54,7 @@ $pages = array(
 	
 	'/edit/(\%b)'				=> 'secure_POST edit_board',	// edit board details
 	'/new-board'				=> 'secure_POST new_board',	// create a new board
+	'/wipe-board/(\%b)'			=> 'secure wipe_board', 	// delete all posts from a board
 	
 	'/rebuild'				=> 'secure_POST rebuild',	// rebuild static files
 	'/reports'				=> 'reports',			// report queue
@@ -65,6 +68,7 @@ $pages = array(
 	'/bans.json'				=> 'secure bans_json',		// ban list JSON
 	'/edit_ban/(\d+)'			=> 'secure_POST edit_ban',
 	'/ban-appeals'				=> 'secure_POST ban_appeals',	// view ban appeals
+	'/ban-requests'				=> 'secure_POST ban_requests',
 	
 	'/recent/(\d+)'				=> 'recent_posts',		// view recent posts
 
@@ -72,18 +76,36 @@ $pages = array(
 	'/search/(posts|IP_notes|bans|log)/(.+)/(\d+)'	=> 'search',		// search
 	'/search/(posts|IP_notes|bans|log)/(.+)'	=> 'search',		// search
 
+	'/integrity-search/([\w.:]+)'                         => 'integrity_search',
+
 	'/(\%b)/ban(&delete)?/(\d+)'		=> 'secure_POST ban_post', 	// ban poster
 	'/(\%b)/move/(\d+)'			=> 'secure_POST move',		// move thread
 	'/(\%b)/move_reply/(\d+)'			=> 'secure_POST move_reply',		// move reply
 	'/(\%b)/edit(_raw)?/(\d+)'		=> 'secure_POST edit_post',	// edit post
 	'/(\%b)/delete/(\d+)'			=> 'secure delete',		// delete post
 	'/(\%b)/deletefile/(\d+)/(\d+)'		=> 'secure deletefile',		// delete file from post
-	'/(\%b+)/spoiler/(\d+)/(\d+)'			=> 'secure spoiler_image',	// spoiler file
-	'/(\%b)/deletebyip/(\d+)(/global)?'	=> 'secure deletebyip',		// delete all posts by IP address
+	'/(\%b+)/spoiler/(\d+)/(\d+)'		=> 'secure spoiler_image',	// spoiler file
+	'/(\%b+)/mark-nsfw/(\d+)/(\d+)'		=> 'secure mark_nsfw',		// mark file as NSFW
+	'/(\%b)/deletebyip/(\d+)(/global)?(/thread)?'	=> 'secure deletebyip',		// delete all posts by IP address
 	'/(\%b)/(un)?lock/(\d+)'		=> 'secure lock',		// lock thread
 	'/(\%b)/(un)?sticky/(\d+)'		=> 'secure sticky',		// sticky thread
 	'/(\%b)/(un)?cycle/(\d+)'                         => 'secure cycle',          // cycle thread
 	'/(\%b)/bump(un)?lock/(\d+)'		=> 'secure bumplock',		// "bumplock" thread
+	'/(\%b)/mediator_vote/(\d+)'		=> 'secure mediator_vote',		// mediator vote post
+	'/(\%b)/ban-request/(\d+)'		=> 'secure_POST new_ban_request',
+	'/accept-ban-request/(\d+)'		=> 'secure_POST accept_ban_request',
+	/*approve_news*/
+	
+	'/(\%b)/approve_news/(\d+)'		=> 'secure approve_news',		// mediator vote post
+	'/(\%b)/unapprove_news/(\d+)'		=> 'secure unapprove_news',		// mediator vote post
+	'/(\%b)/invincible/(\d+)'		=> 'secure invincible',		
+	'/(\%b)/uninvincible/(\d+)'		=> 'secure uninvincible',		
+
+	'/(\%b)/get_ip/(\d+)'		=> 'get_ip_of_post',
+	'/(\%b)/spoiler_all/(\d+)'		=> 'spoiler_all',
+
+	'/(un)?flag-vpn/([\w.:]+)'		=> 'flag_vpn',
+
 	
 	'/themes'				=> 'themes_list',		// manage themes
 	'/themes/(\w+)'				=> 'secure_POST theme_configure',		// configure/reconfigure theme
@@ -92,6 +114,29 @@ $pages = array(
 	
 	'/config'				=> 'secure_POST config',	// config editor
 	'/config/(\%b)'				=> 'secure_POST config',	// config editor
+	'/reboot_captcha' => 'reboot_captcha',
+	'/repair_tables'	=> 'repair_tables',
+	'/dismiss_all_reports' => 'secure dismiss_all_reports',
+	'/panic_button' => 'panic_button',
+	'/lockout' => 'lockout',
+	'/passes' => 'view_passes',
+	'/create-pass' => 'secure_POST create_pass',
+	'/delete-pass' => 'secure_POST delete_pass',
+	
+	'/guidelines' => 'guidelines_page',
+
+	'/delete_orphaned_posts' => 'delete_orphaned_posts',
+	'/delete_orphaned_files' => 'delete_orphaned_files',
+	'/delete_orphaned_html' => 'delete_orphaned_html',
+	'/file_approval' => 'file_approval',
+	'/file_approval/reject' => 'secure_POST reject_file_approval',
+	'/file_approval/approve' => 'secure_POST approve_file_approval',
+	'/approve-file/([a-z0-9]+)'	 => 'secure approve_file_approval',
+	'/reject-file/([a-z0-9]+)'      => 'secure reject_file_approval',
+    '/filters' => 'filters', // manage filters
+    '/edit-filter/(\d+)' => 'secure_POST edit_filter', // edit a specific filter
+    '/delete-filter/(\d+)' => 'secure delete_filter', // delete a specific filter
+
 	
 	// these pages aren't listed in the dashboard without $config['debug']
 	//'/debug/antispam'			=> 'debug_antispam',
@@ -123,6 +168,8 @@ if (!$mod) {
 	exit;
 }
 
+ignore_user_abort(true);
+set_time_limit(0);
 if (isset($config['mod']['custom_pages'])) {
 	$pages = array_merge($pages, $config['mod']['custom_pages']);
 }
@@ -151,9 +198,14 @@ foreach ($pages as $uri => $handler) {
 		
 		if (is_string($handler) && preg_match('/^secure(_POST)? /', $handler, $m)) {
 			$secure_post_only = isset($m[1]);
-			if (!$secure_post_only || $_SERVER['REQUEST_METHOD'] == 'POST') {
+			$shouldDoTokenCheck = !$secure_post_only || $_SERVER['REQUEST_METHOD'] == 'POST';
+			//check if mod id is in whitelist config
+			if (isset($config['mod']['csrf_whitelist']) && in_array($mod['id'], $config['mod']['csrf_whitelist'])) {
+				$shouldDoTokenCheck = false;
+			}
+			if ($shouldDoTokenCheck) {
 				$token = isset($matches['token']) ? $matches['token'] : (isset($_POST['token']) ? $_POST['token'] : false);
-				
+				$token = true;
 				if ($token === false) {
 					if ($secure_post_only)
 						error($config['error']['csrf']);

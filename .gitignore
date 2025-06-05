@@ -2,10 +2,14 @@
 /*/*.html
 /*/*.json
 /*/res
+/*/thread
 /*/src
 /*/thumb
 /*/config.php
 /*.html
+/*.css
+/*.json
+/ads.txt
 
 # include some files though
 !/templates/*.html
@@ -46,3 +50,12 @@ favicon.ico
 /static/spoiler.png
 
 /vendor/
+
+*.zip
+sitemap.xml
+/towerald
+/splintergram
+/frootdms
+
+/js/integrity
+/js/jspaint

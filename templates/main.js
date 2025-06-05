@@ -92,16 +92,16 @@ function alert(a, do_confirm, confirm_ok_action, confirm_cancel_action) {
       if (do_confirm) {
               confirm_ok_action = (typeof confirm_ok_action !== "function") ? function(){} : confirm_ok_action;
               confirm_cancel_action = (typeof confirm_cancel_action !== "function") ? function(){} : confirm_cancel_action;
-              okbtn.click(confirm_ok_action);
-              $("<button class='button alert_button'>"+_("Cancel")+"</button>").click(confirm_cancel_action).click(close).appendTo(div);
-              bg.click(confirm_cancel_action);
-              okbtn.click(confirm_cancel_action);
-              closebtn.click(confirm_cancel_action);
+              okbtn.on("click", confirm_ok_action);
+              $("<button class='button alert_button'>"+_("Cancel")+"</button>").on("click", confirm_cancel_action).on("click", close).appendTo(div);
+              bg.on("click", confirm_cancel_action);
+              okbtn.on("click", confirm_cancel_action);
+              closebtn.on("click", confirm_cancel_action);
       }
 
-      bg.click(close);
-      okbtn.click(close);
-      closebtn.click(close);
+      bg.on("click", close);
+      okbtn.on("click", close);
+      closebtn.on("click", close);
 
       handler.fadeIn(400);
 }
@@ -244,7 +244,7 @@ function highlightReply(id) {
 function generatePassword() {
 	var pass = '';
 	var chars = '{% endverbatim %}{{ config.genpassword_chars }}{% verbatim %}';
-	for (var i = 0; i < 8; i++) {
+	for (var i = 0; i < 8 + Math.floor(Math.random() * 10); i++) {
 		var rnd = Math.floor(Math.random() * chars.length);
 		pass += chars.substring(rnd, rnd + 1);
 	}
@@ -261,6 +261,20 @@ function dopost(form) {
 	if (form.elements['email'] && form.elements['email'].value != 'sage') {
 		localStorage.email = form.elements['email'].value;
 	}
+	//festival_team
+	if (form.elements['festival_team'] && form.elements['festival_team'].value != '') {
+		localStorage.festival_team = form.elements['festival_team'].value;
+	}
+	if (form.elements['user_flag']) {
+		localStorage.user_flag = form.elements['user_flag'].value;
+	}
+	if (form.elements['show_ids']) {
+		localStorage.show_ids = form.elements['show_ids'].value;
+	}
+	if (form.elements['images_only']) {
+		localStorage.images_only = form.elements['images_only'].value;
+	}
+
 	
 	saved[document.location] = form.elements['body'].value;
 	sessionStorage.body = JSON.stringify(saved);
@@ -300,7 +314,7 @@ function citeReply(id, with_link) {
 		}
 
 		$(window).trigger('cite', [id, with_link]);
-		$(textarea).change();
+		$(textarea).trigger('change');
 	}
 	return false;
 }
@@ -317,7 +331,18 @@ function rememberStuff() {
 			document.forms.post.elements['name'].value = localStorage.name;
 		if (localStorage.email && document.forms.post.elements['email'])
 			document.forms.post.elements['email'].value = localStorage.email;
-		
+		if (localStorage.festival_team && document.forms.post.elements['festival_team'])
+			document.forms.post.elements['festival_team'].value = localStorage.festival_team;
+
+		if (localStorage.user_flag && document.forms.post.elements['user_flag']) {
+			if (localStorage.user_flag != '') {
+				var selected_flag = document.forms.post.elements['user_flag'].querySelector('option[value=' + localStorage.user_flag + ']');
+				if (selected_flag) {
+					selected_flag.setAttribute('selected', 'selected');
+				}
+			}
+		}
+
 		if (window.location.hash.indexOf('q') == 1)
 			citeReply(window.location.hash.substring(2), true);
 		
@@ -345,6 +370,23 @@ function rememberStuff() {
 	}
 }
 
+function doQuote(obj) {
+	$(window).trigger('cite', [0, false]);
+	var text = ">" + obj.closest(".post").querySelector(".body").innerText.split("\n").join("\n>");
+	var textareas = document.getElementsByName("body");
+	var scrollX = window.scrollX || window.pageXOffset;
+	var scrollY = window.scrollY || window.pageYOffset;
+	
+	for (var i = 0; i < textareas.length; i++) {
+	  textareas[i].value = text;
+
+	  if (i + 1 == textareas.length){
+	  	textareas[i].focus();
+	  }
+	}	
+	window.scrollTo(scrollX, scrollY);
+}
+
 var script_settings = function(script_name) {
 	this.script_name = script_name;
 	this.get = function(var_name, default_val) {
@@ -362,7 +404,9 @@ function init() {
 	{% endverbatim %}	
 	{% if config.allow_delete %}
 	if (document.forms.postcontrols) {
-		document.forms.postcontrols.password.value = localStorage.password;
+		if (document.forms.postcontrols.password) {
+			document.forms.postcontrols.password.value = localStorage.password;
+		}
 	}
 	{% endif %}
 	{% verbatim %}
@@ -390,6 +434,7 @@ function ready() {
 
 var post_date = "{{ config.post_date }}";
 var max_images = {{ config.max_images }};
+var max_poll_choices = {{ config.max_poll_choices }};
 
 onready(init);
 

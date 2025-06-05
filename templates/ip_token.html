@@ -1,0 +1,61 @@
+<style>div.ban form { padding: 3px 7px; }</style>
+<div class="ban">
+	{% if hidden_service %}
+		<h2>Use an IP token</h2>
+		<p>
+			{% if using_token %}
+				Spoofed IP: {{ ip }}
+				<br />
+				Token expires: {{ expires|until }} from now.
+			{% else %}
+				Spoofed IP: N/A
+				<br />
+				Token expires: N/A
+			{% endif %}
+		</p>
+		{% if using_token %}
+			<form name="delete-token" method="post">
+				<input type="submit" name="delete-token" value="Deactivate IP token" />
+			</form>
+		{% endif %}
+		<form name="activate" method="post">
+			<input type="text" name="ip-token" placeholder="IP token" />
+			<input type="submit" value="Activate" />
+		</form>
+	{% else %}
+		<h2>Your IP: {{ true_ip }}</h2>
+		<p>
+			IP tokens are used to post from the hidden service as if you were on your real IP.
+			<br />
+			Do not share your IP tokens with anyone, as they would be able to post from your IP as if they were you.
+		</p>
+	{% endif %}
+	{% if hidden_service %}
+		<hr />
+		<p>
+			To generate an IP token, visit <a href="https://soyjak.st/ip-token.php">soyjak.st/ip-token.php</a> from the clear web.
+		</p>
+	{% elseif not using_token %}
+		<hr />
+		<form name="generate" method="post">
+			<input disabled type="submit" name="generate" value="{% if token %}Reg{% else %}G{% endif %}enerate IP token" />
+		</form>
+		<script>
+			setTimeout(async() => {
+				const i = document.createElement('input');
+				i.setAttribute('type', 'hidden');
+				i.setAttribute('name', 'integrity-v2');
+				i.value = await Module.ccall("x", "string");
+				document.forms['generate'].append(i);
+				document.forms['generate'].generate.removeAttribute('disabled');
+			}, 5000);
+		</script>
+	{% endif %}
+	{% if token %}
+		<p>
+			Token: {{ token }}
+			<br />
+			Expires: {{ expires|until }} from now.
+		</p>
+	{% endif %}
+</div>

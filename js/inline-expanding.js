@@ -12,8 +12,12 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	'use strict';
+
+	if (localStorage.inline_expand_fit_height !== 'false') {
+		$('<style id="expand-fit-height-style">.full-image { max-height: ' + window.innerHeight + 'px; }</style>').appendTo($('head'));
+	}
 
 	var DEFAULT_MAX = 5;  // default maximum image loads
 	var inline_expand_post = function() {
@@ -192,6 +196,8 @@ $(document).ready(function(){
 	if (window.Options && Options.get_tab('general')) {
 		Options.extend_tab('general', '<span id="inline-expand-max">'+ _('Number of simultaneous image downloads (0 to disable): ') + 
 										'<input type="number" step="1" min="0" size="4"></span>');
+		Options.extend_tab('general', '<label id="inline-expand-fit-height"><input type="checkbox">' + _('Scale expanded images to screen height') + '</label>');
+
 		$('#inline-expand-max input')
 			.css('width', '50px')
 			.val(localStorage.inline_expand_max || DEFAULT_MAX)
@@ -202,6 +208,22 @@ $(document).ready(function(){
 
 				localStorage.inline_expand_max = val;
 			});
+
+                $('#inline-expand-fit-height input').on('change', function() {
+			if (localStorage.inline_expand_fit_height !== 'false') {
+				localStorage.inline_expand_fit_height = 'false';
+				$('#expand-fit-height-style').remove();
+			}
+			else {
+				localStorage.inline_expand_fit_height = 'true';
+				$('<style id="expand-fit-height-style">.full-image { max-height: ' + window.innerHeight + 'px; }</style>').appendTo($('head'));
+			}
+		});
+
+		if (localStorage.inline_expand_fit_height !== 'false') {
+			$('#inline-expand-fit-height input').prop('checked', true);
+		}
+
 	}
 
 	if (window.jQuery) {

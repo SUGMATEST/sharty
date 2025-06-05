@@ -25,11 +25,11 @@
 
 onready(function(){
 	var do_embed_yt = function(tag) {
-		$('div.video-container a', tag).click(function() {
+		$('div.video-container a', tag).on('click', function() {
 			var videoID = $(this.parentNode).data('video');
 		
 			$(this.parentNode).html('<iframe style="float:left;margin: 10px 20px" type="text/html" '+
-				'width="360" height="270" src="//www.youtube.com/embed/' + videoID +
+				'width="252" height="189" src="//www.youtube.com/embed/' + videoID +
 				'?autoplay=1&html5=1" allowfullscreen frameborder="0"/>');
 
 			return false;

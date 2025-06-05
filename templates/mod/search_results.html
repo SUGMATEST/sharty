@@ -1,12 +1,14 @@
-<fieldset style="margin-bottom:20px">
-	<legend>{% trans 'Search' %}</legend>
+{% if search_type != 'integrity' %}
+	<fieldset style="margin-bottom:20px">
+		<legend>{% trans 'Search' %}</legend>
 
-	<ul>
-		<li>
-			{% include 'mod/search_form.html' %}
-		</li>
-	</ul>
-</fieldset>
+		<ul>
+			<li>
+				{% include 'mod/search_form.html' %}
+			</li>
+		</ul>
+	</fieldset>
+{% endif %}
 
 <p style="text-align:center">Showing {{ result_count }} result{% if result_count != 1 %}s{% endif %}.</p>
 
@@ -21,7 +23,11 @@
 		{% for note in results %}
 			<tr>
 				<td class="minimal">
+					{% if post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+					<a href="?/IP/{{ note.ip }}#notes">{{ note.ip }}</a>
+					{% else %}
 					<a href="?/IP/{{ note.ip|cloak_ip }}#notes">{{ note.ip|cloak_ip }}</a>
+					{% endif %}
 				</td>
 				<td class="minimal">
 					{% if note.username %}
@@ -56,8 +62,12 @@
 		{% for ban in results %}
 			<tr{% if ban.expires != 0 and ban.expires < time() %} style="text-decoration:line-through"{% endif %}>
 				<td style="white-space: nowrap">
-					{% if ban.single_addr %}
+					{% if ban.single_addr and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+						<a href="?/IP/{{ ban.mask }}#bans">{{ ban.mask}}</a>
+					{% elseif ban.single_addr %}
 						<a href="?/IP/{{ ban.mask|cloak_mask }}#bans">{{ ban.mask|cloak_mask }}</a>
+					{% elseif post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+						{{ ban.mask|e }}
 					{% else %}
 						{{ ban.mask|cloak_mask|e }}
 					{% endif %}
@@ -148,7 +158,11 @@
 					{% endif %}
 				</td>
 				<td class="minimal">
+					{% if post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+					<a href="?/IP/{{ log.ip }}">{{ log.ip }}</a>
+					{% else %}
 					<a href="?/IP/{{ log.ip|cloak_ip }}">{{ log.ip|cloak_ip }}</a>
+					{% endif %}
 				</td>
 				<td class="minimal">
 					<span title="{{ log.time|date(config.post_date) }}">{{ log.time|ago }}</span>
@@ -176,6 +190,7 @@
 			<th>ID</th>
 			<th>Thread</th>
 			<th>IP</th>
+			{% if mod|hasPermission(config.mod.show_sensitive) %}<th>Password</th>{% endif %}
 			<th>Name</th>
 			<th>Subject</th>
 			<th>File</th>
@@ -209,7 +224,11 @@
 					</small>
 				</td>
 				<td class="minimal">
-					{% if mod|hasPermission(config.mod.show_ip, post.board) %}
+					{% if mod|hasPermission(config.mod.show_ip, post.board) and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
+						<a href="?/IP/{{ post.ip }}">
+							{{ post.ip }}
+						</a>
+					{% elseif mod|hasPermission(config.mod.show_ip, post.board) %}
 						<a href="?/IP/{{ post.ip|cloak_ip }}">
 							{{ post.ip|cloak_ip }}
 						</a>
@@ -217,6 +236,11 @@
 						<em>hidden</em>
 					{% endif %}
 				</td>
+				{% if mod|hasPermission(config.mod.show_sensitive) %}
+					<td class="minimal">
+						{{ post.password|e }}
+					</td>
+				{% endif %}
 				<td style="max-width:100px">
 					<small>
 						{% if post.email|length > 0 %}
@@ -253,6 +277,37 @@
 				</td>
 				<td>
 					<small><em>{{ post.snippet }}</em></small>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+{% endif %}
+
+{% if search_type == 'integrity' %}
+	<table class="modlog">
+		<tr>
+			<th>{% trans 'IP address' %}</th>
+			<th>{% trans 'VPN' %}</th>
+			<th>{% trans 'Matching fields' %}</th>
+			<th>{% trans 'Data collected' %}</th>
+		</tr>
+		{% for data in results %}
+			<tr>
+				<td class="minimal">
+					<a href="?/IP/{{ data.ip }}">{{ data.ip }}</a>
+				</td>
+				<td class="minimal">
+					{% if data.vpn %}
+						{% trans 'Yes' %}
+					{% else %}
+						{% trans 'No' %}
+					{% endif %}
+				</td>
+				<td class="minimal">
+					{{ data.matches }}
+				</td>
+				<td class="minimal">
+					<span title="{{ data.time|date(config.post_date) }}">{{ data.time|ago }} ago</span>
 				</td>
 			</tr>
 		{% endfor %}

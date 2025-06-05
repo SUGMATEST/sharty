@@ -13,14 +13,14 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	if($('span.omitted').length == 0)
 		return; // nothing to expand
 
 	var do_expand = function() {
 		$(this)
 			.html($(this).text().replace(_("Click reply to view."), '<a href="javascript:void(0)">'+_("Click to expand")+'</a>.'))
-			.find('a').click(window.expand_fun = function() {
+			.find('a').on('click', window.expand_fun = function() {
 				var thread = $(this).parents('[id^="thread_"]');
 				var id = thread.attr('id').replace(/^thread_/, '');
 				$.ajax({
@@ -49,7 +49,7 @@ $(document).ready(function(){
 
 						$('<span class="omitted hide-expanded"><a href="javascript:void(0)">' + _('Hide expanded replies') + '</a>.</span>')
 							.insertAfter(thread.find('.op div.body, .op span.omitted').last())
-							.click(function() {
+							.on('click', function() {
 								thread.find('.expanded').remove();
 								$(this).parent().find(".omitted:not(.hide-expanded)").css('display', '');
 								$(this).parent().find(".hide-expanded").remove();

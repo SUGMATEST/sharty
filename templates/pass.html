@@ -1,0 +1,30 @@
+<style>
+	div.ban form { padding: 3px 7px; }
+	#result { color: white; }
+</style>
+<div class="ban">
+	<h2>Enter your passkey</h2>
+	<div style="text-align: center;">
+		{% if success is same as true %}
+			<div id="result" style="background-color:green;">Success: Passkey authenticated.</div>
+		{% elseif success is same as false %}
+			<div id="result" style="background-color:red;">Failure: Invalid passkey.</div>
+		{% endif %}
+		<br />
+		<form name="activate" method="post">
+			<input type="text" name="pass" placeholder="Passkey" />
+			<input type="submit" value="Authenticate" />
+		</form>
+		<p>Don't have a pass? <a href="/survey/?r=survey/index&sid=551184&lang=en">Apply here</a>, they're completely free and serve as a way of whitelisting trusted users.</p>
+		<p>
+			Using a pass grants the following benefits:<ul>
+			<li>No file approval required for new media.</li>
+			<li>No McChallenge captcha screen.</li>
+			<li>Disabled VPN checks, meaning you can post from VPNs.</li>
+			<li>Optional flag on country flag boards which displays how long you've been a pass user for.</li>
+			<li>Access to <a href="/gem/index.html">/gem/</a>, a board only pass users can post on.</li>
+			</ul>
+		</p>
+		<p>To display your country flag instead of your pass on flag boards, set your email to <code>flag</code>.</p>
+	</div>
+</div>

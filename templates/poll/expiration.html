@@ -1,0 +1,7 @@
+{% if poll.expires %}
+    {% if poll.expires > time() %}
+        Voting closes <span id="countdown">{{ poll.expires|until }}</span> from now.
+    {% else %}
+        Voting closed at <time datetime="{{ poll.expires|date('%Y-%m-%dT%H:%M:%S') }}{{ timezone() }}">{{ poll.expires|date('%H:%M:%S') }} UTC on {{ poll.expires|date(config.ban_date) }}</time>.
+    {% endif %}
+{% endif %}

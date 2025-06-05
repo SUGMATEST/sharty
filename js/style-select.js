@@ -30,8 +30,8 @@ onready(function(){
 		i++;
 	});
 	
-	stylesSelect.change(function() {
-		$('#style-select-' + $(this).val()).click();
+	stylesSelect.on('change', function() {
+		$('#style-select-' + $(this).val()).trigger('click');
 	});
 	
 	stylesDiv.hide();

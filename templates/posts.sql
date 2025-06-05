@@ -21,11 +21,28 @@ CREATE TABLE IF NOT EXISTS ``posts_{{ board }}`` (
    `sage` int(1) NOT NULL,
    `embed` text,
    `slug` varchar(256) DEFAULT NULL,
+   `sharty_browser_hash` text CHARACTER SET ascii,
+   `show_ids` TINYINT(1) NOT NULL DEFAULT 0,
+   `images_only` TINYINT(1) NOT NULL DEFAULT 0,
+   `mediator_votes` int(10) NOT NULL DEFAULT 0,
+   `news_approved` TINYINT(1) NOT NULL DEFAULT 0,
+   `invincible` TINYINT(1) NOT NULL DEFAULT 0,
+   `geo_flags` TINYINT(1) NOT NULL DEFAULT 0,
+   `post_flags` bit(32) DEFAULT b'00000000000000000000000000000000',
+   `hobbled` TINYINT(1) NOT NULL DEFAULT 0,
+   `passkey` text CHARACTER SET ascii,
+   `country` char(2) CHARACTER SET ascii,
+   `mod_id` smallint(6) unsigned DEFAULT NULL,
+   `integrity` text DEFAULT NULL,
+   `decryption_key` varchar(32) DEFAULT NULL,
    UNIQUE KEY `id` (`id`),
    KEY `thread_id` (`thread`,`id`),
-   KEY `filehash` (`filehash`(40)),
+   KEY `filehash` (`filehash`(1024)),
    KEY `time` (`time`),
    KEY `ip` (`ip`),
+   KEY `sharty_browser_hash` (`sharty_browser_hash`(64)),
+   KEY `passkey` (`passkey`(64)),
    KEY `list_threads` (`thread`, `sticky`, `bump`)
- ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 AUTO_INCREMENT=1 ;
+ ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci AUTO_INCREMENT=1;
+
  

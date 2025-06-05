@@ -61,6 +61,11 @@ $main_js = $config['file_script'];
 
 $boards = listBoards();
 //$boards = array(array('uri'=>'test'), array('uri'=>'tester'), array('uri'=>'testing'));
+if ($options['board']) {
+	// Only do one board
+	$boards = array(array('uri' => $options['board']));
+}
+
 $boards_m = array_chunk($boards, floor(sizeof($boards)/$options['processes']));
 
 function doboard($board) {
@@ -99,7 +104,7 @@ function doboard($board) {
 		$query = query(sprintf("SELECT `id` FROM ``posts_%s`` WHERE `thread` IS NULL", $board['uri'])) or error(db_error());
 		while($post = $query->fetch()) {
 			echo "(/{$board['uri']}/) Rebuilding #{$post['id']}...\n";
-			@buildThread($post['id']);
+			buildThread($post['id']);
 		}
 	}
 }

@@ -1,0 +1,76 @@
+<?php
+
+$config['board_locked'] = true;
+$config['max_pages'] = 40;
+	$config['threads_per_page'] = 10;
+$config['field_disable_name'] = true;
+
+
+// Changes made via web editor by "doll" @ Tue, 04 Jul 2023 11:04:54 -0400:
+$config['recaptcha'] = true;
+
+
+// Changes made via web editor by "doll" @ Tue, 04 Jul 2023 14:18:39 -0400:
+$config['recaptcha'] = false;
+
+
+// Changes made via web editor by "doll" @ Tue, 04 Jul 2023 14:23:35 -0400:
+$config['recaptcha'] = true;
+
+
+// Changes made via web editor by "doll" @ Tue, 04 Jul 2023 19:03:39 -0400:
+$config['recaptcha'] = true;
+
+// Changes made via web editor by "doll" @ Thu, 20 Jul 2023 21:32:32 -0400:
+$config['board_locked'] = false;
+
+
+// Changes made via web editor by "doll" @ Fri, 21 Jul 2023 10:31:31 -0400:
+$config['recaptcha'] = false;
+
+
+// Changes made via web editor by "doll" @ Sat, 22 Jul 2023 20:34:13 -0400:
+$config['flood_time'] = 60;
+
+
+// Changes made via web editor by "angeleno" @ Mon, 14 Aug 2023 01:14:38 -0400:
+$config['max_threads_per_hour'] = 40;
+
+
+// Changes made via web editor by "angeleno" @ Mon, 14 Aug 2023 01:15:50 -0400:
+$config['max_threads_per_hour'] = 30;
+
+// Don't display user's email when it's not "sage"
+$config['hide_email'] = true;
+$config['field_email_selectbox'] = true;
+$config['allow_roll'] = true;
+// Changes made via web editor by "angeleno" @ Sun, 24 Sep 2023 17:43:04 -0400:
+$config['hcaptcha'] = true;
+
+
+// Changes made via web editor by "angeleno" @ Sun, 24 Sep 2023 19:11:36 -0400:
+$config['hcaptcha'] = false;
+
+
+// Changes made via web editor by "trunk" @ Sun, 01 Oct 2023 03:58:30 -0400:
+$config['hcaptcha'] = true;
+
+
+// Changes made via web editor by "trunk" @ Sun, 01 Oct 2023 04:05:34 -0400:
+$config['hcaptcha'] = false;
+
+// Changes made via web editor by "trunk" @ Thu, 23 Nov 2023 17:00:07 -0500:
+$config['flood_time_ip'] = 120;
+
+
+// Changes made via web editor by "doll" @ Thu, 07 Mar 2024 04:32:58 -0500:
+$config['mandate_soy_history'] = true;
+
+
+// Changes made via web editor by "doll" @ Sun, 10 Mar 2024 16:37:17 -0400:
+$config['mandate_soy_history'] = false;
+
+
+// Changes made via web editor by "doll" @ Tue, 12 Mar 2024 17:21:53 -0400:
+$config['mandate_soy_history'] = true;
+

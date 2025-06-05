@@ -1,0 +1,15 @@
+<?php
+
+
+// Changes made via web editor by "doll" @ Tue, 04 Jul 2023 11:01:32 -0400:
+$config['recaptcha'] = false;
+
+$config['field_disable_name'] = true;
+$config['anonymous'] = 'Baby';
+// Changes made via web editor by "angeleno" @ Wed, 30 Aug 2023 01:38:45 -0400:
+$config['global_message'] = '<script>document.addEventListener("DOMContentLoaded", function() {   const hideThreadLinks = document.querySelectorAll(\'.hide-thread-link\');      hideThreadLinks.forEach(function(link) {     if (link.innerHTML === "[–]") {       link.innerHTML = \'<img src="https://soyjaks.party/static/pacifier.png" width="16" height="16" alt="pacifier">\';     }   }); });</script>';
+
+
+// Changes made via web editor by "angeleno" @ Sun, 04 Feb 2024 23:11:34 -0500:
+$config['global_message'] = '<script>document.addEventListener("DOMContentLoaded", function() {   const hideThreadLinks = document.querySelectorAll(\'.hide-thread-link\');      hideThreadLinks.forEach(function(link) {     if (link.innerHTML === "[–]") {       link.innerHTML = \'<img src="https://soyjak.party/static/pacifier.png" width="16" height="16" alt="pacifier">\';     }   }); });</script>';
+

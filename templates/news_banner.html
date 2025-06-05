@@ -1,0 +1,20 @@
+{% if config.news_banner_enabled %}
+{% set configRoot = config.root %}
+{% set inMod = mod is defined and mod %}
+{% set modRoot = configRoot ~ (inMod ? 'mod.php?/' : '') %}
+<div id="news" style="margin: auto;border: 1px solid #B7C5D9; width:75%; padding: 5px;">
+    <ul style=" list-style-type: disc; padding-left: 20px;">
+		{%for news in news_entries%}
+			<li>
+				<a href="{{ modRoot }}news/thread/{{news.id}}.html">{{news.time|date("%m/%d/%Y") }}: {{news.subject}}</a>
+			</li>
+		{% else %}
+		<li>
+			No news today.
+		</li>
+		{%endfor%}
+		
+	</ul>
+</div>
+
+{%endif%}

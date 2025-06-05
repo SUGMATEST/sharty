@@ -49,7 +49,7 @@ onready(function(){
 		var $post = false;
 		var hovering = false;
 		var hovered_at;
-		$link.hover(function(e) {
+		$link.on('mouseenter', function(e) {
 			hovering = true;
 			hovered_at = {'x': e.pageX, 'y': e.pageY};
 			
@@ -125,7 +125,7 @@ onready(function(){
 					}
 				});
 			}
-		}, function() {
+		}).on('mouseleave', function() {
 			hovering = false;
 			if(!$post)
 				return;
@@ -134,7 +134,7 @@ onready(function(){
 			if($post.hasClass('hidden') || $post.data('cached') == 'yes')
 				$post.css('display', 'none');
 			$('.post-hover').remove();
-		}).mousemove(function(e) {
+		}).on('mousemove', function(e) {
 			if(!$post)
 				return;
 			

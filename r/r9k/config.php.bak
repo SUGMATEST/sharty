@@ -1,0 +1,18 @@
+<?php
+
+
+// Changes made via web editor by "doll" @ Sat, 29 Jul 2023 02:20:34 -0400:
+$config['board_locked'] = true;
+
+
+// Changes made via web editor by "angeleno" @ Sun, 03 Sep 2023 04:04:37 -0400:
+$config['board_locked'] = false;
+
+
+// Changes made via web editor by "angeleno" @ Tue, 05 Sep 2023 21:30:41 -0400:
+$config['board_locked'] = true;
+
+
+// Changes made via web editor by "angeleno" @ Fri, 15 Sep 2023 17:01:42 -0400:
+$config['board_locked'] = false;
+

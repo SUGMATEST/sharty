@@ -20,7 +20,34 @@
 	if(isset($_GET['search']) && !empty($_GET['search']) && isset($_GET['board']) && in_array($_GET['board'], $boards)) {		
 		$phrase = $_GET['search'];
 		$_body = '';
-		
+
+		if ($_GET['board'] == 'm') {
+			error("an unknown error occured"); //hacky way of doing it
+		}
+		if (strtolower($_GET['board']) == 'test') {
+			error("Disallowed board"); //hacky way of doing it
+		}
+		if (strtolower($_GET['board']) == 'qa5') {
+			error("Disallowed board");
+		}
+		if (strtolower($_GET['board']) == 'j') {
+			error("Disallowed board"); //hacky way of doing it
+		}
+		if (strtolower($_GET['board']) == 'mediator') {
+			error("Disallowed board"); //hacky way of doing it
+		}
+                if (strtolower($_GET['board']) == 'gem') {
+                        error("Disallowed board"); //hacky way of doing it
+                }
+		if (strtolower($_GET['board']) == 'raid') {
+			error("Board not found"); //hacky way of doing it
+		}
+		if (strtolower($_GET['board']) == 'chive') {
+			error("Board not found"); //hacky way of doing it
+		}
+		if (strtolower($_GET['board']) == 'shrk') {
+			error("Board not found"); //hacky way of doing it
+		}
 		$query = prepare("SELECT COUNT(*) FROM ``search_queries`` WHERE `ip` = :ip AND `time` > :time");
 		$query->bindValue(':ip', $_SERVER['REMOTE_ADDR']);
 		$query->bindValue(':time', time() - ($queries_per_minutes[1] * 60));

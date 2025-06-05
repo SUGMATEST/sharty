@@ -74,7 +74,7 @@ if (active_page == 'index' && (""+document.location).match(/\/(index\.html)?(\?|
 
     if ($(".new-threads").html() != msg) {
       $(".new-threads").html(msg);
-      $(".new-threads a").click(fetch_new_threads);
+      $(".new-threads a").on('click', fetch_new_threads);
     }
   };
 
@@ -85,7 +85,7 @@ if (active_page == 'index' && (""+document.location).match(/\/(index\.html)?(\?|
 
     if ($(th).find(".new-posts").html() != msg) {
       $(th).find(".new-posts").html(msg);
-      $(th).find(".new-posts a").click(window.expand_fun);
+      $(th).find(".new-posts a").on('click', window.expand_fun);
     }
   };
 

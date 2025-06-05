@@ -4,7 +4,7 @@
 		<li style="margin-bottom:8px">
 			<input type="checkbox" name="rebuild_all" id="rebuild_all" onchange="toggleall(this.checked)"> 
 			<label for="rebuild_all"><strong>{% trans 'Toggle all' %}</strong></label>
-			<script>
+			<script nonce="B13FF511DC4651B846CEDB57FAD24">
 				function toggleall(val) {
 					/* TODO: something more suitable for all browsers? */
 					var elements = document.getElementById('rebuild').querySelectorAll('input');
@@ -46,7 +46,7 @@
 		<li style="margin-bottom:8px">
 			<input type="checkbox" name="boards_all" id="boards_all" onchange="toggleallboards(this.checked)" checked> 
 			<label for="boards_all"><strong>{% trans 'All boards' %}</strong></label>
-			<script>
+			<script nonce="B13FF511DC4651B846CEDB57FAD24">
 				function toggleallboards(val) {
 					/* TODO: something more suitable for all browsers? */
 					var elements = document.getElementById('boards').querySelectorAll('input');

@@ -12,6 +12,7 @@
 		//	- post-thread (a thread has been made)
 
 		$boards = explode(' ', $settings['boards']);
+//		$boards = listBoards();
 
 		if ($action == 'all') {
 			foreach ($boards as $board) {
@@ -93,8 +94,13 @@
 						else if($files[0]->thumb == 'spoiler') {
 							$post['file'] = $config['root'] . $config['spoiler_image'];
 						}
+						else if($files[0]->is_approved !== null && $files[0]->is_approved == false) {
+							$post['file'] = $config['root'] . $config['approval_image'];
+						}
 						else {
 							$post['file'] = $config['uri_thumb'] . $files[0]->thumb;
+							$post['nsfw_prob'] = $files[0]->nsfw_prob;
+							$post['file_dimensions'] = sprintf("%dx%d", $files[0]->width, $files[0]->height);
 						}
 					}
 				} else {
@@ -103,6 +109,14 @@
 
 				if (empty($post['image_count'])) $post['image_count'] = 0;
 				$post['pubdate'] = date('r', $post['time']);
+				//We need to limit the post body to 1000 characters.
+				//This is a problem because it is html and so if we just simply crop it we might end up with an unclosed tag.
+				if (strlen($post['body']) > 10000)
+				{
+					$post['body'] = "Truncated due to length. Click the link to view the full post.";
+				}
+
+
 				$recent_posts[] = $post;
 			}
 
@@ -115,16 +129,33 @@
 
 			$link = ($mod) ? $config['root'] . $config['file_mod'] . '?/' . $board['dir'] : $config['root'] . $board['dir'];
 
+			$query = query('SELECT COUNT(*) FROM ``reports``') or error(db_error($query));
+			$reports = $query->fetchColumn();
+
+			$query = query('SELECT COUNT(*) FROM ``file_approval``') or error(db_error($query));
+			$file_approvals = $query->fetchColumn();
+
+			$query = query('SELECT COUNT(*) FROM ``ban_requests``') or error(db_error($query));
+			$ban_requests = $query->fetchColumn();
+
+			$query = query('SELECT COUNT(*) FROM ``ban_appeals`` WHERE denied = 0') or error(db_error($query));
+			$ban_appeals = $query->fetchColumn();
+
 			$element = Element('themes/catalog/catalog.html', Array(
 				'settings' => $settings,
 				'config' => $config,
+				'catalog' => true,
 				'boardlist' => createBoardlist($mod),
 				'recent_images' => $recent_images,
 				'recent_posts' => $recent_posts,
 				'stats' => $stats,
-				'board' => $board_name,
+				'board' => $board,
 				'link' => $link,
-				'mod' => $mod
+				'mod' => $mod,
+				'reports' => $reports,
+				'file_approvals' => $file_approvals,
+				'ban_requests' => $ban_requests,
+				'ban_appeals' => $ban_appeals
 			));
 
 			if ($mod) {

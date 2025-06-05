@@ -6,7 +6,7 @@
  */
 
 if (active_page === "catalog" || active_page === "thread" || active_page === "index") {
-$(document).on('ready', function(){
+$( function(){
 
 if (window.Options && Options.get_tab('general')) {
 	Options.extend_tab("general", 
@@ -44,7 +44,7 @@ function getFileExtension(filename) { //Pashe, WTFPL
 }
 
 function isImage(fileExtension) { //Pashe, WTFPL
-	return ($.inArray(fileExtension, ["jpg", "jpeg", "gif", "png"]) !== -1);
+	return ($.inArray(fileExtension, ["jpg", "jpeg", "gif", "png", "webp"]) !== -1);
 }
 
 function isVideo(fileExtension) { //Pashe, WTFPL
@@ -133,8 +133,7 @@ function imageHoverStart(e) { //Pashe, anonish, WTFPL
 	if ($this.parent().attr("href").match("src")) {
 		fullUrl = $this.parent().attr("href");
 	} else if (isOnCatalog()) {
-		fullUrl = $this.attr("data-fullimage");
-		if (!isImage(getFileExtension(fullUrl))) {fullUrl = $this.attr("src");}
+		fullUrl = $this.attr("src");
 	}
 	
 	if (isVideo(getFileExtension(fullUrl))) {return;}
@@ -145,6 +144,10 @@ function imageHoverStart(e) { //Pashe, anonish, WTFPL
 		var size = $this.parents('.file').find('.unimportant').text().match(/\b(\d+)x(\d+)\b/),
 			maxWidth = $(window).width(),
 			maxHeight = $(window).height();
+
+		if (isOnCatalog()) {
+			size = $this.closest('.thread').find('.file-dimensions').text().match(/(\d+)x(\d+)/);
+		}
 
 		var scale = Math.min(1, maxWidth / size[1], maxHeight / size[2]);
 		hoverImage.css({

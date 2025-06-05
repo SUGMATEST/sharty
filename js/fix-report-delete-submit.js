@@ -22,7 +22,7 @@ if ($('#delete-fields #password').length) {
 		var postId = $ele.find('.post_no').not('[id]').text();
 		var board_name = $ele.parent().data('board');
 
-		$buf.find('#delete_post_menu,#delete_file_menu').click(function(e) {
+		$buf.find('#delete_post_menu,#delete_file_menu').on('click', function(e) {
 			e.preventDefault();
 			$('#delete_'+postId).prop('checked', 'checked');
 		
@@ -32,7 +32,7 @@ if ($('#delete-fields #password').length) {
 				$('#delete_file').prop('checked', '');
 			}
 			$('input[type="hidden"][name="board"]').val(board_name);
-			$('input[name=delete][type=submit]').click();
+			$('input[name=delete][type=submit]').trigger('click');
 		});
 	});
 }
@@ -46,7 +46,7 @@ Menu.onclick(function(e, $buf) {
 	var postId = $ele.find('.post_no').not('[id]').text();
 	var board_name = $ele.parent().data('board');
 
-	$buf.find('#report_menu,#global_report_menu').click(function(e) {
+	$buf.find('#report_menu,#global_report_menu').on('click', function(e) {
 		if ($(this).attr('id') === "global_report_menu") {
 			var global = '&global';
 		} else {

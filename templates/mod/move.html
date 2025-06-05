@@ -1,5 +1,10 @@
 <form action="?/{{ board }}/move/{{ post }}" method="post" onsubmit="btnSubmit.disabled = true; return true;">
 	<input type="hidden" name="token" value="{{ token }}">
+
+	<ul style="padding:0;text-align:center;list-style:none">
+		<li><input type="submit" name="btnSubmit" value="{% trans 'Move thread' %}"></li>
+	</ul>
+
 	<table>
 		<tr>
 			<th>
@@ -19,7 +24,24 @@
 				</td>
 		</tr>
 		<tr>
-			<th>{% trans 'Target board' %}</th>
+			<th>{% trans 'Common targets' %}</th>
+			<td>
+				<ul style="list-style:none;padding:0">
+					{% for targetboard in boards %}
+						{% if targetboard.uri != board and targetboard.uri in config.mod.common_move_destination_boards %}
+							<li>
+								<input {% if targetboard.uri == 'qa' %}checked{% endif %} type="radio" name="board" value="{{ targetboard.uri }}" id="ban-board-{{ targetboard.uri }}" {% if boards|length == 2 %}checked{% endif %}> 
+								<label style="display:inline" for="ban-board-{{ targetboard.uri }}">
+									{{ config.board_abbreviation|sprintf(targetboard.uri) }} - {{ targetboard.title|e }}
+								</label>
+							</li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<th>{% trans 'All boards' %}</th>
 			<td>
 				<ul style="list-style:none;padding:0">
 					{% for targetboard in boards %}

@@ -18,6 +18,22 @@ function postHandler($post) {
             $tn_path = $board['dir'] . $config['dir']['thumb'] . $file->file_id . '.jpg';
             if(0 == make_webm_thumbnail($file->file_path, $tn_path, $file->thumbwidth, $file->thumbheight, $webminfo['duration'])) {
               $file->thumb = $file->file_id . '.jpg';
+
+              //expand tn_path to full path
+              $full_absolute_path = realpath($tn_path);
+
+              if ($file->nsfw_prob !== 1) {
+                $nsfw_prob = get_nsfw_prob($full_absolute_path);
+                $file->nsfw_prob = $nsfw_prob;
+              }
+
+              /*
+              if ($nsfw_prob > 0.2) {
+                webm_set_spoiler($file);
+                file_unlink($tn_path);
+              }
+              */
+
             }
             else {
               $file->thumb = 'file';

@@ -32,11 +32,26 @@
 			$boards = explode(' ', $settings['boards']);
 		
 			$threads = array();
-		
+
 			foreach ($boards as $board) {
-				$query = query(sprintf("SELECT `id`, `id` AS `thread_id`, `slug`, (SELECT `time` FROM ``posts_%s`` WHERE `thread` = `thread_id` OR `id` = `thread_id` ORDER BY `time` DESC LIMIT 1) AS `lastmod` FROM ``posts_%s`` WHERE `thread` IS NULL", $board, $board)) or error(db_error());
+				$table = "posts_" . $board;
+				$query = query("
+					SELECT 
+						t.id,
+						t.id AS thread_id,
+						t.slug,
+						GREATEST(
+							COALESCE((SELECT MAX(time) FROM `$table` WHERE thread = t.id), 0),
+							t.time
+						) as lastmod
+					FROM `$table` t
+					WHERE t.thread IS NULL
+				") or error(db_error());
+				
 				$threads[$board] = $query->fetchAll(PDO::FETCH_ASSOC);
 			}
+
+			
 				
 			file_write($settings['path'], Element('themes/sitemap/sitemap.xml', Array(
 				'settings' => $settings,

@@ -15,10 +15,10 @@ $(window).ready(function() {
 	var do_not_ajax = false;
 	
 	var setup_form = function($form) {
-		$form.find('input[type="submit"]').click(function() {
+		$form.find('input[type="submit"]').on('click', function() {
 			$form.data('submit-btn', this);
 		});;
-		$form.submit(function(e) {
+		$form.on('submit', function(e) {
 			if (!$(this).data('submit-btn'))
 				return true;
 			if (do_not_ajax)
@@ -42,7 +42,7 @@ $(window).ready(function() {
 						if ($($(form).data('submit-btn')).attr('name') == 'report') {
 							alert(_('Reported post(s).'));
 							if ($(form).hasClass('post-actions')) {
-								$(form).parents('div.post').find('input[type="checkbox"].delete').click();
+								$(form).parents('div.post').find('input[type="checkbox"].delete').trigger('click');
 							} else {
 								$(form).find('input[name="reason"]').val('');
 							}

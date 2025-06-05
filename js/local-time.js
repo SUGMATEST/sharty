@@ -4,7 +4,7 @@
  *
  * Released under the MIT license
  * Copyright (c) 2012 Michael Save <savetheinternet@tinyboard.org>
- * Copyright (c) 2013-2014 Marcin Łabanowski <marcin@6irc.net>
+ * Copyright (c) 2013-2014 Marcin Labanowski <marcin@6irc.net>
  *
  * Usage:
  *   // $config['additional_javascript'][] = 'js/jquery.min.js';
@@ -13,7 +13,7 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	'use strict';
 
 	var iso8601 = function(s) {
@@ -48,7 +48,7 @@ $(document).ready(function(){
 
 		var elapsed = current - previous;
 
-		if (elapsed < msPerMinute) {
+		if (elapsed < 90 * 1000) {
 			return 'Just now';
 		} else if (elapsed < msPerHour) {
 			return Math.round(elapsed/msPerMinute) + (Math.round(elapsed/msPerMinute)<=1 ? ' minute ago':' minutes ago');

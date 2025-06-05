@@ -1,0 +1,128 @@
+.post,
+input,
+textarea {
+  border: 1px solid #040!important;
+}
+
+body {
+  background-color: #000;
+  color: #7f7!important;
+  background-image: url("https://booru.soy/_images/125c6ba37329910a8f662c25f13b80e7/39652%20-%20SoyBooru.png");
+  background-size: 200px;
+  background-position: 100% 0;
+  animation: 10s infinite anim;
+}
+
+.pages.top {
+  background-color: #000;
+  color: #7f7!important;
+}
+
+.pages {
+  background-color: #000 !important;
+  color: #7f7!important;
+}
+
+.post {
+  background: #020!important;
+  color: #fff!important;
+  box-shadow: 0 0 50px green;
+}
+
+.name,
+a {
+  color: #32cd32!important;
+}
+
+.post.highlighted {
+  background: #030!important;
+}
+
+.name {
+  position: relative;
+}
+
+.name:after {
+  content: '## Fed';
+  font-size: 14px;
+  display: inline-block;
+  color: #0f0;
+  text-shadow: 0 0 8px #0f0;
+  margin-left: .25em;
+}
+
+.boardlist {
+  background: #040!important;
+}
+
+.quote,
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #0f0!important;
+}
+
+@keyframes anim {
+  0%, 100% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 100% -5%;
+  }
+}
+
+body:after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: url("https://booru.soy/_images/bfa5349f1fe25f685db1ed8973a3d864/2158%20-%20SoyBooru.png");
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-size: 150px;
+}
+
+input,
+textarea {
+  background: #030;
+  color: #0f0;
+}
+
+textarea {
+  background: #020;
+  color: #fff;
+}
+
+.banner {
+  background-color: transparent!important;
+  color: #7f7!important;
+}
+
+#options_div {
+  background-color: #020;
+}
+
+.options_tab_icon.active {
+  color: #7f7;
+}
+
+.file-hint {
+  color: #fff!important;
+}
+
+form table tr th {
+  background: #020;
+}
+
+.dropzone {
+  color: #7f7;
+}
+
+.dragover {
+  background: #040!important;
+}

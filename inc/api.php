@@ -8,6 +8,7 @@ defined('TINYBOARD') or exit;
 /**
  * Class for generating json API compatible with 4chan API
  */
+#[\AllowDynamicProperties]
 class Api {
 	function __construct(){
 		global $config;
@@ -21,6 +22,7 @@ class Api {
 			'thread' => 'resto',
 			'subject' => 'sub',
 			'body' => 'com',
+			'body_nomarkup' => '___body_nomarkup',
 			'email' => 'email',
 			'name' => 'name',
 			'trip' => 'trip',
@@ -33,6 +35,8 @@ class Api {
 			'sticky' => 'sticky',
 			'locked' => 'locked',
 			'cycle' => 'cyclical',
+			'invincible' => 'looped',
+			'images_only' => 'images_only',
 			'bump' => 'last_modified',
 			'embed' => 'embed',
 		);
@@ -48,6 +52,8 @@ class Api {
 			'height' => 'h',
 			'width' => 'w',
 			'size' => 'fsize',
+			'thumb' => 'thumb',
+			'filename' => 'filename',
 		);
 
 		if (isset($config['api']['extra_fields']) && gettype($config['api']['extra_fields']) == 'array'){
@@ -70,6 +76,8 @@ class Api {
 		'images' => 1,
 		'sticky' => 1,
 		'locked' => 1,
+		'looped' => 1,
+		'images_only' => 1,
 		'last_modified' => 1
 	);
 
@@ -101,11 +109,46 @@ class Api {
 		else {
 			$apiPost['filename'] = substr($file->file, 0, $dotPos);
 		}
-		if (isset ($file->hash) && $file->hash) {
+
+		if (isset ($file->hash_md5) && $file->hash_md5) {
+			$apiPost['md5'] = base64_encode(hex2bin($file->hash_md5));
+		}
+		if (isset ($file->hash_pdq) && $file->hash_pdq) {
+			$apiPost['pdq'] = base64_encode(hex2bin($file->hash_pdq));
+		}
+		else if (isset ($file->hash) && mb_strlen($file->hash) == 32) {
 			$apiPost['md5'] = base64_encode(hex2bin($file->hash));
 		}
-		else if (isset ($post->filehash) && $post->filehash) {
-			$apiPost['md5'] = base64_encode(hex2bin($post->filehash));
+		else if (isset ($file->hash) && $file->hash) {
+			$apiPost['pdq'] = base64_encode(hex2bin($file->hash));
+		}
+
+		if (isset($file->nsfw_prob)) {
+			$apiPost['nsfw_score'] = $file->nsfw_prob;
+		}
+		else {
+			$apiPost['nsfw_score'] = 0;
+		}
+
+		if ($apiPost['ext'] == 'deleted') {
+			$apiPost['filedeleted'] = 1;
+		}
+		else {
+			$apiPost['filedeleted'] = 0;
+		}
+
+		if (isset($file->thumb) && $file->thumb == 'spoiler') {
+			$apiPost['spoiler'] = 1;
+		}
+		else {
+			$apiPost['spoiler'] = 0;
+		}
+
+		if (isset($file->is_approved) && $file->is_approved == 0) {
+			$apiPost['pending_approval'] = 1;
+		}
+		else {
+			$apiPost['pending_approval'] = 0;
 		}
 	}
 
@@ -115,11 +158,33 @@ class Api {
 		$fields = $threadsPage ? $this->threadsPageFields : $this->postFields;
 		$this->translateFields($fields, $post, $apiPost);
 
-		if (isset($config['poster_ids']) && $config['poster_ids']) $apiPost['id'] = poster_id($post->ip, $post->thread, $board['uri']);
+		if (isset($apiPost['___body_nomarkup']) && !empty($post->decryption_key))
+			$apiPost['___body_nomarkup'] = "";
+
+		if (isset($post->post_flags) && $post->post_flags & (1 << 9)) {
+			$apiPost['desktop_only'] = 1;
+		}
+		else {
+			$apiPost['desktop_only'] = 0;
+		}
+
+		if (isset($config['poster_ids']) && $config['poster_ids']) $apiPost['id'] = poster_id($post->ip, $post->thread);
+		$hasCapcode = isset($post->capcode) && $post->capcode;
+
+		if (((isset($config['show_ids']) && $config['show_ids']) || $post->show_ids) && !$hasCapcode){
+			$extra = 0;
+			if (isset($config['show_ids_unique_thread']) && $config['show_ids_unique_thread']) $extra = $post->thread;
+			if ($post->email != "anonymous") {
+				$apiPost['id'] = new_poster_id($post->ip, $extra);
+			}
+			else {
+				$apiPost['id'] = "ANONYMOUS";
+			}
+		}
 		if ($threadsPage) return $apiPost;
 
 		// Handle country field
-		if (isset($post->body_nomarkup) && $this->config['country_flags']) {
+		if (isset($post->body_nomarkup) && ($this->config['country_flags'] || $post->geo_flags)) {
 			$modifiers = extract_modifiers($post->body_nomarkup);
 			if (isset($modifiers['flag']) && isset($modifiers['flag alt']) && preg_match('/^[a-z]{2}$/', $modifiers['flag'])) {
 				$country = strtoupper($modifiers['flag']);

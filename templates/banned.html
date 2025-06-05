@@ -1,12 +1,22 @@
 {% apply spaceless %}
 {# Automatically removes unnecessary whitespace #}
+<!--Don't let ban images overflow.-->
+<style>
+	.ban::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+</style>
 <div class="ban">
 	{% if ban.expires and time() >= ban.expires %}
-		<h2>{% trans %}You were banned! ;_;{% endtrans %}</h2>
+		<h2>{% trans %}You were banned! Ö{% endtrans %}</h2>
 	{% else %}
-		<h2>{% trans %}You are banned! ;_;{% endtrans %}</h2>
+		<h2>{% trans %}You are banned! Ö{% endtrans %}</h2>
 	{% endif %}
 	<p>
+		<!--Ban image-->
+		<img class="banimage" src="{{ config.url_banimage }}" {% if config.banimage_width or config.banimage_height %}style="{% if config.banimage_width %}width:{{ config.banimage_width }}px{% endif %};{% if config.banimage_width %}height:{{ config.banimage_height }}px;{% endif %} float: right; margin-bottom: 7px" {% endif %}alt="Banned" />
 		{% if ban.expires and time() >= ban.expires %}
 			{% trans %}You were banned from{% endtrans %}
 		{% else %}
@@ -23,11 +33,17 @@
 				 {% trans %}for an unspecified reason.{% endtrans %}
 			{% endif %}
 	</p>
+
 	{% if ban.reason %}
 		<p class="reason">
 			{{ ban.reason }}
 		</p>
 	{% endif %}
+	
+	{% if ban.board == 'soy' %}
+	<p>{% trans %}We recommend you visit the <a href="/qa">/qa/ board</a> for further discussions.{% endtrans %}</p>
+	{% endif %}
+
 	<p>
 		{% trans %}Your ban was filed on{% endtrans %} 
 			<strong>{{ ban.created|date(config.ban_date) }}</strong> 
@@ -46,7 +62,7 @@
 			<strong>
 				{{ ban.expires|date(config.ban_date) }}
 			</strong>
-			<script>
+			<script nonce="B13FF511DC4651B846CEDB57FAD24">
 				var secondsLeft = {{ ban.expires - time() }};
 				var end = new Date().getTime() + secondsLeft*1000;
 				function updateExpiresTime() {
@@ -84,7 +100,9 @@
 		</span>
 	</p>
 	<p>{% trans %}Your IP address is{% endtrans %} <strong>{{ ban.ip }}</strong>.</p>
-
+	{% if ban.creator == 137 %}
+	<p>You were banned by the <strong>IAMS.</strong></p>
+	{%endif%}
 	{% if config.ban_page_extra %}
 		<p>{{ config.ban_page_extra }}</p>
 	{% endif %}
@@ -95,38 +113,52 @@
 		{{ post }}
 		<br>
 	{% endif %}
-	
+
 	{% if config.ban_appeals and (not ban.expires or ban.expires - ban.created > config.ban_appeals_min_length )%}
-		<hr>
+	<hr style="clear: both;">
 		{% if pending_appeal %}
 			<p>
 				{% trans %}You submitted an appeal for this ban on{% endtrans %} 
-				<strong>{{ pending_appeal|date(config.ban_date) }}</strong>. {% trans %}It is still pending{% endtrans %}.
+				<strong>{{ pending_appeal.time|date(config.ban_date) }}</strong>. {% trans %}It is still pending{% endtrans %}.
 			</p>
-		{% elseif denied_appeals|length >= config.ban_appeals_max %}
-			{% if denied_appeals|length == 1 %}
+		{% elseif ban.unappealable or denied_appeals|length >= config.ban_appeals_max %}
+			{% if ban.unappealable or denied_appeals|length == 1 %}
 				<p>
 					{% trans %}You appealed this ban on{% endtrans %} 
-					<strong>{{ denied_appeals[0]|date(config.ban_date) }}</strong> 
+					<strong>{{ denied_appeals[0].time|date(config.ban_date) }}</strong> 
 					{% trans %}and it was denied. You may not appeal this ban again.{% endtrans %}
+					<br/>
+					Reason for denial: {{ denied_appeals[0].deny_reason }}
 				</p>
 			{% else %}
 				<p>{% trans %}You have submitted the maximum number of ban appeals allowed. You may not appeal this ban again.{% endtrans %}</p>
 			{% endif %}
+		{% elseif time() - ban.created < config.ban_appeals_min_age %}
+			<p>
+				You may appeal this ban <span id="countdown">{{ (ban.created + config.ban_appeals_min_age)|until }}</span> from now.
+			</p>
 		{% else %}
 			{% if denied_appeals|length %}
 				{% if denied_appeals|length == 1 %}
 					<p>
 						{% trans %}You appealed this ban on{% endtrans %} 
-						<strong>{{ denied_appeals[0]|date(config.ban_date) }}</strong> 
+						<strong>{{ denied_appeals[0].time|date(config.ban_date) }}</strong> 
 						{% trans %}and it was denied.{% endtrans %}
+						{% if denied_appeals[0].deny_reason %}
+							<br/>
+							Reason for denial: {{ denied_appeals[0].deny_reason }}
+						{% endif %}
 					</p>
 					<p>{% trans %}You may appeal this ban again. Please enter your reasoning below.{% endtrans %}</p>
 				{% else %}
 					<p>
 						{% trans %}You last appealed this ban on{% endtrans %} 
-						<strong>{{ denied_appeals[denied_appeals|length - 1]|date(config.ban_date) }}</strong> 
+						<strong>{{ denied_appeals[denied_appeals|length - 1].time|date(config.ban_date) }}</strong> 
 						{% trans %}and it was denied.{% endtrans %}
+						{% if denied_appeals[denied_appeals|length - 1].deny_reason %}
+							<br/>
+							Reason for denial: {{ denied_appeals[denied_appeals|length - 1].deny_reason }}
+						{% endif %}
 					</p>
 					<p>{% trans %}You may appeal this ban again. Please enter your reasoning below.{% endtrans %}</p>
 				{% endif %}

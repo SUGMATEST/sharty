@@ -1,0 +1,43 @@
+{# Form to add a new pass #}
+<h2>Add New Pass</h2>
+<form action="/mod.php?/create-pass" method="post">
+	<label for="new_contact">Contact:</label>
+	<input type="text" id="new_contact" name="contact" required>
+	<input type="hidden" name="token" value="{{ create_token }}">
+	<input type="submit" value="Create Pass">
+</form>
+
+<h2>Current Passes</h2>
+<table border="1">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Contact</th>
+			<th>Passkey</th>
+			<th>Registration Date</th>
+			<th>Expiration Date</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for pass in passes %}
+			<tr>
+				<td>{{ pass.pass_id }}</td>
+				<td>{{ pass.contact }}</td>
+				<td>{{ pass.passkey }}</td>
+				<td>{{ pass.registration_date }}</td>
+				<td>{{ pass.expiration_date }}</td>
+				{#create_token' => make_secure_link_token('create-pass'), 'delete_token#}
+				<td>
+					<a href="/mod.php?/edit-pass/{{ pass.pass_id }}">Edit</a>
+					<form action="/mod.php?/delete-pass" method="post" onsubmit="return confirm('Are you sure?');">
+						<input type="hidden" name="pass_id" value="{{ pass.pass_id }}">
+						<input type="hidden" name="token" value="{{ delete_token }}">
+						<input type="submit" value="Delete">
+
+					</form>
+				</td>
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

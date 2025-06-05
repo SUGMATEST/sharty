@@ -21,7 +21,7 @@ $.fn.longtable = function(fields, options, data) {
         el.html(fields[field].name || field);
 
         if (!fields[field].sort_disable) {
-          el.addClass("sortable").click(function() {
+          el.addClass("sortable").on('click', function() {
             lt._sort_by(field);
           });
         }
@@ -108,7 +108,7 @@ $.fn.longtable = function(fields, options, data) {
 
     update_viewport: function() {
       var first = $(window).scrollTop() - $(elem).offset().top - options.row_h;
-      var last = first + $(window).height();
+      var last = first + Math.round($(window).height());
 
       first = Math.floor(first / options.row_h);
       last  = Math.ceil (last /  options.row_h);

@@ -81,7 +81,7 @@ var banlist_init = function(token, my_boards, inMod) {
        } }
     }, {}, t);
 
-    $("#select-all").click(function(e) {
+    $("#select-all").on('click', function(e) {
       var $this = $(this);
       $("input.unban").prop("checked", $this.prop("checked"));
       lt.get_data().forEach(function(v) { v.access && (selected[v.id] = $this.prop("checked")); });
@@ -136,7 +136,7 @@ var banlist_init = function(token, my_boards, inMod) {
         $("<input type='hidden' name='ban_"+e+"' value='unban' class='hiddens'>").appendTo(".banform");
       });
 
-      $(".banform").off("submit").submit();
+      $(".banform").off("submit").trigger('submit');
     });
 
     if (device_type == 'desktop') {

@@ -1,0 +1,295 @@
+@font-face {
+    font-family: Eater;
+    src: url(/static/fonts/eater.woff2) format('woff2');
+}
+
+body {
+    background: #2d0505;
+    /*skeltal, bloodrain*/
+    background-image: url(/static/eater/bg.png), url(/static/eater/bg.png);
+    background-repeat: repeat, repeat;
+    background-size: 100%, cover;
+    background-attachment: fixed, scroll;
+    color: #c66600
+}
+
+body::before {
+    opacity: 0.8;
+    content: "";
+    /* Required for ::before to work */
+    position: fixed;
+    bottom: -48px;
+    /* Position from the bottom */
+    right: -63px;
+    /* Position from the right */
+    width: 280px;
+    /* Width of the GIF */
+    height: 280px;
+    /* Height of the GIF */
+    background-image: url('/static/eater/ghost.gif');
+    /* The URL of your GIF */
+    background-size: contain;
+    /* Resize background to fit the container */
+    background-repeat: no-repeat;
+    /* Don't repeat the GIF */
+    z-index: 1000;
+    /* Make sure it appears above other elements */
+    pointer-events: none;
+}
+
+div.post,
+div.post.reply,
+div.post.reply.highlighted,
+div#news,
+div.blotter,
+div.mix,
+div.subtitle {
+    color: #ffffff;
+}
+
+span.heading2 {
+    color: #748cb5;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+ul {
+    padding: 0px;
+    margin-top: 0px;
+    color: #748cb5;
+    font-size: 11pt;
+}
+
+header div.subtitle,
+h1 {
+    color: #748cb5;
+    font-family: Eater;
+    text-align: center;
+
+}
+
+.poster_id {
+    cursor: pointer;
+    display: inline-block;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    font-family: Eater;
+    opacity: 0.9;
+}
+
+div.post {
+    color: #FFFFFF;
+    padding: 10px;
+    font-size: 14px
+}
+
+div.post.reply {
+    background: linear-gradient(to bottom, #181a1b 100%, #ffd045 10%, #FFFF00 1%, #F8DE7E 1%, #FBEC5D 30%, #FADA5E 51%, #FBEC5D 86%, #C4B454 95%, #8B8000 100%);
+    border-radius: 15px;
+    border: 1px solid #d36d00;
+}
+
+div.post div.postInfo span.postNum a {
+    text-decoration: none;
+    color: #c0c0c0
+}
+
+div.post div.postInfo span.nameBlock span.name {
+    color: #ff7e00;
+}
+
+div.post div.postInfo span.nameBlock span.postertrip {
+    color: #cd7428;
+}
+
+div.post.reply div.body a {
+    color: #d24432;
+}
+
+div.post.reply.highlighted {
+    background: linear-gradient(137.9deg, #FF7043, #FF8A65, #FFAB91, #FFCCBC 50%, #FBE9E7 100%);
+    color: #000000;
+}
+
+span.heading {
+    color: #d24432;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+
+#disclaimer-modal {
+    background-color: #cd7428;
+}
+
+#disclaimer h3 {
+    border-bottom: 1px solid #cd7428;
+}
+
+a,
+a:visited,
+a.replylink:not(:hover),
+div#absbot a:not(:hover) {
+    color: #cd7428;
+}
+
+hr {
+    border-top: 1px solid #cd7428;
+}
+
+div#boardNavDesktop a {
+    color: #cd7428
+}
+
+div.sideArrows {
+    color: #cd7428;
+}
+
+.deadlink,
+.pageJump a,
+.quoteLink,
+.quotelink {
+    color: #c00 !important;
+}
+
+div.pagelist {
+    background: #cd7428;
+    border-right: 1px solid #ef6e01;
+    border-bottom: 1px solid #ef6e01;
+}
+
+div.pagelist strong {
+    color: #cd7428
+}
+
+
+
+div.pagelist div.cataloglink {
+    border-left: 1px solid #ef6e01;
+}
+
+.greenPostContainer .postMessage {
+    color: #c0c0c0 !important;
+}
+
+.greenPostContainer .post.reply {
+    background-color: #030 !important;
+}
+
+label:not(:has(span.capcode)) span.name {
+    color: #00BF3A !important;
+
+}
+
+form table tr th {
+    background: linear-gradient(to bottom, #181a1b 50%, #d36d00 100%);
+}
+
+div.boardlist, div.pages {
+    font-family: Eater;
+    border-radius: 35px;
+    border: 2px solid #c66600;
+    padding: 5px;
+    opacity: 1;
+    background: linear-gradient(to bottom, #181a1b 100%, #ffd045 10%, #FFFF00 1%, #F8DE7E 1%, #FBEC5D 30%, #FADA5E 51%, #FBEC5D 90%, #C4B454 95%, #8B8000 100%);
+}
+
+.intro span.subject {
+    color: #ffffff;
+    font-weight: bold;
+    font-family: Eater;
+    font-size: 18px
+}
+
+a[href^='mailto:supersage']::after {
+    content: ' SUPER SAGE!';
+    color: red;
+    text-decoration: none;
+    font-family: Eater;
+}
+
+a[href^='mailto:bump']::after {
+    content: ' BUMP!';
+    text-decoration: none;
+    font-family: Eater;
+}
+
+a[href^='mailto:sage']::after {
+    content: ' SAGE!';
+    text-decoration: none;
+    font-family: Eater;
+}
+
+div.pages.top {
+    display: none;
+}
+
+.post-image {
+    border: 3px solid #d36d00;
+    /* Adjust the color to match your theme */
+    padding: 5px;
+    /* Adds spacing between the image and the border */
+    border-radius: 35px;
+    /* Optional: to make the corners rounded */
+    box-shadow: 0px 0px 55px rgba(0, 0, 0, 1);
+    /* Optional: adds a shadow effect */
+}
+
+div#news {
+    background: linear-gradient(to bottom, #181a1b 100%, #ffd045 10%, #FFFF00 1%, #F8DE7E 1%, #FBEC5D 30%, #FADA5E 51%, #FBEC5D 90%, #C4B454 95%, #8B8000 100%);
+    border-radius: 25px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+
+}
+
+div.blotter {
+    border: 2px solid #000000;
+    /* Adjust the color to match your theme */
+    padding: 5px;
+    /* Adds spacing between the image and the border */
+    border-radius: 35px;
+    /* Optional: to make the corners rounded */
+    box-shadow: 0px 0px 55px rgba(0, 0, 0, 1);
+    /* Optional: adds a shadow effect */
+    opacity: 0.8;
+    background: linear-gradient(to bottom, #181a1b 20%, #303436 30%, #181a1b 50%, #242729 100%);
+    width: fit-content;
+    margin: auto;
+}
+
+div.mix {
+    border: 1px solid #111111;
+    background: linear-gradient(to bottom, #d36d00 60%, #181a1b 100%);
+    border-radius: 11px;
+    box-shadow: 5px 5px 8px rgba(0, 0, 0, 15);
+
+}
+
+a {
+    cursor: url('/static/eater/highlighted.png') 10 10, pointer;
+}
+
+header div.subtitle,
+h1 {
+    color: #AF0A0F;
+    font-family: Eater;
+    text-align: center;
+}
+
+.intro span.subject {
+    color: #9ea0aa;
+    font-weight: bold;
+}
+
+.dropzone .file-hint, .tmb-filename {
+    color: #ffffff;
+}
+
+input[type="text"], input[type="password"], textarea, input, #alert_div, #options_div {
+    background: #181a1b;
+    color: #ffffff;
+    border: 1px solid #000000;
+}

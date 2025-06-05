@@ -1,0 +1,63 @@
+{% if ban_requests %}
+{% for request in ban_requests %}
+
+<form action="" method="post" style="margin: 10px 0">
+	<input type="hidden" name="token" value="{{ token }}">
+	<table id="{{ request.id }}" style="margin: 5px 0">
+		{% if mod|hasPermission(config.mod.show_ip, request.board) %}
+			<tr>
+				<th>{% trans 'IP' %}</th>
+				<td><a class="ip-link" style="margin:0;" href="?/IP/{{ request.ip|cloak_ip }}">{{ request.ip|cloak_ip }}</a></td>
+			</tr>
+		{% endif %}
+		<tr>
+			<th>{% trans 'Board' %}</th>
+			<td>
+				/{{ request.board }}/
+			</td>
+		</tr>
+		<tr>
+			<th>{% trans 'Staff' %}</th>
+			<td>
+				{% if request.username %}
+					<a href="?/new_PM/{{ request.username|e }}">{{ request.username|e }}</a>
+				{% else %}
+					<em>{% trans 'deleted?' %}</em>
+				{% endif %}
+			</td>
+		</tr>
+	</table>
+
+	<table style="margin: 10px 0">
+		<tr>
+			<th>{% trans 'Request time' %}</th>
+			<td>{{ request.time|date(config.post_date) }}</td>
+		</tr>
+		<tr>
+			<th>{% trans 'Request reason' %}</th>
+			<td>{{ request.reason }}</td>
+		</tr>
+		{% if mod|hasPermission(config.mod.ban, request.board) %}
+			<tr>
+				<th>{% trans 'Action' %}</th>
+				<td>
+					<input type="hidden" name="request_id" value="{{ request.id }}">
+					<a href="?/accept-ban-request/{{ request.id }}">
+						<input type="button" value="Ban user">
+					</a>
+					<input type="submit" name="deny" value="Deny request">
+				</td>
+			</tr>
+		{% endif %}
+	</table>
+	
+	<div style="">
+		{{ request.post.build(true) }}
+	</div>
+</form>
+<hr>
+
+{% endfor %}
+{% else %}
+	<p style="text-align:center" class="unimportant">({% trans 'There are no ban requests.' %})</p>
+{% endif %}

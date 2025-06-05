@@ -7,8 +7,11 @@
  *   $config['additional_javascript'][] = 'js/file-selector.js';
  */
 function init_file_selector(max_images) {
+if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+	return;
+}
 
-$(document).ready(function () {
+$(function () {
 	// add options panel item
 	if (window.Options && Options.get_tab('general')) {
 		Options.extend_tab('general', '<label id="file-drag-drop"><input type="checkbox">' + _('Drag and drop file selection') + '</label>');
@@ -51,9 +54,20 @@ function addFile(file) {
 	if (files.length == max_images)
 		return;
 
+	if (localStorage.strip_filenames === 'true') {
+		var characters = "abcdefghijklmnopqrstuvwxyz";
+
+		var ext = file.name.split('.').pop();
+		var fileName = Date.now() - Math.floor(Math.random() * 60 * 24*60*60*1000) + characters[Math.floor(Math.random() * characters.length)] + '.' + ext;
+
+		file = new File([file.slice(0, file.size, file.type)], fileName, {type: file.type});
+	}
+
 	files.push(file);
 	addThumb(file);
 }
+
+window.addFile = addFile;
 
 function removeFile(file) {
 	files.splice(files.indexOf(file), 1);
@@ -65,16 +79,18 @@ function getThumbElement(file) {
 
 function addThumb(file) {
 
-	var fileName = (file.name.length < 24) ? file.name : file.name.substr(0, 22) + '…';
+	var fileName = (file.name.length < 24) ? file.name : file.name.substr(0, 22) + '...';
 	var fileType = file.type.split('/')[0];
 	var fileExt = file.type.split('/')[1];
 	var $container = $('<div>')
 		.addClass('tmb-container')
 		.data('file-ref', file)
 		.append(
-			$('<div>').addClass('remove-btn').html('✖'),
+			$('<div>').addClass('remove-btn').html('X'),
 			$('<div>').addClass('file-tmb'),
-			$('<div>').addClass('tmb-filename').html(fileName)
+			$('<div>').addClass('tmb-filename').html(fileName),
+			$('<div>').addClass('tmb-flag').html('<label>NSFW<input class="file-nsfw" type="checkbox"></label>'),
+			$('<div>').addClass('tmb-flag').html('<label>Spoiler<input class="file-spoiler" type="checkbox"></label>')
 		)
 		.appendTo('.file-thumbs');
 
@@ -89,10 +105,41 @@ function addThumb(file) {
 }
 
 $(document).on('ajax_before_post', function (e, formData) {
+	var nsfw = [];
+	var spoilered = [];
+
+	$('.file-nsfw').each(function() {
+		if ($(this).is(':checked')) {
+			var file = $(this).closest('.tmb-container').data('file-ref');
+			var index = files.indexOf(file);
+			if (index != -1) {
+				nsfw.push(index);
+			}
+		}
+	});
+
+	$('.file-spoiler').each(function() {
+		if ($(this).is(':checked')) {
+			var file = $(this).closest('.tmb-container').data('file-ref');
+			var index = files.indexOf(file);
+			if (index != -1) {
+				spoilered.push(index);
+			}
+		}
+	});
+
 	for (var i=0; i<max_images; i++) {
 		var key = 'file';
 		if (i > 0) key += i + 1;
 		if (typeof files[i] === 'undefined') break;
+
+		if (nsfw.includes(i)) {
+			formData.append(key + '-nsfw', 'true');
+		}
+		if (spoilered.includes(i)) {
+			formData.append(key + '-spoilered', 'true');
+		}
+
 		formData.append(key, files[i]);
 	}
 });
@@ -170,7 +217,7 @@ $(document).on('keypress click', '.dropzone', function (e) {
 		$(this).remove();
 	});
 
-	$fileSelector.click();
+	$fileSelector.trigger('click');
 });
 
 $(document).on('paste', function (e) {

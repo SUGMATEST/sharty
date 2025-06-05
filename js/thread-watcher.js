@@ -143,7 +143,7 @@ watchlist.exists = function(sel) {
 	});
 };
 
-$(document).ready(function(){
+$(function(){
 	if (!(active_page == 'thread' || active_page == 'index' || active_page == 'catalog' || active_page == 'ukko')) {
 		return;
 	}

@@ -1,0 +1,288 @@
+/* Kosher Theme */
+.post,
+input,
+textarea {
+  border: 1px solid #0667FF!important;
+}
+{
+color: #0693F9;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+body {
+  background-color: #4E71D3;
+  color: #0670FF!important;
+
+  /* First background image - covers the entire canvas */
+  background-image: url("/static/jew/background.jpg");
+  background-size: cover;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+
+  /* Ensure the body is a positioned element for the pseudo-element */
+  position: relative;
+  z-index: 0; /* Content above it will have a higher z-index */
+}
+
+/* Pseudo-element for the SoyBooru image */
+body::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%; /* Make the pseudo-element stretch across the full width of the viewport */
+  height: 300px; /* Adjust the height of the SoyBooru image area */
+  background-image: url("/static/jew/chudcel.png");
+  background-size: contain; /* Maintain the image's aspect ratio */
+  background-repeat: repeat-x; /* Repeat horizontally across the top */
+  background-position: top left;
+
+  /* Apply the animation */
+  animation: anim 10s ease-in-out infinite;
+
+  /* Ensure it stays below the content */
+  z-index: -1; /* Keeps the SoyBooru image behind all other content */
+  pointer-events: none; /* Optional: Keeps the image from blocking clicks */
+}
+
+/* Keyframes for the animation */
+@keyframes anim {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10%); /* Adjust the animation effect */
+  }
+}
+
+
+body:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image:
+    url("/static/jew/star.gif"),
+    url("/static/jew/money.gif");
+  background-repeat: no-repeat;
+  background-position: 100% 100%, bottom left; /* Original image and the GIF in bottom-right corner */
+  background-size: 150px, 150px; /* First image size remains 150px, the GIF is smaller (50px) */
+  pointer-events: none; /* Prevent interaction with the background images */
+  z-index: -1; /* Ensure it stays behind other content */
+}
+
+
+
+.pages {
+  background-color: #06169E!important;
+  color: #5297BF!important;
+}
+
+div.post {
+  background: url("/static/jew/hebrew.png") no-repeat center center;
+  background-size: 100%; /* Adjust the image size to 80% of the element's size */
+  background-blend-mode: darken, luminosity;
+  background-color: #1E4ECE;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 50px #06169E;
+}
+
+div.post.reply {
+  background: url("/static/jew/hebrew.png") no-repeat center center;
+  background-size: 100% 100%; /* Stretches the image to cover the entire .post */
+  background-blend-mode: darken, luminosity;
+  background-color: #1E4ECE;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 50px #06169E;
+}
+
+.name,
+a {
+  color: #8799FF!important;
+}
+
+.post.highlighted {
+
+  background: #215877!important;
+
+}
+
+.name {
+  position: relative;
+}
+
+.name:after {
+  content: '## Goy';
+  font-size: 14px;
+  display: inline-block;
+  color: #0626FF;
+  text-shadow: 0 0 8px #02CEE0;
+  margin-left: .25em;
+}
+
+.boardlist {
+  background: #2937F4!important;
+}
+
+h1 {
+  color: #0AFCF8;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  background: url("/static/jew/israel.png") no-repeat center center;
+  background-size: 100% 100%; /* Stretch the image to fit the entire h1 */
+  width: fit-content;
+  margin: auto;
+}
+div.subtitle {
+  position: relative;
+  color: #0793E1; /* Blue text */
+  -webkit-text-stroke-width: 0.3px;
+  -webkit-text-stroke-color: grey;
+  background-size: 100% 100%;
+  width: fit-content;
+  margin: auto;
+}
+
+
+
+header div.subtitle,
+h1 {
+	color: #074EE1;
+	text-align: center;
+}
+
+h2,
+h3,
+h4,
+h5 {
+  color: #163EBE!important;
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: blue;
+  width: fit-content;
+  margin: auto;
+}
+
+input,
+textarea {
+  background: #265ED6;
+  color: #0667FF;
+}
+
+textarea {
+  background: #044EA3;
+  color: #fff;
+}
+div.board_image a, div.banner {
+	background-color: #544FFF;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+
+#options_div {
+  background-color: #1E46CE;
+}
+
+.options_tab_icon.active {
+  color: #0616E7;
+}
+
+.file-hint {
+  color: #060EF0!important;
+}
+
+form table tr th {
+  background: #06169E;
+}
+
+.dropzone {
+  color: #0820D8;
+}
+
+.dragover {
+  background: #040!important;
+}
+div.post,
+div.post.reply,
+div.post.reply.highlighted,
+div#news,
+div.blotter,
+div.mix {
+    color: #B7CBE2;
+}
+a,
+a:visited,
+a.replylink:not(:hover),
+div#absbot a:not(:hover) {
+    color: #0670D4;
+}
+div.dropzone-wrap {
+background: linear-gradient(360deg, rgba(105,118,255,1) 0%, rgba(0,30,255,1) 100%);
+
+}
+td#upload_selection {
+background: linear-gradient(360deg, rgba(105,118,255,1) 0%, rgba(0,30,255,1) 100%);
+
+
+}
+div.boardlist {
+	color: #212166;
+background: linear-gradient(360deg, rgba(105,118,255,1) 0%, rgba(0,30,255,1) 100%);
+
+
+}
+img.banner,
+img.board_image {
+	display: block;
+	border: 3px solid #3F3BF0;
+	margin: 0 auto 0 auto;
+}
+span.omitted {
+	display: block;
+	margin-top: 1em;
+	color: #54CEFF;
+}
+input[type="text"], textarea, select {
+	background: #044999;
+}
+a[href^='mailto:sage']::after {
+  content: ' SHOAH!';
+}
+a[href^='mailto:bump']::after {
+  content: ' KOSHER!';
+}
+a[href^='mailto:supersage']::after {
+  content: ' OYYYY VEYYYYYYYYYYYYYY!';
+}
+a.post_no:hover {
+	color: #C9CFD6!important;
+	text-decoration: underline overline;
+}
+div.mix {
+    border: 1px solid #111111;
+background: linear-gradient(180deg, rgba(0,104,255,1) 0%, rgba(47,111,213,1) 54%, rgba(26,51,238,1) 100%);
+    border-radius: 11px;
+    box-shadow: 5px 5px 8px rgba(0, 0, 0, 15);
+
+}
+fieldset {
+background: linear-gradient(360deg, rgba(0,16,189,1) 0%, rgba(0,30,255,1) 100%);
+
+}
+div.ban {
+background: #0693F9;
+}
+.intro span.subject {
+	color: #97B6D8;
+}
+span.heading2 {
+	color: #5d5de4;
+	font-size: 11pt;
+	font-weight: bold;
+}

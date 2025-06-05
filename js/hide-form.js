@@ -7,7 +7,7 @@
  *
  */
 
-$(document).ready(() => {
+$(() => {
  if (active_page !== 'index' && active_page !== 'thread')
  return;
 
@@ -16,7 +16,7 @@ $(document).ready(() => {
 
  form_el.hide();
  form_el.after(`<div id="show-post-form" style="font-size:175%;text-align:center;font-weight:bold">[<a href="#" style="text-decoration:none">${_(form_msg)}</a>]</div>`);
- $('div#show-post-form').click(() => {
+ $('div#show-post-form').on('click', () => {
  $('div#show-post-form').hide();
  form_el.show();
  });

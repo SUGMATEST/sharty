@@ -1,5 +1,5 @@
 if (active_page == 'thread' || active_page == 'index') {
-	$(document).ready(function(){
+	$(function(){
 		function arrayRemove(a, v) { a.splice(a.indexOf(v) == -1 ? a.length : a.indexOf(v), 1); }
 
 		var idshighlighted = [];

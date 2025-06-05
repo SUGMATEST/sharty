@@ -1,0 +1,58 @@
+<?php
+
+// Changes made via web editor by "abu" @ Fri, 11 Nov 2022 11:34:15 -0500:
+$config['reply_limit'] = 10000;
+
+
+// Changes made via web editor by "abu" @ Tue, 10 Jan 2023 00:22:47 -0500:
+$config['force_image_op'] = false;
+
+// Changes made via web editor by "angeleno" @ Mon, 14 Aug 2023 01:15:37 -0400:
+$config['max_threads_per_hour'] = 20;
+
+$config['field_disable_name'] = true;
+
+//Let's see how this works. mwahahahahaha
+/*
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function($post) {
+            if (preg_match('/a/i', $post['body'])) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => 'Ban evasion.'
+);
+*/
+// Changes made via web editor by "trunk" @ Thu, 23 Nov 2023 18:26:44 -0500:
+$config['board_locked'] = true;
+
+
+// Changes made via web editor by "trunk" @ Thu, 23 Nov 2023 18:41:13 -0500:
+$config['board_locked'] = false;
+
+
+
+// Changes made via web editor by "trunk" @ Fri, 08 Dec 2023 03:09:18 -0500:
+$config['force_image_op'] = true;
+
+
+// Changes made via web editor by "doll" @ Tue, 30 Jan 2024 22:47:04 -0500:
+$config['max_threads_per_hour'] = 2;
+
+
+// Changes made via web editor by "doll" @ Thu, 07 Mar 2024 04:50:11 -0500:
+$config['mandate_soy_history'] = false;
+
+
+
+// Changes made via web editor by "doll" @ Tue, 12 Mar 2024 17:20:23 -0400:
+$config['mandate_soy_history'] = false;
+$config['mccaptcha'] = true;
+

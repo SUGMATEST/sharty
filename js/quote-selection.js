@@ -13,14 +13,14 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	if (!window.getSelection)
 		return;
 	
 	$.fn.selectRange = function(start, end) {
 		return this.each(function() {
 			if (this.setSelectionRange) {
-				this.focus();
+				this.trigger('focus');
 				this.setSelectionRange(start, end);
 			} else if (this.createTextRange) {
 				var range = this.createTextRange();
@@ -36,7 +36,7 @@ $(document).ready(function(){
 	var ctrlKey = false;
 	var metaKey = false;
 	
-	$(document).keyup(function(e) {
+	$(document).on('keyup', function(e) {
 		if (e.keyCode == 18)
 			altKey = false;
 		else if (e.keyCode == 17)
@@ -45,7 +45,7 @@ $(document).ready(function(){
 			metaKey = false;
 	});
 	
-	$(document).keydown(function(e) {
+	$(document).on('keydown', function(e) {
 		if (e.altKey)
 			altKey = true;
 		else if (e.ctrlKey)
@@ -99,10 +99,10 @@ $(document).ready(function(){
 		
 		if (document.selection) {
 			// IE
-			body.focus();
+			body.trigger('focus');
 			var sel = document.selection.createRange();
 			sel.text = quote;
-			body.focus();
+			body.trigger('focus');
 		} else if (body.selectionStart || body.selectionStart == '0') {
 			// Mozilla
 			var start = body.selectionStart;
@@ -117,7 +117,7 @@ $(document).ready(function(){
 		} else {
 			// ???
 			body.value += quote;
-			body.focus();
+			body.trigger('focus');
 		}
 	});
 });

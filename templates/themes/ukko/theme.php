@@ -104,6 +104,7 @@
 			return Element('index.html', array(
 				'config' => $config,
 				'board' => $board,
+				'boards' => $boards,
 				'no_post_form' => true,
 				'body' => $body,
 				'mod' => $mod,

@@ -7,7 +7,7 @@ if(active_page == "index" || active_page == "ukko"){
 			hoverElem = $(elementOnMouseOver);
 	});
 	
-	$(document).keydown(function(e){
+	$(document).on('keydown', function(e){
 		//Up arrow
 		if(e.which == 38){
 			var ele = hoverElem;

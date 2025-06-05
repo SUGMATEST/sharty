@@ -1,0 +1,53 @@
+div.post {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(113,0,0,1) 94%);}
+
+div.post.reply {background: #ffffff;}
+
+body {
+  background: #0A3161;
+  background-image: url('/static/independence.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: bottom;
+  background-size: cover;
+
+label:not(:has(span.capcode)) span.name {color:#0A3161 !important;}
+
+div.files {background: #ffffff}
+
+form table tr th{background: #B31942;}
+
+div.post.reply.highlighted {background: #B31942;}
+
+div.pages.top {background: #ffffff;}
+
+div.mix {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);}
+
+div.pages {background: #ffffff;}
+
+div#news {background: #ffffff;}
+
+td#upload_selection {background: #ffffff;}
+
+div.subtitle {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);
+width: 100px;
+margin: auto;}
+
+span#thread-links {background: #B31942;}
+
+span#updater {background: #B31942;}
+
+div#thread_stats {background: #B31942;}
+
+fieldset {background: #B31942;}
+
+div#post-moderation-fields {background: #B31942;}
+
+div.boardlist.bottom {background: #B31942;}
+
+div.boardlist {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);}
+
+h1 {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+width: 200px;
+margin: auto;}

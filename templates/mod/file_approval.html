@@ -1,0 +1,100 @@
+<script src='js/mod/file-approval-auto-reload.js?v3'></script>
+<style>
+	.file-approval-container {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	.file-approval-item {
+		border: 1px solid #ddd;
+		margin: 10px;
+		width: 255px;
+		position: relative;
+	}
+
+	.file-thumbnail img {
+		max-width: 100%;
+		display: block;
+		margin: auto;
+	}
+
+	.file-thumbnail video {
+		position: static;
+		pointer-events: inherit;
+		display: inline;
+		max-width: 100%;
+	}
+
+	.file-info {
+		margin-bottom: 39px;
+	}
+
+	.file-info ul {
+                margin: 0px;
+        }
+
+	.file-actions {
+		width: 100%;
+		position: absolute;
+		bottom: 0;
+	}
+
+	.file-actions form {
+		display: inline-block;
+	}
+
+	.file-actions input {
+		margin: 5px;
+	}
+
+	.reject-button {
+		float: right;
+	}
+</style>
+<span id="updater"><a href="#" id="update_thread" style="padding-left:10px">[Update]</a> (<input type="checkbox" id="auto_update_status" checked=""> Auto) <span id="update_secs"></span></span>
+<div class="file-approval-container">
+	{% for hash, files in files %}
+	<div class="file-approval-item">
+		<div class="file-thumbnail">
+			{% if files[0].extension in config.video_ext %}
+				<video src="{{ files[0].img_src }}" loop controls>Your browser does not support HTML5 video.</video>
+			{% else %}
+				<a href="{{ files[0].img_src }}" target="_blank">
+					<img src="{{ files[0].thumb_src }}" alt="Thumbnail">
+				</a>
+			{% endif %}
+		</div>
+		<div class="file-info">
+			<p><a href="{{ files[0].img_src }}" target="_blank">Extension: {{ files[0].extension }}</a></p>
+			{% if files[0].extension == 'gif' %}
+				<p><a href="https://imgops.com/get2post?x-form-enctype=multipart%2Fform%2Ddata&x-form-action=https%3A%2F%2Fezgif%2Ecom%2Fmaker&new-image-url=https%3A%2F%2F{{ config.site_domain|e('url') }}{{ files[0].img_src|e('url') }}" target="_blank">View frames on Ezgif</a></p>
+			{% endif %}
+			<p hidden>Hash: {{ hash }}</p>
+			Posts:
+			<ul>
+				{% for file in files %}
+				<li>
+					{% if file.threadid %}
+						<a href="mod.php?/{{ file.board }}/thread/{{ file.threadid }}.html#{{ file.postid }}">
+							/{{ file.board }}/thread/{{ file.threadid }}#{{ file.postid }}
+						</a>
+					{% else %}
+                                                <a href="mod.php?/{{ file.board }}/thread/{{ file.postid }}.html">
+                                                        /{{ file.board }}/thread/{{ file.postid }}
+                                                </a>
+					{% endif %}
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<div class="file-actions">
+			<a href="?/{{ secure_link('approve-file/' ~ hash) }}">
+				<input class="approve-button" type="button" value="Approve" />
+			</a>
+			<a href="?/{{ secure_link('reject-file/' ~ hash) }}">
+				<input class="reject-button" type="button" value="Reject" />
+			</a>
+		</div>
+	</div>
+	{% endfor %}
+</div>

@@ -5,7 +5,7 @@
 			{% if username %}
 				<td><a href="?/new_PM/{{ username|e }}">{{ username|e }}</a></td>
 			{% else %}
-				<td><em>{% trans 'deleted?' %}</em></td>
+				<td><em>{% trans 'deleted?' %} (ID: {{ sender }})</em></td>
 			{% endif %}
 		</tr>
 		{% if to != mod.id %}
@@ -14,7 +14,7 @@
 				{% if to_username %}
 					<td><a href="?/new_PM/{{ to_username|e }}">{{ to_username|e }}</a></td>
 				{% else %}
-					<td><em>{% trans 'deleted?' %}</em></td>
+					<td><em>{% trans 'deleted?' %} (ID: {{ to }})</em></td>
 				{% endif %}
 			</tr>
 		{% endif %}

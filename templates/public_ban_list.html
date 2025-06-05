@@ -1,0 +1,33 @@
+<a id="show-all-posts" href="javascript:void(0);">Display all attached posts</a>
+<table id="banlist" class="modlog">
+	<tr>
+		<th>Reason</th>
+		<th>Board</th>
+		<th>Length</th>
+		<th>Staff</th>
+	</tr>
+	{% for ban in bans %}
+		<tr{% if ban.post is not null %} class="has-post"{% endif %}>
+			<td>{% if ban.reason is null %}No reason provided.{% else %}{{ ban.reason }}{% endif %}</td>
+			<td>{% if ban.board is null %}all{% else %}/{{ ban.board }}/{% endif %}</td>
+			<td>{% if ban.expires is null %}forever{% else %}{{ (ban.expires - ban.created)|seconds_to_human }}{% endif %}</td>
+			<td>{% if ban.creator == -1 %}<i>System</i>{% else %}<span style="color:purple; font-weight:bold">Mod</span>{% endif %}</td>
+		</tr>
+		{% if ban.post is not null %}
+			<tr class="ban-post" hidden><td>{{ ban.post }}</td></tr>
+		{% endif %}
+	{% endfor %}
+</table>
+<script>
+	document.getElementById("banlist").addEventListener("click", function(e) {
+		if (e.target.parentElement.className == "has-post") {
+			e.target.parentElement.nextSibling.toggleAttribute("hidden");	
+		}
+	});
+	document.getElementById("show-all-posts").addEventListener("click", function(e) {
+		document.querySelectorAll(".ban-post").forEach(function(e) {
+			e.toggleAttribute("hidden");
+		});
+	});
+</script>
+<style>.has-post { cursor: pointer; }</style>

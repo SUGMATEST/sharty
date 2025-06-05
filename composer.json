@@ -6,13 +6,18 @@
         "ext-mbstring": ">=5.4",
         "ext-gd": ">=5.4",
         "ext-pdo": ">=5.4",
-        "twig/twig": "^2.9",
+        "twig/twig": "^3.0",
         "phpmyadmin/twig-i18n-extension": "^4.0",
         "lifo/ip": "^1.0",
         "gettext/gettext": "^5.5",
         "mrclay/minify": "^2.1.6",
-        "geoip/geoip": "^1.17",
-        "dapphp/securimage": "^4.0"
+        "dapphp/securimage": "^4.0",
+        "anyascii/anyascii": "^0.3.2",
+        "atakde/discord-webhook-php": "^2.0",
+        "xemlock/php-latex": "dev-master",
+        "agence104/livekit-server-sdk": "^1.2",
+        "geoip2/geoip2": "^3.1",
+        "joypixels/emoji-toolkit": "^9.0"
     },
     "autoload": {
         "classmap": ["inc/"],
@@ -48,5 +53,13 @@
             "name": "h00j",
             "homepage": "https://github.com/h00j"
         }
-    ]
+    ],
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "require-dev": {
+        "pheromone/phpcs-security-audit": "^2.0"
+    }
 }

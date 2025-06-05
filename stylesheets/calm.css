@@ -1,0 +1,180 @@
+/* /calm/ theme v1.0 */
+
+label:not(:has(span.capcode)) span.name {
+color:#00BF3A !important;
+ 
+}
+
+form table tr th{
+  background: linear-gradient(to bottom, #2DBBF3 0%,#0DABEE 50%,#0669C0 100%);
+}
+div.post {
+  color: #000;
+  background: linear-gradient(to bottom, #0783D6 0%,#0789DB 10%,#079CE6 25%,#14AFF0 37%,#27B8F3 50%,#3DC0F4 51%,#3DC0F4 83%,#3DC0F4 100%);border-radius: 15px;
+  border-radius: 15px;
+  border: 2px solid #034EA1;
+  padding: 10px;
+  color: #9EF;
+  box-shadow: 0 0 15px cyan;
+  font-family: "Comic Sans MS", "Comic Sans", sans-serif;
+  font-size: 14px
+}
+
+div.banner {
+	background-color: #0778CD;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+
+.intro span.subject {
+	color: #0455A9;
+}
+
+div.post.reply {
+  color: #000;
+  background: linear-gradient(to bottom, #0783D6 0%,#0789DB 10%,#079CE6 25%,#14AFF0 37%,#27B8F3 50%,#3DC0F4 51%,#3DC0F4 83%,#3DC0F4 100%);border-radius: 15px;
+  border: 2.5px solid #034EA1;
+  padding: 7px;
+  color: #9EF;
+  font-family: "Comic Sans MS", "Comic Sans", sans-serif;
+  font-size: 12.5px
+}
+
+header div.subtitle,
+h1 {
+	color: #0793E1;
+	text-align: center;
+}
+
+body {
+    background: url(https://booru.soyjak.st/_images/b571285bd6f12ce9732b750cf67374c3/5130%20-%20SoyBooru.png) no-repeat center fixed;
+background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    font-family: Sans-serif;
+    font-size: 14px;
+    margin: 0;
+    color: #ADD;
+    margin: 0 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+			.bl {
+				text-decoration: none;
+				color: #65DEEA;
+			}
+
+			.box.middle {
+				background: #0453A6;
+				color: #FFFFFF;
+				border: 1px solid #000000;
+				width: inherit;
+			}
+
+			.box.middle h2 {
+				background: #0BA9ED;
+				color: #FFFFFF;
+			}
+
+}
+.bl {
+  text-decoration: none;
+  color: #2EBBF3;
+}
+
+.pages.top {
+  background-color: #37BEF4;
+  color: #7#7 !important;
+}
+
+label:not(:has(span.capcode)) span.name {color:#3BC0F4!important;}
+
+.name,
+a {
+  color: #68DEEA!important;
+}
+
+div.post.reply.highlighted {
+     background: linear-gradient(to bottom, #3b679e 0%,#2b88d9 50%,#207cca 51%,#7db9e8 100%);
+}
+
+.boardlist {
+    background-color:#0097D3 !important
+}
+
+div.pages.top {
+    background: #0097D3;
+}
+
+div.pages {
+
+    background: #0097D3;
+}
+
+h1 {
+  color: #0097D3; 
+  -webkit-text-stroke-width: 0.5px;
+  -webkit-text-stroke-color: black;
+  width: fit-content;
+  margin: auto;
+}
+
+div.dropzone-wrap {
+background: linear-gradient(to bottom, #3BC0F4 0%,#1CB4F1 50%,#08A4EB 51%,#077DD2 100%);
+}
+
+div#news {
+background: linear-gradient(to bottom, #077DD2 0%,#08A4EB 50%,#1CB4F1 51%,#3BC0F4 100%);
+border-radius: 25px;
+}
+
+div.blotter {
+width: fit-content;
+margin: auto;
+}
+
+div.mix {
+background: linear-gradient(to bottom, rgba(184,225,252,0.75) 0%,rgba(169,210,243,0.75) 10%,rgba(144,186,228,0.75) 25%,rgba(144,188,234,0.75) 37%,rgba(144,191,240,0.75) 50%,rgba(107,168,229,0.75) 51%,rgba(162,218,245,0.75) 83%,rgba(189,243,253,0.75) 100%);
+}
+
+
+td#upload_selection {
+background: linear-gradient(to bottom, #3BC0F4 0%,#1CB4F1 50%,#08A4EB 51%,#077DD2 100%);
+}
+
+div.boardlist {
+	color: blue;
+    background-color: rgba(12%, 12%, 12%, 0.10);
+}
+
+/* options.js */
+#options_div, #alert_div {
+	background: #2EBBF3;
+}
+.options_tab_icon {
+	color: #0450A4;
+}
+.options_tab_icon.active {
+	color: #0450A4;
+}
+textarea {
+  border: 2px solid #066BC1!important;
+}
+textarea, input {background-color: #0774CA; color: #60DCEA;}
+.quote, 
+{
+  color: #ACD831!important;
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #06C!important;
+}
+span.omitted {
+	display: block;
+	margin-top: 1em;
+	color: #0453A7;
+}

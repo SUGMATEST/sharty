@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Poll results</title>
+    <style>body { font-family: arial, helvetica, sans-serif; font-size: 10pt; } body::before { display: none !important; }</style>
+    <script type="text/javascript" src="/_main.js?v=4"></script>
+    <script type="text/javascript" src="/js/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/options/user-css.js?v2"></script>
+    {% if mod|hasPermission(config.mod.show_poll_ips) %}<script defer src="/js/mod/poll-ips.js"></script>{% endif %}
+    <style>
+	body, body::after { 
+		background:none transparent !important;
+		background-image: none; margin: 0px;
+	}
+	body {
+		padding: 0px; text-align:center;
+		list-style-position: inside;
+	} 
+	ol { 
+		padding: 0px;
+		margin: 0px; 
+	}
+    </style>
+</head>
+<body>
+    {% if poll.reveal_on_expiration and not creator and poll.expiry > time() %}
+        <b>This poll's results will be revealed when voting closes.</b>
+    {% elseif poll.hide_results and not creator and not mod|hasPermission(config.mod.poll_snooping) %}
+        <b>This poll's results haven't been revealed yet.</b>
+    {% else %}
+    <b>
+    <ol>
+        {% for option in options %}
+            <li>
+                <span id="{{ option.option_id }}">{{ option.option_text|e }}</span>
+                <label for="{{ option.option_id }}">({{ option.votes }} votes)</label>
+                {% if mod|hasPermission(config.mod.show_poll_ips) %}
+                    <a class="show-ips" href="javascript:void(0)">[+]</a>
+                    <div hidden class="poll-ips">
+                    {% for ip in option.ips %}
+                        <a href="/mod.php?/IP/{{ ip }}" target="_blank">{{ ip }}</a>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+    <br>
+    Total: {{ total }} votes{% if poll.multiple_choice %} from {{ voters }} voters{% endif %}.
+    </b>
+    {% endif %}
+    <br>
+    {% include 'poll/expiration.html' %}
+    <div>
+    {% if poll.hide_results and (creator or mod|hasPermission(config.mod.show_poll_ips)) %}
+    Results are currently hidden from other users.
+    <form name="reveal" action="/poll.php" method="post">
+        <input type="hidden" name="poll-id" value="{{ poll.poll_id }}">
+        <input type="submit" name="reveal" value="Reveal results">
+    </form>
+    {% elseif poll.reveal_on_expiration and creator and poll.expiry > time() %}
+    Results are hidden from other users until voting closes.
+    {% endif %}
+    <a href="?id={{ poll.poll_id }}"><input type="button" value="Back to voting"></a>
+    </div>
+</body>
+</html>

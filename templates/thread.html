@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">
           var active_page = "thread"
 	    , board_name = "{{ board.uri }}"
 	    , thread_id = "{{ thread.id }}";
@@ -18,6 +18,7 @@
 	<meta property="og:title" content="{{ meta_subject }}" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="{{ config.domain }}/{{ board.uri }}/{{ config.dir.res }}{{ thread.id }}.html" />
+	<meta property="og:site_name" content="{{ config.site_name }}" />
 	{% if thread.files.0.thumb %}<meta property="og:image" content="{{ config.domain }}/{{ board.uri }}/{{ config.dir.thumb }}{{ thread.files.0.thumb }}" />{% endif %}
 	<meta property="og:description" content="{{ thread.body_nomarkup|remove_modifiers|e }}" />
 
@@ -27,28 +28,19 @@
 	{{ boardlist.top }}
 	<a name="top"></a>
 	{% if pm %}<div class="top_notice">You have <a href="?/PM/{{ pm.id }}">an unread PM</a>{% if pm.waiting > 0 %}, plus {{ pm.waiting }} more waiting{% endif %}.</div><hr />{% endif %}
-	{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" {% if config.banner_width or config.banner_height %}style="{% if config.banner_width %}width:{{ config.banner_width }}px{% endif %};{% if config.banner_width %}height:{{ config.banner_height }}px{% endif %}" {% endif %}alt="" />{% endif %}
-	<header>
-		<h1>{{ board.url }} - {{ board.title|e }}</h1>
-		<div class="subtitle">
-			{% if board.subtitle %}
-				{% if config.allow_subtitle_html %}
-					{{ board.subtitle }}
-				{% else %}
-					{{ board.subtitle|e }}
-				{% endif %}
-			{% endif %}
-			{% if mod %}<p><a href="?/">{% trans %}Return to dashboard{% endtrans %}</a></p>{% endif %}
-		</div>
-	</header>
+	{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" style="max-width:300px" width="300" height="100" alt="A banner for soyjak.party" />{% endif %}
+
+	{% include 'board_header.html' %}
 
 	{% include 'attention_bar.html' %}
 
 	<div class="banner">{% trans %}Posting mode: Reply{% endtrans %} <a class="unimportant" href="{{ return }}">[{% trans %}Return{% endtrans %}]</a> <a class="unimportant" href="#bottom">[{% trans %}Go to bottom {% endtrans %}]</a></div>
 
+	{% include 'post_form.html' %}
+
 	{{ config.ad.top }}
 
-	{% include 'post_form.html' %}
+	{% include 'board_banner.html' %}
 
 	{% if config.global_message %}<hr /><div class="blotter">{{ config.global_message }}</div>{% endif %}
 	<hr />
@@ -59,13 +51,15 @@
 		{{ body }}
 		
 		<div id="thread-interactions">
+			{% apply spaceless %}
 			<span id="thread-links">
 				<a id="thread-return" href="{{ return }}">[{% trans %}Return{% endtrans %}]</a>
-				<a id="thread-top" href="#top">[{% trans %}Go to top{% endtrans %}]</a>
                 		{% if config.catalog_link %}
-					<a id="thread-catalog" href="{{ config.root }}{% if mod %}{{ config.file_mod }}?/{% endif %}{{ board.dir }}{{ config.catalog_link }}">{% trans %}Catalog{% endtrans %}</a>
+					<a id="thread-catalog" href="{{ config.root }}{% if mod %}{{ config.file_mod }}?/{% endif %}{{ board.dir }}{{ config.catalog_link }}">[{% trans %}Catalog{% endtrans %}]</a>
 		                {% endif %}
+				<a id="thread-top" href="#top">[{% trans %}Go to top{% endtrans %}]</a>
 			</span>
+			{% endapply %}
 			
 			<span id="thread-quick-reply">
 				<a id="link-quick-reply" href="#">[{% trans %}Post a Reply{% endtrans %}]</a>
@@ -84,7 +78,7 @@
 
 	{% include 'footer.html' %}
 	
-	<script type="text/javascript">{% verbatim %}
+	<script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">{% verbatim %}
 		ready();
 	{% endverbatim %}</script>
 </body>

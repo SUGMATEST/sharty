@@ -11,7 +11,7 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	
 	if (!localStorage.hiddenrecentposts)
 		localStorage.hiddenrecentposts = '{}';
@@ -50,7 +50,7 @@ $(document).ready(function(){
 
 		$('<a class="hide-post-link" href="javascript:void(0)"> Dismiss </a>')
 		.insertBefore(post_container.find('a.eita-link:first'))
-		.click(function(){
+		.on('click', function(){
 			hidden_data[board][id] = Math.round(Date.now() / 1000);
 			store_data_posts();
 
@@ -58,12 +58,12 @@ $(document).ready(function(){
 			post_container.children().hide();
 		});
 		if(hidden_data[board][id])
-			post_container.find('a.hide-post-link').click();
+			post_container.find('a.hide-post-link').trigger('click');
 	}
 
 	$('a.eita-link').each(do_hide_posts);
 
-	$('#erase-local-data').click(function(){
+	$('#erase-local-data').on('click', function(){
 		hidden_data = {};
 		store_data_posts();
 		$(this).html('Loading...');

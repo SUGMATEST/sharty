@@ -14,3 +14,5 @@ $height = 80;
 
 // Captcha length:
 $length = 6;
+
+$config['mandate_soy_history'] = false;

@@ -1,0 +1,131 @@
+* {font-family: "Comic Sans MS", "Comic Sans", cursive}
+
+div.post {
+  background: url("https://media.discordapp.net/attachments/1319137415876575252/1378633274972176485/pride-ezgif.com-speed.gif?ex=683d4fca&is=683bfe4a&hm=ccb9c2edd0b64e92bdb8e66170fc85e9ce023a59936d7acdc75abab99681dc2b&=&width=2516&height=950") no-repeat center center;  
+background-size: 100% 100%; /* Stretches the image to cover the entire .post */
+  border-radius: 15px;
+  border: 2px solid #E50000;
+  padding: 10px;
+  color: #DB1E80;
+  box-shadow: 0 0 15px #DBBA33;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 24pt;
+}
+div.post.reply {
+  background: url("https://media.discordapp.net/attachments/1319137415876575252/1378633274972176485/pride-ezgif.com-speed.gif?ex=683d4fca&is=683bfe4a&hm=ccb9c2edd0b64e92bdb8e66170fc85e9ce023a59936d7acdc75abab99681dc2b&=&width=2516&height=950") no-repeat center center;  
+background-size: 100% 100%; /* Stretches the image to cover the entire .post */
+border: 2px solid #E50000;
+  padding: 7px;
+  color: #DB1E80;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 24pt;
+}
+body {
+    background: #511F16; 
+    background-image: url(https://media.discordapp.net/attachments/1355663843568783423/1378609610323132437/image.png?ex=683d39c0&is=683be840&hm=6fb2cf72ab8a1ef79c032517fea01f7c689bec3c85fdd77f6b68cd8364bd665d&=&format=webp&quality=lossless&width=2484&height=1514);
+    background-size: cover;
+    background-attachment: fixed;
+    color: #F43FAC;
+			.bl {
+				text-decoration: none;
+				color: #9C2F2F;
+			}
+
+			.box.middle {
+				background: #B6562A;
+				color: #DBBA33;
+				border: 1px solid #B6562A;
+				width: inherit;
+			}
+
+			.box.middle h2 {
+				background: #DBBA33;
+				color: #B6562A;
+			}
+
+}
+.name,
+a {
+  background-image: linear-gradient(#770088, #004CFF, #028121, #FFEE00, #FF8D00, #E50000);
+  color: transparent !important;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none; /* Optional: Remove underline */
+}.intro span.subject {
+	color: #ff2121;
+}
+td#upload_selection {
+background: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+}
+form table tr th{
+  background: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+}
+div.dropzone-wrap {
+background: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+}
+input,
+textarea {
+  background: #ff0000;
+  border: 2px solid #ff006a!important;
+  color: #ff2ee7;
+.name,
+}
+header div.subtitle,
+h1 {background: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+div.banner {
+	background-color: #004CFF;
+color: #770088;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+div.boardlist, div.pages {
+    border: 2px solid transparent; /* Needed for fallback */
+    border-radius: 35px;
+    padding: 5px;
+    background: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+color: blue
+}
+label:not(:has(span.capcode)) span.name {
+  background-image: linear-gradient(#E50000, #FF8D00, #FFEE00, #028121, #004CFF, #770088);
+  color: transparent !important;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+boardlist {
+	color: blue;
+}
+span.omitted {
+	display: block;
+	margin-top: 1em;
+	color: #d500ff;
+}
+body::before {
+    opacity: 0.8;
+    content: "";
+    /* Required for ::before to work */
+    position: fixed;
+    bottom: 0px;
+    /* Position from the bottom */
+    right: -43px;
+    /* Position from the right */
+    width: 260px;
+    /* Width of the GIF */
+    height: 230px;
+    /* Height of the GIF */
+    background-image: url('https://media.discordapp.net/attachments/1319137415876575252/1378642681668042783/dead_tranny.png?ex=683d588d&is=683c070d&hm=f2cedbcce6f8b6522affac2fdb01350d715da4e5745c8bd5c69bc89e5dc5914c&=&format=webp&quality=lossless&width=800&height=800');
+    /* The URL of your GIF */
+    background-size: contain;
+    /* Resize background to fit the container */
+    background-repeat: no-repeat;
+    /* Don't repeat the GIF */
+    z-index: 1000;
+    /* Make sure it appears above other elements */
+    pointer-events: none;
+}

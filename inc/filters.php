@@ -40,6 +40,10 @@ class Filter {
 							case 'ip':
 								if ($flood_post['ip'] != $_SERVER['REMOTE_ADDR'])
 									continue 3;
+								break;							
+							case 'sharty_browser_hash':
+								if ($flood_post['sharty_browser_hash'] != $post['browser_hash'])
+									continue 3;
 								break;
 							case 'body':
 								if ($flood_post['posthash'] != make_comment_hex($post['body_nomarkup']))
@@ -154,7 +158,17 @@ class Filter {
 				$this->reject = isset($this->reject) ? $this->reject : true;
 				$this->all_boards = isset($this->all_boards) ? $this->all_boards : false;
 				
-				Bans::new_ban($_SERVER['REMOTE_ADDR'], $this->reason, $this->expires, $this->all_boards ? false : $board['uri'], -1);
+				//Create a dummy post
+				$post = array(
+					'body' => $this->post['body'],
+					'body_nomarkup' => $this->post['body_nomarkup'],
+					'board' => $this->post['board'],
+					'ip' => $_SERVER['REMOTE_ADDR'],
+					'filehash' => $this->post['filehash'],
+					'browser_hash' => $this->post['browser_hash']
+				);
+
+				Bans::new_ban($_SERVER['REMOTE_ADDR'], $this->reason, $this->expires, $this->all_boards ? false : $board['uri'], -1, $post, true);
 
 				if ($this->reject) {
 					if (isset($this->message))
@@ -222,14 +236,16 @@ function do_filters(array $post) {
 	
 	if (isset($has_flood)) {
 		if ($post['has_file']) {
-			$query = prepare("SELECT * FROM ``flood`` WHERE `ip` = :ip OR `posthash` = :posthash OR `filehash` = :filehash");
+			$query = prepare("SELECT * FROM ``flood`` WHERE `ip` = :ip OR `posthash` = :posthash OR `filehash` = :filehash OR `sharty_browser_hash` = :sharty_browser_hash");
 			$query->bindValue(':ip', $_SERVER['REMOTE_ADDR']);
 			$query->bindValue(':posthash', make_comment_hex($post['body_nomarkup']));
 			$query->bindValue(':filehash', $post['filehash']);
+			$query->bindValue(":sharty_browser_hash", $post['browser_hash']);
 		} else {
-			$query = prepare("SELECT * FROM ``flood`` WHERE `ip` = :ip OR `posthash` = :posthash");
+			$query = prepare("SELECT * FROM ``flood`` WHERE `ip` = :ip OR `posthash` = :posthash OR `sharty_browser_hash` = :sharty_browser_hash");
 			$query->bindValue(':ip', $_SERVER['REMOTE_ADDR']);
 			$query->bindValue(':posthash', make_comment_hex($post['body_nomarkup']));
+			$query->bindValue(":sharty_browser_hash", $post['browser_hash']);
 		}
 		$query->execute() or error(db_error($query));
 		$flood_check = $query->fetchAll(PDO::FETCH_ASSOC);

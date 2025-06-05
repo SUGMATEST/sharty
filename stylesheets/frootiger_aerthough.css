@@ -1,0 +1,146 @@
+/* Frootiger Aerthough Theme v1.0 */
+
+label:not(:has(span.capcode)) span.name {
+color:#00BF3A !important;
+ 
+}
+
+form table tr th{
+  background: linear-gradient(to bottom, #b4e391 0%,#61c419 50%,#b4e391 100%);
+}
+
+div.post {
+  color: #000;
+  background: linear-gradient(to bottom, #b8e1fc 0%,#a9d2f3 10%,#90bae4 25%,#90bcea 37%,#90bff0 50%,#6ba8e5 51%,#a2daf5 83%,#bdf3fd 100%);
+  border-radius: 25px;
+  border: 2px solid #73AD21;
+  padding: 20px;
+  font-family: Frutiger;
+  font-size: 14px
+}
+
+div.post.reply {
+  color: #000;
+  background: linear-gradient(to bottom, #b8e1fc 0%,#a9d2f3 10%,#90bae4 25%,#90bcea 37%,#90bff0 50%,#6ba8e5 51%,#a2daf5 83%,#bdf3fd 100%);
+  border-radius: 25px;
+  border: 2px solid #73AD21;
+  padding: 20px;
+  font-family: Frutiger;
+  font-size: 14px
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+  background: #A0D1FF;
+  background-image: url('img/soyjak-party-2005-sm.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: bottom;
+  background-size: cover;
+}
+}
+
+@media only screen and (min-width: 768px) {
+body {
+  background: #A0D1FF;
+  background-image: url('img/soyjak-party-2005.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: bottom;
+  background-size: cover;
+}
+}
+
+div.post.reply.highlighted {
+     background: linear-gradient(to bottom, #3b679e 0%,#2b88d9 50%,#207cca 51%,#7db9e8 100%);
+}
+
+.boardlist {
+    background-color:#83BDD5 !important
+}
+
+div.pages.top {
+    background: #83BDD5;
+}
+
+div.pages {
+
+    background: #83BDD5;
+}
+
+h1 {
+  color: #0AFCF8; 
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  background: linear-gradient(to bottom, #b3dced 0%,#29b8e5 50%,#bce0ee 100%);
+  width: fit-content;
+  margin: auto;
+}
+
+div.dropzone-wrap {
+background: linear-gradient(to bottom, #ebf1f6 0%,#abd3ee 50%,#89c3eb 51%,#d5ebfb 100%);
+}
+
+div#news {
+background: linear-gradient(to bottom, #ebf1f6 0%,#abd3ee 50%,#89c3eb 51%,#d5ebfb 100%);
+border-radius: 25px;
+}
+
+div.blotter {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+width: fit-content;
+margin: auto;
+}
+
+div.mix {
+background: linear-gradient(to bottom, rgba(184,225,252,0.75) 0%,rgba(169,210,243,0.75) 10%,rgba(144,186,228,0.75) 25%,rgba(144,188,234,0.75) 37%,rgba(144,191,240,0.75) 50%,rgba(107,168,229,0.75) 51%,rgba(162,218,245,0.75) 83%,rgba(189,243,253,0.75) 100%);
+}
+
+div.subtitle {
+background: linear-gradient(to bottom, #b3dced 0%,#29b8e5 50%,#bce0ee 100%);
+width: 100px;
+border-radius: 25px;
+margin: auto;
+}
+
+td#upload_selection {
+background: linear-gradient(to bottom, #ebf1f6 0%,#abd3ee 50%,#89c3eb 51%,#d5ebfb 100%);
+}
+
+div#expand-all-images {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+width: fit-content;
+margin-left: auto;
+}
+
+div.files {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+div#post-moderation-fields {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+span#thread-links {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+span#updater {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+div#thread_stats {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+fieldset {
+background: linear-gradient(to bottom, #f6f8f9 0%,#e5ebee 50%,#d7dee3 51%,#f5f7f9 100%);
+}
+
+span.quote {
+font-weight: bold;
+color: green;
+}
+
+
+

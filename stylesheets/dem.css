@@ -1,0 +1,144 @@
+* {
+  font-family: "Futura", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+  color: #3A8F9E; /* Default cool blue color for text */
+}
+
+label:not(:has(span.capcode)) span.name {
+  color: #4F7E96 !important; /* Muted blue for green text */
+}
+
+form table tr th {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  color: #3A8F9E; /* Cool blue color for table headings */
+}
+
+div.post, div.post.reply {
+  color: #3A8F9E; /* Cool blue for text */
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  border: 2px solid white; /* White border */
+  padding: 20px;
+}
+
+div.post.reply.highlighted {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+}
+
+.boardlist {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  border: 2px solid white; /* White border */
+  color: #3A8F9E; /* Cool blue for text */
+}
+
+div.pages.top, div.pages {
+  background: #83BDD5;
+  border-radius: 4px; /* Small edge curve */
+  color: #3A8F9E; /* Cool blue for text */
+}
+div.banner {
+	background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  border: 2px solid white; /* White border */
+  color: #3A8F9E; /* Cool blue for text */
+	font-weight: normal;
+}
+h1 {
+  color: #1A6D7A; /* A deeper cool blue with a hint of green */
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+}
+
+div.dropzone-wrap,
+div#news,
+td#upload_selection,
+div#post-moderation-fields {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  border: 2px solid white; /* White border */
+  color: #3A8F9E; /* Cool blue for text */
+}
+
+div.mix {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  color: #3A8F9E; /* Cool blue for text */
+}
+
+span#thread-links, span#updater {
+  background: linear-gradient(0deg, rgba(255, 255, 255, 1) 0%, rgba(173, 216, 230, 1) 100%);
+  border-radius: 4px; /* Small edge curve */
+  border: 2px solid white; /* White border */
+  color: #3A8F9E; /* Cool blue for text */
+}
+
+/* Animated scrolling foreground (low opacity overlay) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background-image: url('https://files.catbox.moe/3qojx5.png');
+  background-repeat: repeat-x;
+  background-size: contain;
+  z-index: -2;
+  animation: scroll-bg 30s linear infinite;
+  opacity: 0.2;
+}
+
+@keyframes scroll-bg {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Overlay image above the scrolling image */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://files.catbox.moe/vjb2cd.png'); /* Replace with your overlay image URL */
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: -3; /* Place this above the scrolling image */
+  opacity: 0.8; /* Adjust opacity for overlay */
+}
+
+/* Stretch the gradient-image background from top to bottom and show top of image at top of page */
+html {
+  min-height: 100%;
+  background-image: url('https://files.catbox.moe/uhe0ud.png');
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  background-attachment: scroll;
+  background-position: top center;
+  background-color: #52F2E2; /* Added background color */
+}
+
+body {
+  background: transparent;
+}
+
+/* Responsive fix for mobile */
+@media only screen and (max-width: 767px) {
+  html {
+    background-image: url('https://files.catbox.moe/c2pi5v.png');
+    background-repeat: no-repeat;
+    background-size: 100% auto;
+    background-attachment: scroll;
+    background-position: top center;
+    background-color: #52F2E2; /* Added background color */
+  }
+
+  body {
+    background: transparent;
+  }
+}

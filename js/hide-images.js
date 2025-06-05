@@ -14,7 +14,7 @@
  *
  */
 
-$(document).ready(function(){
+$(function(){
 	$('<style type="text/css"> img.hidden{ opacity: 0.1; background: grey; border: 1px solid #000; } </style>').appendTo($('head'));
 	
 	if (!localStorage.hiddenimages)
@@ -50,7 +50,7 @@ $(document).ready(function(){
 		
 		var replacement = $('<span>'+_('File')+' <small>(<a class="hide-image-link" href="javascript:void(0)">'+_('hide')+'</a>)</small>: </span>');
 				
-		replacement.find('a').click(function() {
+		replacement.find('a').on('click', function() {
 			if (hidden_data[board][id]) {
 				hidden_data[board][id]['ts'] = Math.round(Date.now() / 1000);
 				if (hidden_data[board][id]['index'].indexOf(index) === -1)
@@ -60,7 +60,7 @@ $(document).ready(function(){
 			}
 			store_data();
 			
-			var show_link = $('<a class="show-image-link" href="javascript:void(0)">'+_('show')+'</a>').click(function() {
+			var show_link = $('<a class="show-image-link" href="javascript:void(0)">'+_('show')+'</a>').on('click', function() {
 				var i = hidden_data[board][id]['index'].indexOf(index);
 				if (i > -1) hidden_data[board][id]['index'].splice(i,1);
 				
@@ -78,7 +78,7 @@ $(document).ready(function(){
 			$(this).hide().after(show_link);
 			
 			if ($(img).parent().data('expanded') == 'true') {
-				$(img).parent().click();
+				$(img).parent().trigger('click');
 			}
 		
 			$(img)
@@ -90,7 +90,7 @@ $(document).ready(function(){
 		$(this).parent().prev().contents().first().replaceWith(replacement);
 		
 		if (hidden_data[board][id] && hidden_data[board][id]['index'].indexOf(index) !== -1)
-			$(this).parent().prev().find('.hide-image-link').click();
+			$(this).parent().prev().find('.hide-image-link').trigger('click');
 	};
 
 	$('div.post > a > img.post-image, div.post > a > video.post-image, div > a > img.post-image, div > a > video.post-image').each(handle_images);

@@ -66,6 +66,19 @@
 					$files = json_decode($post['files']);
 
                 if ($files[0]->file == 'deleted' || $files[0]->thumb == 'file') continue;
+				//check if any is not approved
+				$shouldContinue = false;
+				foreach ($files as $file) {
+					if ($file->is_approved == 0) {
+						$shouldContinue = true;
+						break;
+					}
+					if ($file->nsfw_prob > 0.15) {
+						$shouldContinue = true;
+						break;
+					}
+				}
+				if ($shouldContinue) continue;
 				
 				// board settings won't be available in the template file, so generate links now
 				$post['link'] = $config['root'] . $board['dir'] . $config['dir']['res']

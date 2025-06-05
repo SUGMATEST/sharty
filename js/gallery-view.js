@@ -4,7 +4,7 @@ $(function(){
   var gallery_view = false;
 
   $('hr:first').before('<div id="gallery-view" style="text-align:right"><a class="unimportant" href="javascript:void(0)">-</a></div>');
-  $('#gallery-view a').html(gallery_view ? _("Disable gallery mode") : _("Enable gallery mode")).click(function() {
+  $('#gallery-view a').html(gallery_view ? _("Disable gallery mode") : _("Enable gallery mode")).on('click', function() {
     gallery_view = !gallery_view;
     $(this).html(gallery_view ? _("Disable gallery mode") : _("Enable gallery mode"));
     toggle_gview(document);
@@ -47,7 +47,7 @@ $(function(){
 
     handler = $("<div id='alert_handler'></div>").hide().appendTo('body').css('text-align', 'left');
 
-    $("<div id='alert_background'></div>").click(close_gallery).appendTo(handler);
+    $("<div id='alert_background'></div>").on('click', close_gallery).appendTo(handler);
 
     images = $("<div id='gallery_images'></div>").appendTo(handler);
     toolbar = $("<div id='gallery_toolbar'></div>").appendTo(handler);
@@ -70,7 +70,7 @@ $(function(){
     });
 
     $("<a href='javascript:void(0)'><i class='fa fa-times'></i></div>")
-    .click(close_gallery).appendTo(toolbar);
+    .on('click', close_gallery).appendTo(toolbar);
 
     $('body').on('keydown.gview', function(e) {
       if (e.which == 39 || e.which == 40) { // right or down arrow

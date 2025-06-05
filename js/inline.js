@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(function() {
   var App = {
     cache: {},
     get: function(url, cb) {
@@ -142,7 +142,7 @@ $(document).ready(function() {
         $('.body a[href*="'+location.pathname+'"]').not('[rel]').not('.toolong > a').add('.mentioned a')
           .attr('onclick', null)// XXX disable highlightReply
           .off('click')
-          .click(inline)
+          .on('click', inline)
     }
 
     assign_inline();

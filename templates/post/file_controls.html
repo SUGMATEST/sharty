@@ -1,10 +1,19 @@
 {% if post.files and mod %}
 <span class="controls">
+{% if file.is_approved|default(true) == false and mod|hasPermission(config.mod.file_approval, board.uri) %}
+	<a title="{% trans %}Approve file{% endtrans %}" onclick="fetch('?/{{ secure_link('approve-file/' ~ file.hash) }}'); event.target.remove(); if (active_page == 'thread') { setTimeout(() => { document.getElementById('update_thread').click(); }, 1000); }" href="javascript:void(0)">{{ config.mod.link_approvefile }}</a>&nbsp;
+{% endif %}
 {% if file.file != 'deleted' and mod|hasPermission(config.mod.deletefile, board.uri) %}
-{{ secure_link_confirm(config.mod.link_deletefile, 'Delete file'|trans, 'Are you sure you want to delete this file?'|trans, board.dir ~ 'deletefile/' ~ post.id ~ '/' ~ loop.index0 ) }}&nbsp;
+	{{ secure_link_confirm(config.mod.link_deletefile, 'Delete file'|trans, 'Are you sure you want to delete this file?'|trans, board.dir ~ 'deletefile/' ~ post.id ~ '/' ~ loop.index0 ) }}&nbsp;
 {% endif %}
 {% if file.file and file.file != 'deleted' and file.thumb != 'spoiler' and mod|hasPermission(config.mod.spoilerimage, board.uri) %}
-{{ secure_link_confirm(config.mod.link_spoilerimage, 'Spoiler file'|trans, 'Are you sure you want to spoiler this file?'|trans, board.dir ~ 'spoiler/' ~ post.id ~ '/' ~ loop.index0 ) }}
+	{{ secure_link_confirm(config.mod.link_spoilerimage, 'Spoiler file'|trans, 'Are you sure you want to spoiler this file?'|trans, board.dir ~ 'spoiler/' ~ post.id ~ '/' ~ loop.index0 ) }}&nbsp;
+{% endif %}
+{% if file.file != 'deleted' and mod|hasPermission(config.mod.mark_nsfw, board.uri) %}
+	{{ secure_link_confirm(config.mod.link_marknsfw, 'Mark file as NSFW'|trans, 'Are you sure you want to mark this file as NSFW?'|trans, board.dir ~ 'mark-nsfw/' ~ post.id ~ '/' ~ loop.index0 ) }}&nbsp;
+{% endif %}
+{% if file.is_approved|default(true) == false and mod|hasPermission(config.mod.file_approval, board.uri) %}
+	{{ secure_link_confirm(config.mod.link_rejectfile, 'Reject file'|trans, 'Are you sure you want to reject this file?'|trans, 'reject-file/' ~ file.hash) }}
 {% endif %}
 </span>
 {% endif %}

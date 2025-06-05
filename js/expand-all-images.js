@@ -18,10 +18,10 @@
 
 if (active_page == 'ukko' || active_page == 'thread' || active_page == 'index')
 onready(function(){
-	$('hr:first').before('<div id="expand-all-images" style="text-align:right"><a class="unimportant" href="javascript:void(0)"></a></div>');
-	$('div#expand-all-images a')
-		.text(_('Expand all images'))
-		.click(function() {
+	$('#thread-links').append('<a id="expand-all-images" href="javascript:void(0)"></a>');
+	$('#expand-all-images')
+		.text(_('[Expand all images]'))
+		.on('click', function() {
 			$('a img.post-image').each(function() {
 				// Don't expand YouTube embeds
 				if ($(this).parent().parent().hasClass('video-container'))
@@ -32,21 +32,21 @@ onready(function(){
 					return;
 
 				if (!$(this).parent().data('expanded'))
-					$(this).parent().click();
+					$(this).parent().trigger('click');
 			});
 
 			if (!$('#shrink-all-images').length) {
-				$('hr:first').before('<div id="shrink-all-images" style="text-align:right"><a class="unimportant" href="javascript:void(0)"></a></div>');
+				$('#thread-links').append('<a id="shrink-all-images" href="javascript:void(0)"></a>');
 			}
 
-			$('div#shrink-all-images a')
-				.text(_('Shrink all images'))
-				.click(function(){
+			$('#shrink-all-images')
+				.text(_('[Shrink all images]'))
+				.on('click', function(){
 					$('a img.full-image').each(function() {
 						if ($(this).parent().data('expanded'))
-							$(this).parent().click();
+							$(this).parent().trigger('click');
 					});
-					$(this).parent().remove();
+					$(this).remove();
 				});
 		});
 });

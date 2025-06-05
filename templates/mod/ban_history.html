@@ -10,9 +10,19 @@
 		</td>
 	</tr>
 	<tr>
+		<th>{% trans 'Ban ID' %}</th>
+		<td>
+			{{ ban.id }}
+		</td>
+	</tr>
+	<tr>
 		<th>{% trans 'IP' %}</th>
 		<td>{{ ban.cmask }}</td>
 	</tr>
+	<tr>
+                <th>{% trans 'Pass' %}</th>
+                <td>{% if ban.pass_id %}{{ ban.pass_id }}{% else %}N/A{% endif %}</td>
+        </tr>
 	<tr>
 		<th>{% trans 'Reason' %}</th>
 		<td>
@@ -51,6 +61,16 @@
 		<th>{% trans 'Seen' %}</th>
 		<td>
 			{%  if ban.seen %}
+				{% trans 'Yes' %}
+			{%  else %}
+				{% trans 'No' %}
+			{%  endif %}
+		</td>
+	</tr>
+	<tr>
+		<th>{% trans 'Unappealable' %}</th>
+		<td>
+			{%  if ban.unappealable %}
 				{% trans 'Yes' %}
 			{%  else %}
 				{% trans 'No' %}

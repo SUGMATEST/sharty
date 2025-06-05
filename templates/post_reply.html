@@ -6,16 +6,26 @@
 	{% if not index %}<a id="{{ post.id }}" class="post_anchor"></a>{% endif %}
 	<input type="checkbox" class="delete" name="delete_{{ post.id }}" id="delete_{{ post.id }}" />
 	<label for="delete_{{ post.id }}">
+		{% if post.decryption_key is not null %}
+		<img class="icon" title="Restricted Post" src="{{ config.image_encrypted }}" alt="restricted" />
+	        {% endif %}
 		{% include 'post/subject.html' %}
 		{% include 'post/name.html' %}
-		{% include 'post/ip.html' %}
+		{% include 'post/festival_team.html' %}
 		{% include 'post/flag.html' %}
+		{% include 'post/ip.html' %}
 		{% include 'post/time.html' %}
 	</label>
 	{% apply spaceless %}
 	{% include 'post/poster_id.html' %}&nbsp;
-	<a class="post_no" id="post_no_{{ post.id }}" onclick="highlightReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('', '50') }}{% else %}{{ post.link }}{% endif %}">No.</a>
+	<a class="post_no" id="post_no_{{ post.id }}" onclick="highlightReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('', '50') }}{% else %}{{ post.link }}{% endif %}">№</a>
 	<a class="post_no" onclick="citeReply({{ post.id }})" href="{% if isnoko50 %}{{ post.link('q', '50') }}{% else %}{{ post.link('q') }}{% endif %}">{{ post.id }}</a>
+	{% if config.item_shop %}<a class="post_award" href="javascript:void(0);" onclick="ItemShop.show({{ post.id }});">[Award]</a>{% endif %}
+	{% if config.user_vote_to_delete %}<a title="Vote to delete" href="/vote.php?board={{ board.uri }}&id={{ post.id }}">[Vote]</a>{% endif %}
+	{% include 'post/award.html' %}
+	{% if index == false %}
+	<a class="post_quote" href="javascript:void(0);" onclick="doQuote(this);">[Quote]</a>
+	{%endif%}
 	</p>
 	{% endapply %}
     {% include 'post/fileinfo.html' %} 

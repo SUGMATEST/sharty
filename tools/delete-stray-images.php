@@ -18,12 +18,12 @@ foreach ($boards as $board) {
 	
 	openBoard($board['uri']);
 	
-	$query = query(sprintf("SELECT `file`, `thumb` FROM ``posts_%s`` WHERE `file` IS NOT NULL", $board['uri']));
+	$query = query(sprintf("SELECT `file`, `thumb` FROM ``posts_%s`` WHERE `files` IS NOT NULL", $board['uri']));
 	$valid_src = array();
 	$valid_thumb = array();
 	
 	while ($post = $query->fetch(PDO::FETCH_ASSOC)) {
-		$valid_src[] = $post['file'];
+		$valid_src[] = $post['files'];
 		$valid_thumb[] = $post['thumb'];
 	}
 	

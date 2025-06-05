@@ -1,0 +1,51 @@
+<header>
+	<h1>{{ board.url }} - {{ board.title|e }}</h1>
+	<div class="subtitle">
+		{% if board.subtitle %}
+			{% if config.allow_subtitle_html %}
+				{{ board.subtitle }}
+			{% else %}
+				{{ board.subtitle|e }}
+			{% endif %}
+		{% endif %}
+		{% if board.uri %}
+			<br>
+			{% if catalog %}
+				<a href="{% if mod %}/mod.php?{% endif %}/{{ board.uri }}/index.html">Return to Index</a>
+			{% else %}
+				<a href="{% if mod %}/mod.php?{% endif %}/{{ board.uri }}/catalog.html">Catalog</a>
+			{% endif %}
+		{% endif %}
+		{% if mod %}
+			<p><a href="?/">{% trans %}Return to dashboard{% endtrans %}</a></p>
+			{% if mod|hasPermission(config.mod.ban) and ban_requests > 0 %}
+			<p>
+				<strong>
+					<a href="?/ban-requests">{% trans %}Ban requests{% endtrans %} ({{ ban_requests }})</a>
+				</strong>
+			</p>
+			{% endif %}
+			{% if mod|hasPermission(config.mod.file_approval) and file_approvals > 0 %}
+			<p>
+				<strong>
+					<a href="?/file_approval">{% trans %}File approval{% endtrans %} ({{ file_approvals }})</a>
+				</strong>
+			</p>
+			{% endif %}
+			{% if mod|hasPermission(config.mod.reports) and reports > 0 %}
+			<p>
+				<strong>
+					<a href="?/reports">{% trans %}Report queue{% endtrans %} ({{ reports }})</a>
+				</strong>
+			</p>
+			{% endif %}
+			{% if mod|hasPermission(config.mod.ban_appeals) and ban_appeals > 0 %}
+			<p>
+				<strong>
+					<a href="?/ban-appeals">{% trans %}Ban appeals{% endtrans %} ({{ ban_appeals }})</a>
+				</strong>
+			</p>
+			{% endif %}
+		{% endif %}
+	</div>
+</header>

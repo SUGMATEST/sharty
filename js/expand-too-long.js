@@ -13,7 +13,7 @@
 
 $(function() {
 	var do_expand = function() {
-		$(this).find('a').click(function(e) {
+		$(this).find('a').on('click', function(e) {
 			e.preventDefault();
 
 			var url = $(this).attr('href');

@@ -40,7 +40,7 @@ if (active_page == 'catalog') {
 				button.data('expanded', '1');
 				button.text('Close');
 				$('.catalog_search').append(' <input id="search_field" style="border: inset 1px;">');
-				$('#search_field').focus();
+				$('#search_field').trigger('focus');
 			} else {
 				button.removeData('expanded');
 				button.text('Search');
@@ -64,7 +64,7 @@ if (active_page == 'catalog') {
 				if (e.which === 83 && e.target.tagName === 'BODY' && !(e.ctrlKey || e.altKey || e.shiftKey)) {
 					e.preventDefault();
 					if ($('#search_field').length !== 0) { 
-						$('#search_field').focus();
+						$('#search_field').trigger('focus');
 					} else {
 						searchToggle();
 					}

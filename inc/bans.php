@@ -113,20 +113,21 @@ class Bans {
 		return array($ipstart, $ipend);
 	}
 	
-	static public function find($ip, $board = false, $get_mod_info = false, $banid = null) {
+	static public function find($ip, $board = false, $get_mod_info = false, $banid = null, $pass_id = null) {
 		global $config;
 
 		$query = prepare('SELECT ``bans``.*' . ($get_mod_info ? ', `username`' : '') . ' FROM ``bans``
 		' . ($get_mod_info ? 'LEFT JOIN ``mods`` ON ``mods``.`id` = `creator`' : '') . '
 		WHERE
 			(' . ($board !== false ? '(`board` IS NULL OR `board` = :board) AND' : '') . '
-		(`ipstart` = :ip OR (:ip >= `ipstart` AND :ip <= `ipend`)) OR (``bans``.id = :id))
+		(`ipstart` = :ip OR (:ip >= `ipstart` AND :ip <= `ipend`) OR (``bans``.pass_id = :pass_id AND ``bans``.pass_id IS NOT NULL)) OR (``bans``.id = :id))
 		ORDER BY `expires` IS NULL, `expires` DESC');
 		
 		if ($board !== false)
 			$query->bindValue(':board', $board, PDO::PARAM_STR);
 		
 		$query->bindValue(':id', $banid);
+		$query->bindValue(':pass_id', $pass_id);
 		$query->bindValue(':ip', inet_pton($ip));
 
 		$query->execute() or error(db_error($query));
@@ -151,7 +152,7 @@ class Bans {
 	static public function stream_json($out = false, $filter_ips = false, $filter_staff = false, $board_access = false) {
 		$query = query("SELECT ``bans``.*, `username` FROM ``bans``
 			LEFT JOIN ``mods`` ON ``mods``.`id` = `creator`
- 			ORDER BY `created` DESC") or error(db_error());
+ 			ORDER BY `created` DESC LIMIT 10000") or error(db_error());
                 $bans = $query->fetchAll(PDO::FETCH_ASSOC);
 
 		if ($board_access && $board_access[0] == '*') $board_access = false;
@@ -215,17 +216,30 @@ class Bans {
 	}
 	
 	static public function delete($ban_id, $modlog = false, $boards = false, $dont_rebuild = false) {
-		global $config;
+		global $config, $mod;
 
 		if ($boards && $boards[0] == '*') $boards = false;
 
-		if ($modlog) {
-			$query = query("SELECT `ipstart`, `ipend`, `board` FROM ``bans`` WHERE `id` = " . (int)$ban_id) or error(db_error());
-			if (!$ban = $query->fetch(PDO::FETCH_ASSOC)) {
-				// Ban doesn't exist
-				return false;
-			}
+		$query = query("SELECT `ipstart`, `ipend`, `board`, `post` FROM ``bans`` WHERE `id` = " . (int)$ban_id) or error(db_error());
+		if (!$ban = $query->fetch(PDO::FETCH_ASSOC)) {
+			// Ban doesn't exist
+			return false;
+		}
 
+		if (!empty($ban['post'])) {
+			$post = json_decode($ban['post'], true);
+			if (!empty($post['integrity'])) {
+				$integrity = json_decode($post['integrity'], true);
+				$key = get_integrity_key($integrity);
+
+				$redis = new Redis();
+				$redis->connect('127.0.0.1', 6379);
+				$redis->del($key);
+				$redis->close();
+			}
+		}
+
+		if ($modlog) {
 			if ($boards !== false && !in_array($ban['board'], $boards))
 		                error($config['error']['noaccess']);
 			
@@ -243,7 +257,7 @@ class Bans {
 		return true;
 	}
 	
-	static public function new_ban($cloaked_mask, $reason, $length = false, $ban_board = false, $mod_id = false, $post = false) {
+	static public function new_ban($cloaked_mask, $reason, $length = false, $ban_board = false, $mod_id = false, $post = false, $hide_from_public = false) {
 		$mask = uncloak_mask($cloaked_mask);
 
 		global $mod, $pdo, $board;
@@ -256,7 +270,11 @@ class Bans {
 		$mask = self::range_to_string($range);
 		$cloaked_mask = cloak_mask($mask);
 		
-		$query = prepare("INSERT INTO ``bans`` VALUES (NULL, :ipstart, :ipend, :time, :expires, :board, :mod, :reason, 0, :post)");
+		$query = prepare(
+			"INSERT INTO ``bans`` " .
+			"(`ipstart`, `ipend`, `created`, `expires`, `board`, `creator`, `reason`, `seen`, `post`, `pass_id`, `hide_post_from_ban_list`) VALUES " .
+			"(:ipstart, :ipend, :time, :expires, :board, :mod, :reason, 0, :post, :pass_id, :hide_from_public)"
+		);
 		
 		$query->bindValue(':ipstart', $range[0]);
 		if ($range[1] !== false && $range[1] != $range[0])
@@ -296,10 +314,27 @@ class Bans {
 
 			$post['board'] = $board['uri'];
 			$query->bindValue(':post', json_encode($post));
-		} else
+
+			if (!empty($post['passkey'])) {
+				$query->bindValue(':pass_id', substr($post['passkey'], 4));
+			}
+			else {
+				$query->bindValue(':pass_id', null, PDO::PARAM_NULL);
+			}
+		} else {
 			$query->bindValue(':post', null, PDO::PARAM_NULL);
+			$query->bindValue(':pass_id', null, PDO::PARAM_NULL);
+		}
+
+		if ($hide_from_public) {
+			$query->bindValue(':hide_from_public', 1);
+		} else {
+			$query->bindValue(':hide_from_public', 0);
+		}
 		
 		$query->execute() or error(db_error($query));
+		$ban_id = $pdo->lastInsertId();
+
 		if (isset($mod['id']) && $mod['id'] == $mod_id) {
 			modLog('Created a new ' .
 				($length > 0 ? preg_replace('/^(\d+) (\w+?)s?$/', '$1-$2', until($length)) : 'permanent') .
@@ -307,12 +342,12 @@ class Bans {
 				($ban_board ? '/' . $ban_board . '/' : 'all boards') .
 				' for ' .
 				(filter_var($mask, FILTER_VALIDATE_IP) !== false ? "<a href=\"?/IP/$cloaked_mask\">$cloaked_mask</a>" : $cloaked_mask) .
-				' (<small>#' . $pdo->lastInsertId() . '</small>)' .
+				' (<small>#' . $ban_id . '</small>)' .
 				' with ' . ($reason ? 'reason: ' . utf8tohtml($reason) . '' : 'no reason'));
 		}
 
 		rebuildThemes('bans');
 
-		return $pdo->lastInsertId();
+		return $ban_id;
 	}
 }

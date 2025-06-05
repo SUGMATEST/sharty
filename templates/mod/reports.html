@@ -1,4 +1,8 @@
 {% if reports %}
+	{% if mod|hasPermission(config.mod.show_sensitive) %}
+		{{ secure_link_confirm('Dismiss all reports', 'Dismiss all reports'|trans, 'Are you sure you want to dismiss all reports?'|trans, 'dismiss_all_reports') }}
+	{% endif %}
+	<br/>
 	{{ reports }}
 {% else %}
 	<p style="text-align:center" class="unimportant">({% trans 'There are no reports.' %})</p>

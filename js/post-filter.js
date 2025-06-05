@@ -179,10 +179,21 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 				$ele.parent().find('.body, .files, .video-container').not($ele.children('.reply').children()).hide();
 
 				// hide thread replies on index view
-				if (active_page == 'index' || active_page == 'ukko') $ele.parent().find('.omitted, .reply:not(.hidden), post_no, .mentioned, br').hide();
+				if (active_page == 'index' || active_page == 'ukko') {
+					$ele.parent().find('.omitted, .reply:not(.hidden), post_no, .mentioned, br').hide();
+				}
+
+				if (localStorage.show_stubs === 'false') {
+					$ele.parent().hide();
+				}
 			} else {
 				// normal posts
 				$ele.children('.body, .files, .video-container').hide();
+
+				if (localStorage.show_stubs === 'false') {
+					$ele.hide();
+					$ele.next('br').hide();
+				}
 			}
 		}
 		function show(ele) {
@@ -191,10 +202,21 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			$(ele).data('hidden', false);
 			if ($ele.hasClass('op')) {
 				$ele.parent().find('.body, .files, .video-container').show();
-				if (active_page == 'index') $ele.parent().find('.omitted, .reply:not(.hidden), post_no, .mentioned, br').show();
+				if (active_page == 'index') { 
+					$ele.parent().find('.omitted, .reply:not(.hidden), post_no, .mentioned, br').show();
+				}
+
+				if (localStorage.show_stubs === 'false') {
+					$ele.parent().show();
+				}
 			} else {
 				// normal posts
 				$ele.children('.body, .files, .video-container').show();
+
+				if (localStorage.show_stubs === 'false') {
+					$ele.show();
+					$ele.next('br').show();
+				}
 			}
 		}
 
@@ -213,11 +235,17 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 				submenu.add_item('filter-add-id-plus', _('ID +'), _('Hide ID and all replies'));
 				submenu.add_item('filter-add-name', _('Name'));
 				submenu.add_item('filter-add-trip', _('Tripcode'));
+				submenu.add_item('filter-add-flag', _('Flag'));
+				submenu.add_item('filter-add-filename', _('Filename'));
+				submenu.add_item('filter-add-filehash', _('File Hash'));
 
 			submenu = Menu.add_submenu('filter-menu-remove', _('Remove filter'));
 				submenu.add_item('filter-remove-id', _('ID'));
 				submenu.add_item('filter-remove-name', _('Name'));
 				submenu.add_item('filter-remove-trip', _('Tripcode'));
+				submenu.add_item('filter-remove-flag', _('Flag'));
+				submenu.add_item('filter-remove-filename', _('Filename'));
+				submenu.add_item('filter-remove-filehash', _('File Hash'));
 
 			Menu.onclick(function (e, $buffer) {
 				var ele = e.target.parentElement.parentElement;
@@ -237,12 +265,17 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 					postTrip = $ele.find('.trip').text();
 				}
 
+				var postFlag = '';
+				if (pageData.hasFlag) {
+					postFlag = $ele.find('.flag').attr('title');
+				}
+
 				/*  display logic and bind click handlers
 				 */
 
 				 // unhide button
 				if ($ele.data('hidden')) {
-					$buffer.find('#filter-menu-unhide').click(function () {
+					$buffer.find('#filter-menu-unhide').on('click', function () {
 						//  if hidden due to post id, remove it from blacklist
 						//  otherwise just show this post
 						blacklist.remove.post(boardId, threadId, postId);
@@ -251,14 +284,14 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 					$buffer.find('#filter-menu-hide').addClass('hidden');
 				} else {
 					$buffer.find('#filter-menu-unhide').addClass('hidden');
-					$buffer.find('#filter-menu-hide').click(function () {
+					$buffer.find('#filter-menu-hide').on('click', function () {
 						blacklist.add.post(boardId, threadId, postId, false);
 					});
 				}
 
 				//  post id
 				if (!$ele.data('hiddenByPost')) {
-					$buffer.find('#filter-add-post-plus').click(function () {
+					$buffer.find('#filter-add-post-plus').on('click', function () {
 						blacklist.add.post(boardId, threadId, postId, true);
 					});
 				} else {
@@ -267,16 +300,16 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 
 				// UID
 				if (pageData.hasUID && !$ele.data('hiddenByUid')) {
-					$buffer.find('#filter-add-id').click(function () {
+					$buffer.find('#filter-add-id').on('click', function () {
 						blacklist.add.uid(boardId, threadId, postUid, false);
 					});
-					$buffer.find('#filter-add-id-plus').click(function () {
+					$buffer.find('#filter-add-id-plus').on('click', function () {
 						blacklist.add.uid(boardId, threadId, postUid, true);
 					});
 
 					$buffer.find('#filter-remove-id').addClass('hidden');
 				} else if (pageData.hasUID) {
-					$buffer.find('#filter-remove-id').click(function () {
+					$buffer.find('#filter-remove-id').on('click', function () {
 						blacklist.remove.uid(boardId, threadId, postUid);
 					});
 
@@ -291,13 +324,13 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 
 				//  name
 				if (!pageData.forcedAnon && !$ele.data('hiddenByName')) {
-					$buffer.find('#filter-add-name').click(function () {
+					$buffer.find('#filter-add-name').on('click', function () {
 						addFilter('name', postName, false);
 					});
 
 					$buffer.find('#filter-remove-name').addClass('hidden');
 				} else if (!pageData.forcedAnon) {
-					$buffer.find('#filter-remove-name').click(function () {
+					$buffer.find('#filter-remove-name').on('click', function () {
 						removeFilter('name', postName, false);
 					});
 
@@ -310,13 +343,13 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 
 				//  tripcode
 				if (!pageData.forcedAnon && !$ele.data('hiddenByTrip') && postTrip !== '') {
-					$buffer.find('#filter-add-trip').click(function () {
+					$buffer.find('#filter-add-trip').on('click', function () {
 						addFilter('trip', postTrip, false);
 					});
 
 					$buffer.find('#filter-remove-trip').addClass('hidden');
 				} else if (!pageData.forcedAnon && postTrip !== '') {
-					$buffer.find('#filter-remove-trip').click(function () {
+					$buffer.find('#filter-remove-trip').on('click', function () {
 						removeFilter('trip', postTrip, false);
 					});
 
@@ -325,6 +358,75 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 					// board has forced anon
 					$buffer.find('#filter-remove-trip').addClass('hidden');
 					$buffer.find('#filter-add-trip').addClass('hidden');
+				}
+
+				// flag
+				if (pageData.hasFlag && !$ele.data('hiddenByFlag') && postFlag !== '') {
+					$buffer.find('#filter-add-flag').on('click', function () {
+						addFilter('flag', '^' + postFlag + '$', true);
+					});
+
+					$buffer.find('#filter-remove-flag').addClass('hidden');
+				} else if (pageData.hasFlag && postFlag !== '') {
+					$buffer.find('#filter-remove-flag').on('click', function () {
+						removeFilter('flag', '^' + postFlag + '$', true);
+					});
+
+					$buffer.find('#filter-add-flag').addClass('hidden');
+				} else {
+					// board doesn't have flags
+					$buffer.find('#filter-remove-flag').addClass('hidden');
+					$buffer.find('#filter-add-flag').addClass('hidden');
+				}
+
+				// file
+				let $filesParent = $ele;
+				if ($ele.hasClass('op')) {
+					$filesParent = $ele.siblings('.files');
+				}
+
+				if ($filesParent.find('.fileinfo').length > 0) {
+					if (!$ele.data('hiddenByFilename')) {
+						$buffer.find('#filter-add-filename').on('click', function () {
+							$filesParent.find('.filename-download-link').each(function() {
+								addFilter('filename', $(this).attr('download'), false);
+							});
+						});
+
+						$buffer.find('#filter-remove-filename').addClass('hidden');
+					} else {
+						$buffer.find('#filter-remove-filename').on('click', function () {
+							$filesParent.find('.filename-download-link').each(function() {
+								removeFilter('filename', $(this).attr('download'), false);
+							});
+						});
+
+						$buffer.find('#filter-add-filename').addClass('hidden');
+					}
+
+					if (!$ele.data('hiddenByFilehash')) {
+						$buffer.find('#filter-add-filehash').on('click', function () {
+							$filesParent.find('.filehash').each(function() {
+								addFilter('filehash', $(this).text(), false);
+							});
+						});
+
+						$buffer.find('#filter-remove-filehash').addClass('hidden');
+					} else {
+						$buffer.find('#filter-remove-filehash').on('click', function () {
+							$filesParent.find('.filehash').each(function() {
+								removeFilter('filehash', $(this).text(), false);
+							});
+						});
+
+						$buffer.find('#filter-add-filehash').addClass('hidden');
+					}
+				} else {
+					// post doesn't have files
+					$buffer.find('#filter-remove-filename').addClass('hidden');
+					$buffer.find('#filter-remove-filehash').addClass('hidden');
+					$buffer.find('#filter-add-filename').addClass('hidden');
+					$buffer.find('#filter-add-filehash').addClass('hidden');
 				}
 
 				/*  hide sub menus if all items are hidden
@@ -345,17 +447,17 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			/*if ($(ele).find('.hide-thread-link').length)
 				$('.hide-thread-link').remove();*/
 
-			if ($(ele).hasClass('op') && !$(ele).find('.hide-thread-link').length) {
-				$('<a class="hide-thread-link" style="float:left;margin-right:5px" href="javascript:void(0)">[' + ($(ele).data('hidden') ? '+' : '&ndash;') + ']</a>')
-					.insertBefore($(ele).find(':not(h2,h2 *):first'))
-					.click(function() {
+			if ($(ele).hasClass('op') && !$(ele).parent().find('.hide-thread-link').length) {
+				$('<a class="hide-thread-link" style="float:left;margin-right:5px" href="javascript:void(0)">[' + ($(ele).data('hidden') ? '+' : '–') + ']</a>')
+					.prependTo($(ele).parent())
+					.on('click', function() {
 						var postId = $(ele).find('.post_no').not('[id]').text();
 						var hidden = $(ele).data('hidden');
 						var boardId = $(ele).parents('.thread').data('board');
 					
 						if (hidden) {
 							blacklist.remove.post(boardId, threadId, postId, false);
-							$(this).html('[&ndash;]');
+							$(this).html('[–]');
 						} else {
 							blacklist.add.post(boardId, threadId, postId, false);
 							$(this).text('[+]');
@@ -375,7 +477,7 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 
 			var list = getList();
 			var postId = $post.find('.post_no').not('[id]').text();
-			var name, trip, uid, subject, comment;
+			var name, trip, uid, subject, comment, flag, filenames, filehashes;
 			var i, length, array, rule, pattern;  // temp variables
 
 			var boardId	      = $post.data('board');
@@ -384,10 +486,19 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			var localList   = pageData.localList;
 			var noReplyList = pageData.noReplyList;
 			var hasUID      = pageData.hasUID;
+			var hasFlag = pageData.hasFlag;
 			var forcedAnon  = pageData.forcedAnon;
 
 			var hasTrip = ($post.find('.trip').length > 0);
 			var hasSub = ($post.find('.subject').length > 0);
+
+			var hasFile
+			if ($post.hasClass('op')) {
+				hasFile = ($post.parent().find('.fileinfo').length > 0);
+			}
+			else {
+				hasFile = ($post.find('.fileinfo').length > 0);
+			}
 
 			$post.data('hidden', false);
 			$post.data('hiddenByUid', false);
@@ -396,6 +507,9 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			$post.data('hiddenByTrip', false);
 			$post.data('hiddenBySubject', false);
 			$post.data('hiddenByComment', false);
+			$post.data('hiddenByFlag', false);
+			$post.data('hiddenByFilename', false);
+			$post.data('hiddenByFilehash', false);
 
 			// add post with matched UID to localList
 			if (hasUID &&
@@ -436,6 +550,22 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			});
 			comment = array.join(' ');
 
+			if (hasFlag)
+				flag = $post.find('.flag').attr('title');
+
+			if (hasFile) {
+				filenames = [];
+				filehashes = [];
+
+				let $filesParent = $post;
+				if ($post.hasClass('op')) {
+					$filesParent = $post.siblings('.files');
+				}
+				$filesParent.find('.fileinfo').each(function() {
+					filenames.push($(this).find('.filename-download-link').attr('download'));
+					filehashes.push($(this).find('.filehash').text());
+				});
+			}
 
 			for (i = 0, length = list.generalFilter.length; i < length; i++) {
 				rule = list.generalFilter[i];
@@ -467,6 +597,34 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 								hide(post);
 							}
 							break;
+						case 'flag':
+							if (hasFlag && pattern.test(flag)) {
+								$post.data('hiddenByFlag', true);
+								hide(post);
+							}
+							break;
+						case 'filename':
+							if (hasFile) {
+								for (const filename of filenames) {
+									if (pattern.test(filename)) {
+										$post.data('hiddenByFilename', true);
+										hide(post);
+										break;
+									}
+								}
+							}
+							break;
+						case 'filehash':
+							if (hasFile) {
+								for (const hash of filehashes) {
+									if (pattern.test(hash)) {
+										$post.data('hiddenByFilehash', true);
+										hide(post);
+										break;
+									}
+								}
+							}
+							break;
 					}
 				} else {
 					switch (rule.type) {
@@ -494,6 +652,35 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 							if (pattern.test(comment)) {
 								$post.data('hiddenByComment', true);
 								hide(post);
+							}
+							break;
+						case 'flag':
+							pattern = new RegExp('\\b'+ rule.value+ '\\b');
+							if (hasFlag && pattern.test(flag)) {
+								$post.data('hiddenByFlag', true);
+								hide(post);
+							}
+							break;
+						case 'filename':
+							if (hasFile) {
+								for (const filename of filenames) {
+									if (filename == rule.value) {
+										$post.data('hiddenByFilename', true);
+										hide(post);
+										break;
+									}
+								}
+							}
+							break;
+						case 'filehash':
+							if (hasFile) {
+								for (const hash of filehashes) {
+									if (hash == rule.value) {
+										$post.data('hiddenByFilehash', true);
+										hide(post);
+										break;
+									}
+								}
 							}
 							break;
 					}
@@ -621,7 +808,10 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 				name: 'name',
 				trip: 'tripcode',
 				sub: 'subject',
-				com: 'comment'
+				com: 'comment',
+				flag: 'flag',
+				filename: 'filename',
+				filehash: 'filehash',
 			};
 
 			$ele.empty();
@@ -659,7 +849,10 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 							'<option value="name">'+_('Name')+'</option>' +
 							'<option value="trip">'+_('Tripcode')+'</option>' +
 							'<option value="sub">'+_('Subject')+'</option>' +
-							'<option value="com">'+_('Comment')+'</option>' +
+							'<option selected value="com">'+_('Comment')+'</option>' +
+							'<option value="flag">'+_('Flag')+'</option>' +
+							'<option value="filename">'+_('Filename')+'</option>' +
+							'<option value="filehash">'+_('File Hash')+'</option>' +
 						'</select>' +
 						'<input type="text">' +
 						'<input type="checkbox">' +
@@ -670,6 +863,7 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 							_('This will clear all filtering rules including hidden posts.')+' <a id="confirm-y" href="#">'+_('yes')+'</a> | <a id="confirm-n" href="#">'+_('no')+'</a>' +
 						'</div>' +
 					'</div>' +
+					'<div id="filter-display-stubs"><label><input type="checkbox">Display stubs</label></div>' +
 					'<div id="filter-container"><table id="filter-list"></table></div>'
 				);
 				drawFilterList();
@@ -710,6 +904,18 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 					$('#filter-control #confirm').addClass('hidden');
 				});
 
+				$('#filter-display-stubs input').on('change', function() {
+					if (localStorage.show_stubs !== 'false') {
+						localStorage.show_stubs = 'false';
+					}
+					else {
+						localStorage.show_stubs = 'true';
+					}
+				});
+
+				if (localStorage.show_stubs !== 'false') {
+					$('#filter-display-stubs input').prop('checked', true);
+				}
 
 				// remove button
 				$('#filter-list').on('click', '.del-btn', function (e) {
@@ -802,6 +1008,7 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 				localList: [],  // all the blacklisted post IDs or UIDs that apply to the current page
 				noReplyList: [],  // any posts that replies to the contents of this list shall be hidden
 				hasUID: (document.getElementsByClassName('poster_id').length > 0),
+				hasFlag: (document.getElementsByClassName('flag').length > 0),
 				forcedAnon: ($('th:contains(Name)').length === 0)  // tests by looking for the Name label on the reply form
 			};
 
@@ -833,6 +1040,7 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'cata
 			if (active_page == 'catalog') {
 				$(document).on('click', '.mix', function(e) {
 					if (e.shiftKey) {
+						e.preventDefault();
 						var threadId = $(this).data('id').toString();
 						var postId = threadId;
 						blacklist.add.post(pageData.boardId, threadId, postId, false);

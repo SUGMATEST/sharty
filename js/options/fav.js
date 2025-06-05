@@ -1,4 +1,4 @@
-$(document).ready(function(){
+$(function(){
 //Creating functions
 var generateList = function(){
 	var favStor = [];
@@ -49,9 +49,9 @@ $(favList).appendTo(Options.get_tab('fav-tab').content);  //Adding the list of f
 var addDiv = $("<div id='favs-add-board'>");
 
 var plusBox = $("<input id=\"plusBox\" type=\"text\">").appendTo(addDiv);
-plusBox.keydown(function( event ) {
+plusBox.on('keydown', function( event ) {
 	if(event.keyCode == 13){
-		$("#plus").click();
+		$("#plus").trigger('click');
 	}
 });
 

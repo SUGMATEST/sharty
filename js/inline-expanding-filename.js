@@ -15,10 +15,10 @@
 
 onready(function(){
 	var inline_expanding_filename = function() {
-		$(this).find(".fileinfo > a").click(function(){
+		$(this).find(".fileinfo > a").on('click', function(){
 			var imagelink = $(this).parent().parent().find('a[target="_blank"]:first');
 			if(imagelink.length > 0) {
-				imagelink.click();
+				imagelink.trigger('click');
 				return false;
 			}
 		});

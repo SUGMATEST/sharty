@@ -14,7 +14,7 @@
 var tab = Options.add_tab("user-js", "code", _("User JS"));
 
 var textarea = $("<textarea></textarea>").css({
-  "font-size": 12,
+  "font-size": "12px",
   position: "absolute",
   top: 35, bottom: 35,
   width: "calc(100% - 20px)", margin: 0, padding: "4px", border: "1px solid black",
@@ -25,7 +25,7 @@ var submit = $("<input type='button' value='"+_("Update custom Javascript")+"'>"
   height: 25, bottom: 5,
   width: "calc(100% - 10px)",
   left: 5, right: 5
-}).click(function() {
+}).on('click', function() {
   localStorage.user_js = textarea.val();
   document.location.reload();
 }).appendTo(tab.content);

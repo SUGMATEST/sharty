@@ -1,24 +1,40 @@
-<form name="post" onsubmit="return dopost(this);" enctype="multipart/form-data" action="{{ config.post_url }}" method="post">
+<form name="post" enctype="multipart/form-data" action="{{ config.post_url }}" method="post">
 {{ antibot.html() }}
 {% if id %}<input type="hidden" name="thread" value="{{ id }}">{% endif %}
 {{ antibot.html() }}
-<input type="hidden" name="board" value="{{ board.uri }}">
+{% if board.uri %}<input type="hidden" name="board" value="{{ board.uri }}">{% endif %}
 {{ antibot.html() }}
 {% if current_page %}
 	<input type="hidden" name="page" value="{{ current_page }}">
 {% endif %}
+
+
 {% if mod %}<input type="hidden" name="mod" value="1">{% endif %}
 	<table>
-		{% if not config.field_disable_name or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri)) %}<tr>
+		{% if not config.field_disable_name or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri) or config.field_disable_name is same as('selectbox')) %}
+		<tr>
 			<th>
 				{% trans %}Name{% endtrans %}
 				{{ antibot.html() }}
 			</th>
 			<td>
-				<input type="text" name="name" size="25" maxlength="35" autocomplete="off"> {% if config.allow_no_country and config.country_flags %}<input id="no_country" name="no_country" type="checkbox"> <label for="no_country">{% trans %}Don't show my flag{% endtrans %}</label>{% endif %}
+				{% if config.field_disable_name is same as ('selectbox') and (not post.mod|hasPermission(config.mod.bypass_field_disable, board.uri)) %}
+					<select name="name">
+						{% for name_option in config.selectable_names %}
+							<option value="{{ name_option }}">{{ name_option }}</option>
+						{% endfor %}
+					</select>
+				{% else %}
+					<input type="text" name="name" size="25" maxlength="35" autocomplete="off"> 
+					{% if config.allow_no_country and config.country_flags %}
+						<input id="no_country" name="no_country" type="checkbox"> 
+						<label for="no_country">{% trans %}Don't show my flag{% endtrans %}</label>
+					{% endif %}
+				{% endif %}
 				{{ antibot.html() }}
 			</td>
-		</tr>{% endif %}
+		</tr>
+		{% endif %}		
 		{% if not config.field_disable_email or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri)) %}<tr>
 			<th>
 				{% if (mod and not post.mod|hasPermission(config.mod.bypass_field_disable, board.uri) and config.field_email_selectbox) or (not mod and config.field_email_selectbox) or (config.hide_email) %}
@@ -30,18 +46,23 @@
 			</th>
 			<td>
 				{% if (mod and not post.mod|hasPermission(config.mod.bypass_field_disable, board.uri) and config.field_email_selectbox) or (not mod and config.field_email_selectbox) %}
-				<select name="email" id="email_selectbox" autocomplete="off">
+				<select name="email" id="email_selectbox" autocomplete="on">
 					<option value=""></option>
 					<option value="sage">sage</option>
+					<option value="bump">bump</option>
 					{% if not config.always_noko %}<option value="noko">noko</option>{% endif %}
 					{% if config.always_noko %}<option value="nonoko">nonoko</option>{% endif %}
+					<option value="flag">flag</option>
+					<option value="flag sage">flag sage</option>
+					<option value="anonymous">anonymous</option>
+					<option value="anonymous sage">anonymous sage</option>
 				</select>
 				{% else %}
 				<input type="text" name="email" size="25" maxlength="40" autocomplete="off">
 				{% endif %}
 				{{ antibot.html() }}
 				{% if not (not (config.field_disable_subject or (id and config.field_disable_reply_subject)) or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri))) %}
-				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />{% if config.spoiler_images %} <input id="spoiler" name="spoiler" type="checkbox"> <label for="spoiler">{% trans %}Spoiler Image{% endtrans %}</label>				{% endif %}
+				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />
 				{% endif %}
 				{{ antibot.html() }}
 			</td>
@@ -53,25 +74,58 @@
 			</th>
 			<td>
 				<input style="float:left;" type="text" name="subject" size="25" maxlength="100" autocomplete="off">
-				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />{% if config.spoiler_images %} <input id="spoiler" name="spoiler" type="checkbox"> <label for="spoiler">{% trans %}Spoiler Image{% endtrans %}</label>{% endif %}
+				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />
 			</td>
 		</tr>
 		{% endif %}
+		{% if config.splatfest_enabled %}
+		<tr>
+			<th>
+				Team
+			</th>
+			<td>
+				<select name="festival_team">
+					<option value="">None</option>
+					{% for team, data in config.splatfest_teams %}
+						<option value="{{ team }}">{{ team }}</option>
+					{% endfor %}
+				</select>
+			</td>
+		</tr>
+		{%endif%}
 		<tr>
 			<th>
 				{% trans %}Comment{% endtrans %}
 				{{ antibot.html() }}
 			</th>
 			<td>
-				<textarea name="body" id="body" rows="5" cols="35"></textarea>
+				<textarea name="body" id="body" rows="5" cols="35" {% if id %}autofocus{% endif %}></textarea>
 				{{ antibot.html() }}
 				{% if not (not (config.field_disable_subject or (id and config.field_disable_reply_subject)) or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri))) %}
 				{% if not (not config.field_disable_email or (mod and post.mod|hasPermission(config.mod.bypass_field_disable, board.uri))) %}
-				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />{% if config.spoiler_images %} <input id="spoiler" name="spoiler" type="checkbox"> <label for="spoiler">{% trans %}Spoiler Image{% endtrans %}</label>{% endif %}
+				<input accesskey="s" style="margin-left:2px;" type="submit" name="post" value="{% if id %}{{ config.button_reply }}{% else %}{{ config.button_newtopic }}{% endif %}" />
 				{% endif %}
 				{% endif %}
 			</td>
 		</tr>
+		{% if not board.uri %}
+		<tr>
+			<th>
+				{% trans %}Board{% endtrans %}
+				{{ antibot.html() }}
+			</th>
+			<td>
+				<select name="board">
+                                        {% for b in boards %}
+						{% if b.uri != "shrk" %}
+                                                <option value="{{ b.uri }}">/{{ b.uri }}/</option>
+						{% endif %}
+                                        {% endfor %}
+				</select>
+				{{ antibot.html() }}
+			</td>
+		</tr>
+		{% endif %}
 		{% if config.recaptcha %}
 		<tr>
 			<th>
@@ -84,13 +138,65 @@
 			</td>
 		</tr>
 		{% endif %}
+		{% if config.hcaptcha %}
+		<tr>
+			<th>
+				{% trans %}Verification{% endtrans %}
+				{{ antibot.html() }}
+			</th>
+			<td>
+				<div class="h-captcha" data-sitekey="{{ config.hcaptcha_public }}"></div>
+				{{ antibot.html() }}
+			</td>
+		</tr>
+		{% endif %}
+		{% if config.powcaptcha %}
+		<tr>
+			<th>
+				{% trans %}Verification{% endtrans %}
+				{{ antibot.html() }}
+			</th>
+			<td>
+				<div class="powcaptcha-container" className="captcha-container" name="captcha-container"
+				data-sqr-captcha-url="https://soyjaks.party/js/captcha" 
+				data-sqr-captcha-challenge=""
+				data-sqr-captcha-callback="window.powcaptcha_callback">
+			  	</div>
+
+				<input type="hidden" name="captchaChallenge" />
+				<input type="hidden" name="captchaNonce" />
+				{{ antibot.html() }}
+			</td>
+		</tr>
+		{% endif %}
+		{%if config.mccaptcha %}
+		<tr>
+			<th>
+				{% trans %}Verification{% endtrans %}
+				{{ antibot.html() }}
+			</th>
+			<td>
+				<div class="captcha-div" style="display: none;"/>
+				<image width="350" height="390" id="captcha_image"></image>
+				<p style="margin:0;">Please type the name of the object/variant:</p>
+				<input class="captcha_text" type="text" name="captcha_text" size="32" maxlength="20" autocomplete="off" style="margin:0;">
+				<input type="hidden" name="x" id="captcha_x"/>
+				<input type="hidden" name="y" id="captcha_y"/>
+				<input type="hidden" name="guid" id ="captcha_guid"/>
+				</div>
+				<button type="button" onclick="showCaptchas()" id="show-captcha-button">Show Captcha</button>
+				<button type="button" onclick="newCaptcha()" id="new-captcha-button">Get New Captcha</button>
+				{{ antibot.html() }}
+			</td>
+		</tr>
+		{%endif%}
 		{% if config.captcha.enabled %}
 		<tr class='captcha'>
 			<th>
 				{% trans %}Verification{% endtrans %}
 			</th>
 			<td>
-				<script>load_captcha("{{ config.captcha.provider_get }}", "{{ config.captcha.extra }}");</script>
+				<script nonce="B13FF511DC4651B846CEDB57FAD24">load_captcha("{{ config.captcha.provider_get }}", "{{ config.captcha.extra }}");</script>
 				<noscript>
 					<input class='captcha_text' type='text' name='captcha_text' size='32' maxlength='6' autocomplete='off'>
 					<div class="captcha_html">
@@ -106,7 +212,7 @@
                                 {% trans %}Verification{% endtrans %}
                         </th>
                         <td>
-                                <script>load_captcha("{{ config.captcha.provider_get }}", "{{ config.captcha.extra }}");</script>
+                                <script nonce="B13FF511DC4651B846CEDB57FAD24">load_captcha("{{ config.captcha.provider_get }}", "{{ config.captcha.extra }}");</script>
 				<noscript>
 					<input class='captcha_text' type='text' name='captcha_text' size='32' maxlength='6' autocomplete='off'>
 					<div class="captcha_html">
@@ -117,15 +223,23 @@
                 	</tr>
 			{% endif %}
 		{% endif %}
-		{% if config.user_flag %}
+		{% if config.geo_flags_thread_button or config.user_flag or (config.optional_state_flags and config.country_flags and not config.state_flags) %}
 			<tr>
 				<th>{% trans %}Flag{% endtrans %}</th>
 				<td>
 					<select name="user_flag" id="user_flag">
-						<option value="">{% trans %}None{% endtrans %}</option>
-						{% for flag, text in config.user_flags %}
-							<option value="{{ flag }}">{{ text }}</option>
-						{% endfor %}
+						<option value="">{% trans %}Default{% endtrans %}</option>
+						{% if config.country_flags %}
+							<option value="country">Country flag</option>
+						{% endif %}
+						{% if config.optional_state_flags and not config.state_flags %}
+							<option value="state">State/Region flag</option>
+						{% endif %}
+						{% if config.user_flag %}
+							{% for flag, text in config.user_flags %}
+								<option value="{{ flag }}">{{ text }}</option>
+							{% endfor %}
+						{% endif %}
 					</select>
 				</td>
 			</tr>
@@ -149,7 +263,7 @@
 			<td>
 				<input type="file" name="file" id="upload_file">
 
-				<script type="text/javascript">if (typeof init_file_selector !== 'undefined') init_file_selector({{ config.max_images }});</script>
+				<script type="text/javascript" nonce="B13FF511DC4651B846CEDB57FAD24">if (typeof init_file_selector !== 'undefined') init_file_selector({{ config.max_images }});</script>
 
 				{% if config.allow_upload_by_url %}
 					<div style="float:none;text-align:left" id="upload_url">
@@ -161,7 +275,7 @@
 			</td>
 		</tr>
 		{% if config.enable_embedding %}
-		<tr id="upload_embed">
+		<tr id="upload_embed" style="display: none;">
 			<th>
 				{% trans %}Embed{% endtrans %}
 				{{ antibot.html() }}
@@ -171,12 +285,31 @@
 			</td>
 		</tr>
 		{% endif %}
-		{% if mod and ((not id and post.mod|hasPermission(config.mod.sticky, board.uri)) or (not id and post.mod|hasPermission(config.mod.lock, board.uri)) or post.mod|hasPermission(config.mod.rawhtml, board.uri)) %}
-		<tr>
+		<tr id="upload_voice" style="display: none;">
 			<th>
-				{% trans %}Flags{% endtrans %}
+				{% trans %}Voice{% endtrans %}
+				{{ antibot.html() }}
 			</th>
 			<td>
+			</td>
+		</tr>
+		{% if config.enable_polls %}
+		<tr id="upload_poll" style="display: none;">
+			<th>
+				{% trans %}Poll{% endtrans %}
+				{{ antibot.html() }}
+			</th>
+			<td>
+			</td>
+		</tr>
+		{% endif %}
+		{% if mod and (((not id and post.mod|hasPermission(config.mod.sticky, board.uri)) or (not id and post.mod|hasPermission(config.mod.lock, board.uri)) or post.mod|hasPermission(config.mod.rawhtml, board.uri))) or ((config.show_ids_thread_button or config.images_only_thread_button) and not id) %}
+		<tr>
+			<th>
+				{% trans %}Options{% endtrans %}
+			</th>
+			<td>
+				{%if mod%}
 				{% if not id and post.mod|hasPermission(config.mod.sticky, board.uri) %}<div class="center">
 					<label for="sticky">{% trans %}Sticky{% endtrans %}</label>
 					<input title="{% trans %}Sticky{% endtrans %}" type="checkbox" name="sticky" id="sticky"><br>
@@ -189,6 +322,44 @@
 					<label for="raw">{% trans %}Raw HTML{% endtrans %}</label><br>
 					<input title="{% trans %}Raw HTML{% endtrans %}" type="checkbox" name="raw" id="raw">
 				</div>{% endif %}
+				{% if post.mod|hasPermission(config.mod.rawhtml, board.uri) %}<div class="center">
+					<label for="stream_thread">{% trans %}Stream Thread - Nudev Hands Only{% endtrans %}</label><br>
+					<input title="{% trans %}Stream Thread{% endtrans %}" type="checkbox" name="stream_thread" id="stream_thread">
+				</div>
+				{% endif %}
+				{%endif%}
+				{% if not id %}
+				{% if config.show_ids_thread_button and not config.show_ids %}
+				<div class="center">
+					<label for="show_ids">{% trans %}Poster IDs{% endtrans %}</label><br>
+					<input {% if config.invert_ids_thread_button %}checked{% endif %} title="{% trans %}Show IDs{% endtrans %}" type="checkbox" name="show_ids" id="show_ids">
+				</div>
+				{% endif %}
+				{% if config.images_only_thread_button %}
+				<div class="center">
+					<label for="images_only">{% trans %}Images Only{% endtrans %}</label><br>
+					<input title="{% trans %}Images Only{% endtrans %}" type="checkbox" name="images_only" id="images_only">
+				</div>
+				{% endif %}
+				{% if config.geo_flags_thread_button %}
+				<div class="center">
+					<label for="geo_flags">{% trans %}Geo Flags{% endtrans %}</label><br>
+					<input title="{% trans %}Geo Flags{% endtrans %}" type="checkbox" name="geo_flags" id="geo_flags">
+				</div>
+				{% endif %}
+				{% if config.desktop_only_thread_button %}
+				<div class="center">
+					<label for="desktop_only">{% trans %}Desktop Only{% endtrans %}</label><br>
+					<input title="{% trans %}Desktop Only{% endtrans %}" type="checkbox" name="desktop_only" id="desktop_only">
+				</div>
+				{% endif %}
+				{% if config.encrypted_thread_button %}
+				<div class="center">
+					<label for="encrypted_thread">{% trans %}Restricted Thread{% endtrans %}</label><br>
+					<input title="{% trans %}Prevents lurkers and banned users from reading replies{% endtrans %}" type="checkbox" name="encrypted_thread" id="encrypted_thread">
+				</div>
+				{% endif %}
+				{%endif%}
 			</td>
 		</tr>
 		{% endif %}
@@ -198,7 +369,7 @@
 				{{ antibot.html() }}
 			</th>
 			<td>
-				<input type="text" name="password" value="" size="12" maxlength="18" autocomplete="off"> 
+				<input type="text" name="password" value="" size="12" maxlength="18" autocomplete="new-password"> 
 				<span class="unimportant">{% trans %}(For file deletion.){% endtrans %}</span>
 				{{ antibot.html() }}
 			</td>
@@ -208,6 +379,65 @@
 <input type="hidden" name="hash" value="{{ antibot.hash() }}">
 </form>
 
-<script type="text/javascript">{% verbatim %}
-	rememberStuff();
-{% endverbatim %}</script>
+{% if config.powcaptcha %}
+
+<script> 
+
+	window.powcaptcha_callback = function(nonce) {
+		document.getElementsByName("captchaNonce").forEach((cont) => {cont.setAttribute("value", nonce)});
+	};
+	getNewChallenge = function() {
+		$.get( "/inc/powcaptcha/entrypoint.php?mode=token", function( data ) {
+		if (data === "")
+		{
+			getNewChallenge();
+			return;
+		}
+		document.getElementsByName("captcha-container").forEach((cont) => {cont.setAttribute("data-sqr-captcha-challenge", data)});
+		document.getElementsByName("captchaChallenge").forEach((cont) => {cont.setAttribute("value", data)});
+		document.getElementsByName("captchaNonce").forEach((cont) => {cont.removeAttribute("value")});
+		window.sqrCaptchaTrigger();
+	});
+	};
+
+	startToken = function() {
+		$.get( "/inc/powcaptcha/entrypoint.php?mode=token", function( data ) {
+		if (data === "")
+		{
+			startToken();
+			return;
+		}
+		document.getElementsByName("captcha-container").forEach((cont) => {cont.setAttribute("data-sqr-captcha-challenge", data)});
+		document.getElementsByName("captchaChallenge").forEach((cont) => {cont.setAttribute("value", data)});
+
+		$.getScript("https://soyjaks.party/js/captcha/static/captcha.js");
+		var unt = setInterval(function () {
+			if (window.sqrCaptchaInitDone)
+			{
+				clearInterval(unt);
+				return;
+			}
+		window.sqrCaptchaInit();
+		
+		}, 1000);
+		
+	});
+	};
+	startToken();
+	
+	var originaldopost = dopost;
+
+	dopost = function(form) {
+		
+		if(window.sqrCaptchaInitDone) {
+			  window.sqrCaptchaReset();
+		   }
+		window.sqrCaptchaInit();
+		getNewChallenge();
+		return originaldopost(form);
+	}
+	</script>
+{% endif %}
+
+<script src="/js/postform.js?v2"></script>
+<iframe src="/challenge-check.html" style="width: 0; height: 0; border: 0; border: none; position: absolute;"></iframe>

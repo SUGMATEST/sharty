@@ -51,7 +51,7 @@ function add_favorites() {
 };
 
 if (active_page == 'thread' || active_page == 'index' || active_page == 'catalog' || active_page == 'ukko') {
-	$(document).ready(function(){
+	$(function(){
 		var favorites = JSON.parse(localStorage.favorites);
 		var is_board_favorite = ~$.inArray(board_name, favorites);
 

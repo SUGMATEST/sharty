@@ -1,0 +1,183 @@
+<?php
+
+header('Cache-Control: public, max-age=180');
+
+include 'inc/bansdependency.php'; //A 403'd directory
+//Db connection stuff
+$dbname = DBNAME;
+$hostname = HOSTNAME;
+
+$username = SQLUSERNAME;
+$password = SQLPASS;
+
+$conn = new PDO("mysql:host=$hostname;dbname=$dbname", $username, $password);
+
+$query = "SELECT ipstart, created, reason, board, expires, creator, post FROM bans ORDER BY id DESC LIMIT 100";
+$stmt = $conn->prepare($query);
+$stmt->execute();
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+foreach($results as &$result) {
+    $ip = inet_ntop($result['ipstart']);
+    if ($ip == '82.17.191.214') {
+        $result['ipstart'] = $ip;
+    }
+    else {
+        $result['ipstart'] = 'x.x.x.x';
+    }
+
+    /*
+    $ip_parts = explode('.', (inet_ntop($result['ipstart'])));
+    if(count($ip_parts) == 4){
+        $result['ipstart'] = $ip_parts[0] . '.' . $ip_parts[1] . '.x.x';
+        if (!preg_match("/^[0-9]*\.[0-9]*\.x\.x$/", $result['ipstart'])) {
+            $result['ipstart'] = 'other';
+        }
+    }else{
+        $result['ipstart'] = 'other';
+    }
+    */
+}
+
+
+function get_identifier_code_for_username($username) {
+	//Converts a username to a 2 digit hex string like aa4b or 0a4b.
+	//This is used to identify mods in the bans and moves.
+	//We hash it with md5 and take the last two bytes.
+	$hash = md5($username . "hfg8fwegyh3gvb45hy4y345yt345y734w4"); // salt to prevent rainbow tables
+	$hash = substr($hash, -4);
+	return $hash;
+}
+
+//Same function, but for a number instead - MAKE SURE TO EDIT BANS.PHP FI YOU CAHNGE THIS
+function get_identifier_code_for_number($number) {
+	$hash = md5($number . "hfg8fwegyh3gvb45hy4y345yt345y734w4"); // salt to prevent rainbow tables
+	$hash = substr($hash, -4);
+	return $hash;
+}
+?>
+<html class="desktop-style">
+<title>Ban List</title>
+<link rel="stylesheet" media="screen" href="/stylesheets/style.css">
+<div class="boardlist"><span class="sub" data-description="0">[ <a href="/">home</a> / <a href="/o">overboard</a> ]</span>  <span class="sub" data-description="1">[ <a href="/soy/index.html" title="Soyjaks">soy</a> / <a href="/qa/index.html" title="Question &amp; Answer">qa</a> / <a href="/raid/index.html" title="Raid: SHADOW LEGENDS">raid</a> / <a href="/swa/index.html" title="Swaggers With Attitude">swa</a> ]</span>  <span class="sub" data-description="2">[ <a href="/pol/index.html" title="International Politics">pol</a> / <a href="/int/index.html" title="International">int</a> ]</span>  <span class="sub" data-description="3">[ <a href="/craft/index.html" title="Minecraft">craft</a> / <a href="/tttt/index.html" title="Trouble in Terrorist Town Talk">tttt</a> ]</span>  <span class="sub" data-description="4">[ <a href="/a/index.html" title="Aryanime">a</a> / <a href="/fit/index.html" title="Health, Fitness and IRL">fit</a> / <a href="/g/index.html" title="General Threads">g</a> / <a href="/mtv/index.html" title="Music, Television, Video games">mtv</a> / <a href="/r/index.html" title="Requests &amp; Soy Art">r</a> / <a href="/r9k/index.html" title="ROBOT9999">r9k</a> / <a href="/sude/index.html" title="Soychan 2004">sude</a> / <a href="/tech/index.html" title="Technology">tech</a> / <a href="/webm/index.html" title="Videos and GIF">webm</a> ]</span>  <span class="sub" data-description="5">[ <a href="/q/index.html" title="Soyjak Party Meta">q</a> / <a href="/news/index.html" title="Soy News">news</a> / <a href="/gem/index.html" title="Soygem Party">gem</a> / <a href="/chive/index.html" title="Archive">chive</a> ]</span>  <span class="sub" data-description="6">[ <a href="/rules.html">rules</a> / <a href="/pass.html">pass</a> / <a href="/bans.php">bans</a> ]</span>  <span class="sub" data-description="7">[ <a href="https://wiki.soyjak.st/">wiki</a> / <a href="https://soybooru.com">booru</a> / <a href="/irc.html">irc</a> / <a href="https://soyjak.blog/">blog</a> / <a href="https://soysylum.org/">soysylum</a> / <a href="https://t.me/thedailyjak">dailyjak</a> ]</span></div>
+<header><h1>Ban List</h1></header>
+<table class="modlog">
+<tr><th>IP</th><th>Reason</th><th>Board</th><th>Length</th><th>Staff</th></tr>
+<script type="text/javascript" src="/js/mobile-style.js"></script>
+<style>
+body {
+    max-width: 100%;
+}
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.tooltip .tooltiptext {
+    display: none;
+    background-color: #fff;
+    color: #000;
+    text-align: justify;
+    border-radius: 0px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    top: 100%; 
+    left: 0;
+    opacity: 0;
+    border: 1px solid #000;
+    width: 100%;
+    white-space: pre-wrap;
+}
+
+.tooltip:hover .tooltiptext {
+    display: block;
+    opacity: 1;
+}
+
+</style>
+<?php
+function calctime($seconds = 0) {
+    $interval = date_diff(date_create("@0"),date_create("@$seconds"));
+
+    foreach (array('y'=>'year','m'=>'month','d'=>'day','h'=>'hour','i'=>'minute','s'=>'second') as $format=>$desc) {
+        if ($interval->$format >= 1) $thetime[] = $interval->$format . ($interval->$format == 1 ? " $desc" : " {$desc}s");
+    }
+
+    return isset($thetime) ? implode(' ', $thetime) . ($interval->invert ? ' ago' : '') : NULL;
+}
+foreach ($results as $result) {
+    $post = json_decode($result['post'], true);
+    echo "<tr>";
+    echo "<td>" . htmlspecialchars($result['ipstart']) . "</td>";
+    $reason = $result['reason'] ?? "<i>no reason given</i>";
+    if (!empty($result['post']) && ($result['reason'] !== '3. Advertising for imageboards, discord servers, telegram channels, crypto projects, etc. is not permitted.' && 
+    $result['reason'] !== '1. You will not post, link to, or request illegal content.' && 
+    $result['reason'] !== '3. Participation in hostile or disruptive off-site communities or servers is forbidden.' && 
+    $result['reason'] !== '1. Attempting to get the site taken down via DDOS, false reports, etc. is forbidden.' && 
+    $result['reason'] !== 'Pending ban request.' &&
+    !str_contains($post['body_nomarkup'], 'http')
+    )
+    ) {
+        $body = $post['body'];
+        $reason = "<div class=\"tooltip\">$reason<span class=\"tooltiptext\">$body</span></div>";
+    }
+    echo "<td>$reason</td>";
+    if (!$result['board']) {
+        echo "<td>all</td>";
+    }
+    else {
+        echo "<td>/" . htmlspecialchars($result['board']) . "/</td>";
+    }
+
+    //$result['expires'] is the unix timestamp of when the ban expires
+    $currentLength = $result['expires'] - time();
+    $totalLength = $result['expires'] - $result['created'];
+
+    //convert totalLength to human readable format
+    $totalLengthStr = calctime($totalLength);
+    $currentLengthStr = calctime($currentLength) . " from now";
+    if (!$result['expires']) {
+        echo "<td>forever</td>";
+    }
+    else {
+        echo "<td>" . $totalLengthStr . "</td>";
+    }
+    $creatorHash = get_identifier_code_for_number($result['creator']);
+    switch ($result['creator']) {
+        case -1;
+        echo "<td><i>system</i></td>";
+        break;
+//        case 194;
+//        echo "<td><i>system</i></td>";
+//        break;
+//        case 137:
+//        echo "<td><i>IAMS</i></td>";
+//        break;
+
+        case 108;
+        echo "<td><span style='color:#db7500; font-weight:bold'>Froot</span></td>";
+        break;
+        //case 54;
+        //echo "<td><span style='color:#ff0000; font-weight:bold'>DOLL</span></td>";
+        //break;
+        //case 68;
+        //echo "<td><span style='color:#ff3c9a; font-weight:bold'>Red</span></td>";
+        //break;
+	case 127:
+	echo "<td><span style='color:purple; font-weight:bold'>06eb</span></td>";
+	break;
+        default:
+        if ($result['ipstart'] == '82.17.191.214' && $result['creator'] == 90) {
+            echo "<td><span style='color:red; font-weight:bold'>Quote</span></td>";
+        }
+        else {
+            echo "<td><span style='color:purple; font-weight:bold'>Mod</span></td>";
+        }
+//        echo "<td><span style='color:purple; font-weight:bold'>{$creatorHash}</span></td>";
+    }
+}
+
+echo "</table>";

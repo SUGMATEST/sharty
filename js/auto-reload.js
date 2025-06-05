@@ -23,22 +23,22 @@
 
 auto_reload_enabled = true; // for watch.js to interop
 
-$(document).ready(function(){
+$(function(){
 	if($('div.banner').length == 0)
 		return; // not index
 		
-	if($(".post.op").size() != 1)
+	if($(".post.op").length != 1)
 		return; //not thread page
 	
 	var countdown_interval;
 
 	// Add an update link
-	$('.boardlist.bottom').prev().after("<span id='updater'><a href='#' id='update_thread' style='padding-left:10px'>["+_("Update")+"]</a> (<input type='checkbox' id='auto_update_status' checked> "+_("Auto")+") <span id='update_secs'></span></span>");
+	$('.boardlist.bottom').prev().after("<span id='updater'><a href='#' id='update_thread' style='padding-left:10px'>["+_("Update")+"]</a> (<input type='checkbox' checked id='auto_update_status'> "+_("Auto")+") <span id='update_secs'></span></span>");
 
 	// Grab the settings
-	var settings = new script_settings('auto-reload');
+	var settings = new script_settings('auto-reload-sse');
 	var poll_interval_mindelay        = settings.get('min_delay_bottom', 5000);
-	var poll_interval_maxdelay        = settings.get('max_delay', 600000);
+	var poll_interval_maxdelay        = settings.get('max_delay', 30000);
 	var poll_interval_errordelay      = settings.get('error_delay', 30000);
 
 	// number of ms to wait before reloading
@@ -68,7 +68,7 @@ $(document).ready(function(){
 	});
 
 	var window_active = true;
-	$(window).focus(function() {
+	$(window).on('focus', function() {
 		window_active = true;
 		recheck_activated();
 
@@ -77,12 +77,12 @@ $(document).ready(function(){
 			poll_interval_delay = poll_interval_mindelay;
 		}
 	});
-	$(window).blur(function() {
+	$(window).on('blur', function() {
 		window_active = false;
 	});
 	
 
-	$('#auto_update_status').click(function() {
+	$('#auto_update_status').on('click', function() {
 		if($("#auto_update_status").is(':checked')) {
 			auto_update(poll_interval_mindelay);
 		} else {
@@ -149,8 +149,10 @@ $(document).ready(function(){
 				var loaded_posts = 0;	// the number of new posts loaded in this update
 				var elementsToAppend = [];
 				var elementsToTriggerNewpostEvent = [];
+				var postIDs = [];
 				$(data).find('div.post.reply').each(function() {
 					var id = $(this).attr('id');
+					postIDs.push(id);
 					if($('#' + id).length == 0) {
 						if (!new_posts) {
 							first_new_post = this;
@@ -169,7 +171,27 @@ $(document).ready(function(){
 				});
 				time_loaded = Date.now(); // interop with watch.js
 				
-				
+
+				if (postIDs.length > 0) {
+					
+					//Let's remove any posts that are not in the new data from the DOM
+					$('div.post.reply:not(.you)').each(function() {
+						if (postIDs.indexOf($(this).attr('id')) == -1) {
+							//remove the br
+							$(this).next().remove();
+							$(this).remove();
+						}
+					});
+					
+
+					$('div.post.reply .unapproved').each(function() {
+						var post = $(this).closest('div.post.reply');
+						var updatedPost = $(data).find('#' + post.attr('id'));
+						post.replaceWith(updatedPost);
+						$(document).trigger('new_post', $('#' + post.attr('id')));
+					});
+				}
+
 				if ($('#auto_update_status').is(':checked')) {
 					// If there are no new posts, double the delay. Otherwise set it to the min.
 					if(loaded_posts == 0) {
@@ -222,7 +244,7 @@ $(document).ready(function(){
 		return false;
 	};
 	
-	$(window).scroll(function() {
+	$(window).on('scroll', function() {
 		recheck_activated();
 		
 		// if the newest post is not visible

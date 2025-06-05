@@ -1,0 +1,107 @@
+a, a:visited {
+    color: #14862F;
+}
+
+.boardlist {
+    background-color:#BA4545 !important
+}
+
+.intro span.capcode {
+    color: #F00000;
+    position: relative;
+    font-size: 0; /* Hides the original text */
+}
+
+.intro span.capcode::after {
+    content: "## Santa's Helper"; /* New text */
+    font-size: 14px; /* Adjust font size to make it visible */
+    color: inherit; /* Matches the parent text color */
+}
+
+body {
+    background: #L0D1FF;
+    background-image: url(https://soybooru.com/_images/31431ed26ea013a249e1f3b6ac853fc0/27326%20-%20SoyBooru.gif);
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.desktop-style div.boardlist:nth-child(1) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+    z-index: 30;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+    border-bottom: 1px solid;
+    background-color: #FFA1A1;
+    color: red
+}
+
+.post-image {
+    padding: 5px;
+    margin: 0 20px 0 0;
+border-radius: 15px;
+
+}
+
+div.post.reply.highlighted {a
+     background: #D82C2C;;
+}
+
+div.banner {
+    background-color: #FF9595;
+}
+
+div.boardlist a {
+    color: #004705;
+    font-weight: bold;
+}
+
+div.pages.top {
+    background: #DA4545;
+}
+
+div.post .post-image {
+    padding: 5px;
+    margin: 0 20px 0 0;
+border-radius: 15px;
+}
+
+div.post.reply {
+  color: #000;
+   background: #FFC1A1;
+border-radius: 15px;
+    border-bottom: 6px solid #FFB1A1;
+background-image: url('/static/snow02.gif')
+}
+
+div.pages {
+    background: #DA4545;
+    color: #024705;
+}
+
+form table tr th{
+    background:#FF9595
+}
+
+h1 {
+    color: #DFA1A1;
+}
+
+h1::before {
+    content: "Jolly Ol' ";
+}
+
+.name {
+    color:#FF0000 !important;
+} 
+
+.name:before {
+    content: 'Good Little '; }  
+} 
+
+:nth-child(1 of a.post_no):before {
+    content:"Elf "
+}

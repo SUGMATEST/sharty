@@ -1,0 +1,52 @@
+.name {
+    color:#c7c7c7 !important;
+} 
+
+body {
+    background: ##c7c7c7;
+    background-image: url(https://files.catbox.moe/rz4p5r.png);
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+div.pages.top {
+    background: #c7c7c7;
+}
+
+div.pages {
+    background: #c7c7c7;
+    color: #c7c7c7;
+}
+
+h1 {
+    color: #D82C2C;
+}
+
+h1::before {
+    content: "Giga ";
+}
+
+div.post.reply {
+  color: #000;
+   background: #6e6e6e;
+}
+div.post.reply.highlighted {
+  background: #4f4f4f;
+}
+
+form table tr th{
+    background:#404040
+}
+
+.boardlist {
+    background-color:#787878 !important
+}
+
+.name:before {
+    content: 'Giga'; }  
+} 
+
+.name {
+    color:#c7c7c7 !important;
+} 

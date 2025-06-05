@@ -6,8 +6,22 @@
         <div class="file{% if post.num_files > 1 %} multifile" style="width:{{ file.thumbwidth + 40 }}px"{% else %}"{% endif %}>
 	{% if file.file == 'deleted' %}
 		<img class="post-image deleted" src="{{ config.root }}{{ config.image_deleted }}" alt="" />
+	{% elseif file.is_approved|default(true) == false and not mod|hasPermission(config.mod.file_approval, board.uri) %}
+		<img class="post-image unapproved" src="{{ config.root }}{{ config.approval_image }}" alt="Unapproved media" />  
 	{% else %}
-		<p class="fileinfo">File: <a href="{{ config.uri_img }}{{ file.file }}">{{ file.file }}</a> <span class="unimportant">
+		<p class="fileinfo">File: 
+		{% if file.is_approved|default(true) == false %}<span style="border: 2px solid red; color: #ff0000; font-weight:bold; font-size: 1.5em;padding:0.1em;">Unapproved</span> {% endif %}
+		{% if config.show_filename and file.filename %}
+			{% if file.filename|length > config.max_filename_display %}
+				<a href="{{ config.uri_img }}{{ file.file }}" title="{{ file.filename|e|bidi_cleanup }}">{{ file.filename|truncate_filename(config.max_filename_display)|e|bidi_cleanup }}</a> 
+			{% else %}
+				<a href="{{ config.uri_img }}{{ file.file }}">{{ file.filename|e|bidi_cleanup }}</a> 
+			{% endif %}
+			<a class="filename-download-link" href="{{ config.uri_img }}{{ file.file }}" download="{{ file.filename|e|bidi_cleanup }}" title="Download with original filename">📥︎</a> 
+		{% else %}
+			<a href="{{ config.uri_img }}{{ file.file }}">{{ file.file }}</a> 
+		{% endif %}		
+		<span class="unimportant">
 		(
 			{% if file.thumb == 'spoiler' %}
 				{% trans %}Spoiler Image{% endtrans %}, 
@@ -19,15 +33,10 @@
 					, {{ ratio(file.width, file.height) }}
 				{% endif %}
 			{% endif %}
-			{% if config.show_filename and file.filename %}
-				, 
-				{% if file.filename|length > config.max_filename_display %}
-					<span class="postfilename" title="{{ file.filename|e|bidi_cleanup }}">{{ file.filename|truncate_filename(config.max_filename_display)|e|bidi_cleanup }}</span>
-				{% else %}
-					<span class="postfilename">{{ file.filename|e|bidi_cleanup }}</span>
-				{% endif %}
-			{% endif %}
-		)
+			{% if file.nsfw_prob|default(0) == 1 %}, NSFW{% endif %}
+		) 
+		{% if file.hash %}<span hidden class="filehash">{{ file.hash }}</span>{% endif %}
+		<span hidden class="nsfw-prob">{{ file.nsfw_prob|default(0) }}</span>
 		{% include "post/image_identification.html" %}
 		{% include "post/file_controls.html" %}</span></p>
 	{% include "post/image.html" with {'post':file} %}

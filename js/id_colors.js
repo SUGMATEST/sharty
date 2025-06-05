@@ -1,5 +1,5 @@
 if (active_page == 'thread' || active_page == 'index') {
-	$(document).ready(function(){
+	$(function(){
 		if (window.Options && Options.get_tab('general')) {
 			var selector = '#color-ids>input';
 			var e = 'change';

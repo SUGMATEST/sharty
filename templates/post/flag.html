@@ -1,9 +1,9 @@
-{% if config.display_flags and post.modifiers.flag %}
+{% if (post.mod and post.mod|hasPermission(config.mod.show_sensitive, board.uri) and post.country) or (config.display_flags and post.modifiers.flag) %}
 	 <img
 		{% if config.country_flags_condensed %}
-			 class="flag flag-{{ post.modifiers.flag }}" src="{{ config.image_blank }}"
+			 class="flag flag-{{ post.modifiers.flag|default(post.country) }}" src="{{ config.image_blank }}"
 		{% else %}
-			 class="flag" src="{{ config.uri_flags|sprintf(post.modifiers.flag) }}"
+			 class="flag" src="{{ config.uri_flags|sprintf(post.modifiers.flag|default(post.country)) }}"
 		{% endif %}
 		 style="{% if post.modifiers['flag style'] %}
 				{{ post.modifiers['flag style'] }}

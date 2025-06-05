@@ -255,3 +255,7 @@
 .flag.flag-zanzibar {background-position: -144px -165px}
 .flag.flag-zm {background-position: -160px -165px}
 .flag.flag-zw {background-position: -176px -165px}
+
+/*Meme Flags */
+.flag.flag-red {background:url(lgbt.png) no-repeat !important}
+.flag.flag-kuz {background:url(flags.png) no-repeat !important}

@@ -63,10 +63,10 @@ function createBoardlist($mod=false) {
 	$body = trim($body);
 
 	// Message compact-boardlist.js faster, so that page looks less ugly during loading
-	$top = "<script type='text/javascript'>if (typeof do_boardlist != 'undefined') do_boardlist();</script>";
+	$top = "<script type='text/javascript' nonce='B13FF511DC4651B846CEDB57FAD24'>if (typeof do_boardlist != 'undefined') do_boardlist();</script>";
 	
 	return array(
-		'top' => '<div class="boardlist">' . $body . '</div>' . $top,
+		'top' => '<div class="boardlist">' . $body . '</div><br>' . $top,
 		'bottom' => '<div class="boardlist bottom">' . $body . '</div>'
 	);
 }
@@ -254,7 +254,7 @@ function truncate($body, $url, $max_lines = false, $max_chars = false) {
 			$body = preg_replace('/&[^;]*$/', '', $body);
 		}
 		
-		$body .= '<span class="toolong">'.sprintf(_('Post too long. Click <a href="%s">here</a> to view the full text.'), $url).'</span>';
+		$body .= '<span class="toolong">'.sprintf(_('<a href="%s">Post too long. Click here to view the full text.</a>'), $url).'</span>';
 	}
 	
 	return $body;
@@ -338,6 +338,7 @@ function embed_html($link) {
 	return 'Embedding error.';
 }
 
+#[\AllowDynamicProperties]
 class Post {
 	public function __construct($post, $root=null, $mod=false) {
 		global $config;
@@ -350,16 +351,23 @@ class Post {
 
 		if (isset($this->files) && $this->files) {
 			$this->files = is_string($this->files) ? json_decode($this->files) : $this->files;
-			// Compatibility for posts before individual file hashing
 			foreach ($this->files as $i => &$file) {
 				if (empty($file)) {
 					unset($this->files[$i]);
 					continue;
 				}
-				if (!isset($file->hash))
-					$file->hash = $this->filehash;
+				if (is_array($file)) {
+					if (!isset($file['hash'])) {
+						$file['hash'] = $this->filehash;
+					}
+				} else if (is_object($file)) {
+					if (!isset($file->hash)) {
+						$file->hash = $this->filehash;
+					}
+				}
 			}
 		}
+		
 		
 		$this->subject = utf8tohtml($this->subject);
 		$this->name = utf8tohtml($this->name);
@@ -398,6 +406,7 @@ class Post {
 	}
 };
 
+#[\AllowDynamicProperties]
 class Thread {
 	public function __construct($post, $root = null, $mod = false, $hr = true) {
 		global $config;
@@ -412,7 +421,7 @@ class Thread {
 			$this->files = is_string($this->files) ? json_decode($this->files) : $this->files;
 		
 		$this->subject = utf8tohtml($this->subject);
-		$this->name = utf8tohtml($this->name);
+		$this->name = ($this->name);
 		$this->mod = $mod;
 		$this->root = $root;
 		$this->hr = $hr;
@@ -455,11 +464,12 @@ class Thread {
 		global $board, $config, $debug;
 		
 		$hasnoko50 = $this->postCount() >= $config['noko50_min'];
-		
+		$pages = ceil( $this->postCount() / 100);
+
 		event('show-thread', $this);
 
 		$file = ($index && $config['file_board']) ? $config['file_post_thread_fileboard'] : $config['file_post_thread'];
-		$built = Element($file, array('config' => $config, 'board' => $board, 'post' => &$this, 'index' => $index, 'hasnoko50' => $hasnoko50, 'isnoko50' => $isnoko50, 'mod' => $this->mod));
+		$built = Element($file, array('config' => $config, 'board' => $board, 'post' => &$this, 'index' => $index, 'hasnoko50' => $hasnoko50, 'isnoko50' => $isnoko50, 'mod' => $this->mod, 'pages' => $pages));
 		
 		return $built;
 	}
