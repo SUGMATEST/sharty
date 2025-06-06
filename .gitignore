@@ -29,6 +29,7 @@
 /templates/cache
 
 # other stuff
+.well-known
 .DS_Store
 .htaccess
 thumbs.db
@@ -60,3 +61,5 @@ sitemap.xml
 
 /js/integrity
 /js/jspaint
+
+/o/*

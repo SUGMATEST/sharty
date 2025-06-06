@@ -1,6 +1,0 @@
-<?php
-
-
-// Changes made via web editor by "doll" @ Thu, 07 Mar 2024 04:46:48 -0500:
-$config['mandate_soy_history'] = true;
-
