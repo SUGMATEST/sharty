@@ -1971,41 +1971,9 @@ if (isset($_POST['delete'])) {
 
 	//Some thing in which you have to have some post history to post. Good for stopping get steals. Keep this commented out in most cases or else you will die.
 	if (
-		$config['mandate_soy_history'] && !$mod && !$hasPass
+		$config['mandate_soy_history'] && $newUser && !$mod && !$hasPass
 	) {
-		// $ip = $endUserIP;
-		// $queryStr = "
-		// 		SELECT * FROM `posts_soy` WHERE `ip` = :ip
-		// 		UNION
-		// 		SELECT * FROM `posts_q` WHERE `ip` = :ip
-		// 		UNION
-		// 		SELECT * FROM `posts_qa` WHERE `ip` = :ip
-		// 	";
-
-		// $query = prepare($queryStr);
-		// $query->bindValue(":ip", $ip);
-
-		// if (!$query->execute()) {
-		// 	error(db_error($query));
-		// }
-
-		// if ($query->rowCount() == 0) {
-		// 	error("You look like a bot.");
-		// }
-		$ip = $_SERVER['REMOTE_ADDR'];
-		//check if exists in redis
-
-		/*
-				$cached_result = $redis->get($ip);
-				if ($cached_result) {
-				  // Result is cached, return the value
-				  return $cached_result === 'true';
-				} else {*/
-		$result = $redis->get($ip);
-
-		if (!$result) {
-			error($config['error']['no_post_history']);
-		}
+		error($config['error']['no_post_history']);
 	}
 
 	if (isset($config['mandate_board_history']) && $config['mandate_board_history']) {
