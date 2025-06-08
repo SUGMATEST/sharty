@@ -23,6 +23,9 @@ if (isset($_POST['thread'], $_POST['board'])) {
 	$pass_id = get_pass_id($_COOKIE['pass']);
 
 	if (!$is_mod && !isset($pass_id)) {
+		if (isset($config['encrypted_thread_pass_only']) && $config['encrypted_thread_pass_only'])
+			error("A Soygem pass is required to decrypt threads on this board.");
+
 		if (get_oldest_post($_SERVER['REMOTE_ADDR']) > time() - (3600 * 8) || get_ip_post_count($_SERVER['REMOTE_ADDR']) < 15 || $_SERVER['REMOTE_ADDR'] == '0.0.0.0') {
 			error("Your IP address doesn't meet the requirements for decrypting threads.");
 		}
