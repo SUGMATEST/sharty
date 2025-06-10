@@ -987,7 +987,7 @@ if ($step == 0) {
 	preg_match_all("/(^|\n)((SET|CREATE|INSERT).+)\n\n/msU", $sql, $queries);
 	$queries = $queries[2];
 	
-	$queries[] = Element('posts.sql', array('board' => 'b'));
+	$queries[] = Element('posts.sql', array('board' => 'news'));
 	
 	$sql_errors = '';
 	foreach ($queries as $query) {
