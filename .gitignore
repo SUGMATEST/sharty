@@ -24,6 +24,7 @@
 
 # script file
 /main.js
+/_main.js
 
 # templates cache
 /templates/cache
