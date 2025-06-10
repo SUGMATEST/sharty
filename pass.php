@@ -72,7 +72,13 @@ if (isset($_POST['pass'])) {
 	$pass = $prepared->fetch();
 	if ($pass) {
 		$hmac = createHMACToken($pass['passkey'], $SECRET);
-		setcookie('pass', $hmac, time() + 60 * 60 * 24 * 30);
+		setcookie('pass', $hmac, [
+			'expires' => time() + 60 * 60 * 24 * 30,
+			'path' => "/",
+			'secure' => true,
+			'httponly' => true,
+			'samesite' => "Strict"
+		]);
 		modLog("Activated pass #" . $pass['pass_id']);
 
 		$success = true;
