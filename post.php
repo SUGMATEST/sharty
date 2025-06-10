@@ -226,11 +226,7 @@ if (isset($_POST['delete'])) {
 	check_login(false);
 	$is_mod = isset($mod);
 
-	if ($_POST['board'] == "mediator" && !$is_mod) {
-		error($config['error']['board_locked']);
-	}
-
-	if (!hasPermission($config['mod']['post_on_locked_board'], $board['uri']) && $config['board_locked']) {
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked']) {
 		error($config['error']['board_locked']);
 	}
 
@@ -359,7 +355,7 @@ if (isset($_POST['delete'])) {
 		}
 	}
 
-	if (!hasPermission($config['mod']['post_on_locked_board'], $board['uri']) && $config['board_locked']) {
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked']) {
 		error($config['error']['board_locked']);
 	}
 	/*			_('1. You WILL NOT post, link to, or request illegal content.'),
@@ -720,7 +716,7 @@ if (isset($_POST['delete'])) {
 	if ((rand() % 30000) == 0) {
 		error("Are you REALLY sure you want to make that post? Do you know what you're doing? Maybe you'd like to reconsider that?");
 	}
-	if (!hasPermission($config['mod']['post_on_locked_board'], $board['uri']) && $config['board_locked']) {
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked']) {
 		error($config['error']['board_locked']);
 	}
 	if ($config['board_thread_creation_locked'] && !isset($_POST['thread']) && !hasPermission($config['mod']['sticky'], $board['uri'])) {
