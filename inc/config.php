@@ -2139,7 +2139,7 @@
 	$config['mod']['cycle'] = MANAGER;
 	$config['cycle_limit'] = &$config['reply_limit'];
 	// Post on locked boards
-	$config['mod']['post_on_locked_board'] = MOD;
+	$config['mod']['post_on_locked_board'] = JANITOR;
 	// Lock a thread
 	$config['mod']['lock'] = MOD;
 	// Post in a locked thread

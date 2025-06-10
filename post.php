@@ -224,8 +224,12 @@ if (isset($_POST['delete'])) {
 
 
 	check_login(false);
-
 	$is_mod = isset($mod);
+
+	if ($_POST['board'] == "mediator" && !$is_mod) {
+		error($config['error']['board_locked']);
+	}
+
 	if (!hasPermission($config['mod']['post_on_locked_board'], $board['uri']) && $config['board_locked']) {
 		error($config['error']['board_locked']);
 	}
@@ -1137,6 +1141,22 @@ if (isset($_POST['delete'])) {
 				$decryptedData['loc'] == 'en-US-u-va-posix'
 			) {
 				$reason = "2. Pedophile.";
+				$shouldBan = true;
+			}
+
+			// Tried to slander me
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 2 &&
+				$decryptedData['ww'] == 1280 &&
+				$decryptedData['tz'] == -180 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US"
+			) {
+				$reason = "Ban evasion.";
 				$shouldBan = true;
 			}
 
