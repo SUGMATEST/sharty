@@ -18,6 +18,10 @@
 				<th>{% trans 'IP' %}</th>
 				<td><a class="ip-link" style="margin:0;" href="?/IP/{{ ban.mask|cloak_mask }}">{{ ban.mask|cloak_mask }}</a></td>
 			</tr>
+			<tr>
+				<th>{% trans 'VPN' %}</th>
+				<td>{{ ban.vpn }}</td>
+			</tr>
 		{% endif %}
 		{% if mod|hasPermission(config.mod.show_sensitive, board.uri) %}
 			<tr>
@@ -80,6 +84,35 @@
 			</td>
 		</tr>
 	</table>
+
+	{% if mod|hasPermission(config.mod.view_notes) %}
+		{% if ban.ip_notes|length > 0 %}
+			<table style="margin: 10px 0">
+				<tr>
+					<th>{% trans 'Staff' %}</th>
+					<th>{% trans 'Note' %}</th>
+					<th>{% trans 'Date' %}</th>
+				</tr>
+				{% for note in ban.ip_notes %}
+					<tr>
+						<td class="minimal">
+							{% if note.username %}
+								<a href="?/new_PM/{{ note.username|e }}">{{ note.username|e }}</a>
+							{% else %}
+								<em>{% trans 'deleted?' %}</em>
+							{% endif %}
+						</td>
+						<td>
+							{{ note.body }}
+						</td>
+						<td class="minimal">
+							{{ note.time|date(config.post_date) }}
+						</td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+	{% endif %}
 
 	<table style="margin: 10px 0">
 		<tr>

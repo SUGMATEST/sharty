@@ -82,6 +82,14 @@ function generate_salt() {
 function login($username, $password) {
 	global $mod, $config;
 	
+	if (mb_strlen($username) > 30) {
+		return false;
+	}
+
+	if (mb_strlen($password) > 300) {
+		return false;
+	}
+
 	$query = prepare("SELECT `id`, `type`, `boards`, `password`, `version` FROM ``mods`` WHERE BINARY `username` = :username");
 	$query->bindValue(':username', $username);
 	$query->execute() or error(db_error($query));
@@ -196,9 +204,17 @@ function check_login($prompt = false) {
 	global $config, $mod;
 	// Validate session
 	if (isset($_COOKIE[$config['cookies']['mod']])) {
+		if (mb_strlen($_COOKIE[$config['cookies']['mod']]) > 67) {
+			destroyCookies();
+			if ($prompt) {
+				mod_login();
+			}
+			die();
+		}
+
 		// Should be username:hash:salt
 		$cookie = explode(':', $_COOKIE[$config['cookies']['mod']]);
-		if (count($cookie) != 3) {
+		if (count($cookie) != 3 || mb_strlen($cookie[0]) > 30 || mb_strlen($cookie[2]) != 15) {
 			// Malformed cookies
 			destroyCookies();
 			if ($prompt) mod_login();

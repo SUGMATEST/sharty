@@ -111,7 +111,18 @@ function ipintel_function($Visitor_IP)
       format=json returns the result in JSON format with extra information.
   */
 //  $email = $redis->get('getIPIntelEmail');
-  $email = 'soyjakst@outlook.com';
+  $checksToday = $redis->incr("GetIPIntelChecksDay");
+  $redis->expire("GetIPIntelChecksDay", 60*60*24, "NX");
+
+  $checksMinute = $redis->incr("GetIPIntelChecksMinute");
+  $redis->expire("GetIPIntelChecksMinute", 60, "NX");
+
+  if ($checksToday >= 500 || $checksMinute >= 15) {
+    error_log('Reached rate limits for GetIPIntel');
+    return 2;
+  }
+
+  $email = 'soy@nigge.rs';
   $ch = curl_init("https://check.getipintel.net/check.php?ip=" . $Visitor_IP . "&contact=" . $email . "&flags=f");
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
   $result = curl_exec($ch);
@@ -123,7 +134,7 @@ function ipintel_function($Visitor_IP)
   }
 
   /*result is now a float from 0-1*/
-  if ($result > 0.95) {
+  if ($result > 0.90) {
     error_log('GetIPIntel blocked ' . $Visitor_IP . ' - Response: ' . $result);
     return 1;
   } else if ($result < 0) {
@@ -302,11 +313,11 @@ function vpn_check($ip, $returnNoCache = false)
     }
 
     if ($tordnsel === 1 || $bgptools === 1 || $proxycheck === 1 || $ipintel === 1)
-      $redis->set($ip, 'true', 30*24*60*90);
+      $redis->set($ip, 'true', 30*24*60*60);
     else if ($tordnsel === 0 && $bgptools === 0 || $proxycheck === 0 && $ipintel === 0)
-      $redis->set($ip, 'false', 30*24*60*90);
+      $redis->set($ip, 'false', 30*24*60*60);
     else
-      $redis->set($ip, 'false', 24*60*60);
+      $redis->set($ip, 'false', 60*60*6);
 
     if ($tordnsel === 1 || $bgptools === 1 || $proxycheck === 1 || $ipintel === 1) {
       return true;

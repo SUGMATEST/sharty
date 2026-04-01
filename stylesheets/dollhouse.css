@@ -1,0 +1,117 @@
+body {
+    background: #0A2B66; 
+    
+    background-color: #0A2B66; /* Sets the Dark Blue color */
+    color: #FFFFFF; /* White text for readability */
+    font-family: arial, helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+.desktop-style body {
+    padding-top: 20px;
+}
+
+a,
+a:visited,
+.bl {
+    text-decoration: none;
+    color: #FD3D99; /* CUSTOM: Pink links */
+}
+
+a:hover,
+.intro a.post_no:hover,
+.intro a.email:hover span.name {
+    color: #FFEC40; /* CUSTOM: Bright Yellow on hover */
+}
+
+/* --- POST CONTAINERS AND REPLIES --- */
+div.post.reply {
+    background: #0A2B66; /* CUSTOM: Dark Blue background for reply boxes */
+    margin: 0.2em 4px;
+    padding: 0.2em 0.3em 0.5em 0.6em;
+    border-width: 1px;
+    border-style: none solid solid none;
+    border-color: #FD3D99; /* CUSTOM: Pink border */
+    display: inline-block;
+    max-width: 94% !important;
+}
+
+div.post.reply.highlighted {
+    background: #2D58A0; /* CUSTOM: Lighter Blue for highlighted replies */
+}
+
+/* Base post container background (slightly lighter dark blue for contrast) */
+div.post, .thread {
+    background-color: #1A3C88;
+    border-color: #FD3D99;
+    color: #FFFFFF;
+}
+
+/* --- POST INFORMATION (NAMES, SUBJECTS, METADATA) --- */
+.intro span.name {
+    color: #FD3D99; /* CUSTOM: Pink for the name/ID */
+    font-weight: bold;
+}
+
+.intro span.subject {
+    color: #99FF99; /* CUSTOM: Bright Green for the subject line */
+    font-weight: bold;
+}
+
+.intro a.email span.name,
+.intro time,
+p.intro a.ip-link,
+p.intro a.capcode,
+p.intro a.nametag,
+.postinfo {
+    color: #FD3D99; /* CUSTOM: Pink for all metadata */
+}
+
+/* --- QUOTE TEXT --- */
+span.quote {
+    color: #99FF99; /* CUSTOM: Bright Green for standard quotes (>) */
+}
+
+span.quote2 {
+    color: #FFEC40; /* CUSTOM: Bright Yellow for secondary quotes */
+}
+
+/* --- HEADERS --- */
+h2 {
+    color: #FD3D99; /* CUSTOM: Pink for h2 headers */
+    font-size: 11pt;
+    margin: 0;
+    padding: 0;
+}
+
+header div.subtitle,
+h1 {
+    color: #FD3D99; /* CUSTOM: Pink for H1 and subtitle */
+    text-align: center;
+}
+
+/* --- MISC. CONTAINERS (Modals, Pages, etc.) --- */
+div.ban {
+    background: #1A3C88; /* CUSTOM: Dark post color for ban boxes */
+    border: 1px solid #FD3D99; /* CUSTOM: Pink border */
+}
+
+div.ban h2,
+form table tr th {
+    background: #FD3D99; /* CUSTOM: Pink background for ban headers/table headers */
+    color: #000000; /* Black text on bright background */
+}
+
+div.pages {
+    color: #FFFFFF; /* CUSTOM: White text for page numbers */
+    background: #1A3C88; /* CUSTOM: Dark post color for pagination box */
+    border-right: 1px solid #FD3D99; /* CUSTOM: Pink border */
+    border-bottom: 1px solid #FD3D99;
+}
+
+.desktop-style div.boardlist:nth-child(1) {
+    border-bottom: 1px solid #FD3D99; /* CUSTOM: Pink border */
+    background-color: #1A3C88; /* CUSTOM: Dark post color for sticky boardlist */
+}

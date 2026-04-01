@@ -529,7 +529,7 @@ class ImageConvertVIPS extends ImageBase {
 		
 		$config['thumb_keep_animation_frames'] = (int)$config['thumb_keep_animation_frames'];
 		
-		if ($this->format == 'gif' && ($config['thumb_ext'] == 'webp' || $config['thumb_ext'] == 'gif' || $config['thumb_ext'] == '') && $config['thumb_keep_animation_frames'] > 1) {
+		if (($this->format == 'gif' || $this->format == 'webp') && ($config['thumb_ext'] == 'webp' || $config['thumb_ext'] == 'gif' || $config['thumb_ext'] == '') && $config['thumb_keep_animation_frames'] > 1) {
 			if (($error = shell_exec("vips thumbnail " .
 					escapeshellarg($this->src . '') . "[n=-1] " .
 					escapeshellarg($this->temp) . "[strip,Q=50] {$this->width} --height {$this->height}"

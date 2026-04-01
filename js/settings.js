@@ -57,7 +57,7 @@ tb_settings['auto-reload'] = {
 	// Minimum delay before reloading the page when at the bottom
 	min_delay_bottom: 5000,
 	// Maximum delay before reloading the page
-	max_delay: 30000,
+	max_delay: 15000,
 	// Delay if there was an error
 	error_delay: 30000,
 	// Reset the delay to the minimum upon focussing the window.

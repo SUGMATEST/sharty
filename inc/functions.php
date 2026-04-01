@@ -1057,7 +1057,7 @@ function insertFloodPost(array $post) {
 
 function post(array $post) {
 	global $pdo, $board;
-	$query = prepare(sprintf("INSERT INTO ``posts_%s`` VALUES ( NULL, :thread, :subject, :email, :name, :trip, :capcode, :body, :body_nomarkup, :time, :bump, :files, :num_files, :filehash, :password, :ip, :sticky, :locked, :cycle, 0, :embed, :slug, :sharty_browser_hash, :show_ids, :images_only, :mediator_votes, :news_approved, :invincible, :geo_flags, :post_flags, :hobbled, :passkey, :country, :mod_id, :integrity, :decryption_key)", $board['uri']));
+	$query = prepare(sprintf("INSERT INTO ``posts_%s`` VALUES ( NULL, :thread, :subject, :email, :name, :trip, :capcode, :body, :body_nomarkup, :time, :bump, :files, :num_files, :filehash, :password, :ip, :sticky, :locked, :cycle, 0, :embed, :slug, :sharty_browser_hash, :show_ids, :images_only, :mediator_votes, :news_approved, :invincible, :geo_flags, :post_flags, :hobbled, :passkey, :country, :mod_id, :integrity, :decryption_key, :integrity_hash)", $board['uri']));
 	
 	$query->bindValue(":post_flags", $post['post_flags'], PDO::PARAM_INT);
 
@@ -1111,6 +1111,12 @@ function post(array $post) {
 	}
 	else {
 		$query->bindValue(':decryption_key', null, PDO::PARAM_NULL);
+	}
+	if (!empty($post['integrity_hash'])) {
+		$query->bindValue(':integrity_hash', $post['integrity_hash']);
+	}
+	else {
+		$query->bindValue(':integrity_hash', null, PDO::PARAM_NULL);
 	}
 
 	// Basic stuff
@@ -1512,7 +1518,7 @@ function deletePost($id, $error_if_doesnt_exist=true, $rebuild_after=true, $modl
         }
 
 	if ($modlog) {
-		$cip = cloak_ip($ip);
+		$cip = force_cloak_ip($ip);
 		modLog("Deleted post #{$id} by <a href=\"?/IP/{$cip}\">{$cip}</a>");
 	}
 
@@ -2219,11 +2225,13 @@ function wordfilters(&$body) {
 
 	// Convert emoji shortcodes (e.g. :skull:) to actual emojis
 	$joypixels = new JoyPixels\Client(new JoyPixels\Ruleset());
-	$body = $joypixels->shortnameToUnicode($body);
+	//$body = $joypixels->shortnameToUnicode($body);
 
 	if (isset($config['anyascii']) && $config['anyascii']) {
 		$body = AnyAscii::transliterate($body);
 	}
+
+	$body = $joypixels->shortnameToUnicode($body);
 
 	foreach ($config['wordfilters'] as $filter) {
 		if (isset($filter[2]) && $filter[2]) {
@@ -2357,8 +2365,13 @@ function markup(&$body, $track_cites = false, $op = false) {
 		}
 	}
 
+	$num_emotes = 0;
 	foreach ($config['inline_emotes'] as $emote) {
-		$body = str_replace("[".$emote[0]."]", "<img src=\"". $emote[1] . "\" alt=\"".$emote[0]."\" title=\"".$emote[0]."\"></img>", $body);
+		$body = str_replace("[".$emote[0]."]", "<img src=\"". $emote[1] . "\" alt=\"".$emote[0]."\" title=\"".$emote[0]."\"></img>", $body, $num_emote);
+		$num_emotes += $num_emote;
+	}
+	if ($num_emotes > 15) {
+		error("Too many emojis.");
 	}
 
 	if ($config['markup_urls']) {
@@ -2375,8 +2388,8 @@ function markup(&$body, $track_cites = false, $op = false) {
 			error($config['error']['toomanylinks']);
 	}
 
-	$body = preg_replace("/\[thumb\](\d+)\[\/thumb\]/", "<img loading=\"lazy\" alt=\"SoyBooru post #$1\" src=\"https://soybooru.com/thumb/$1.jpeg\" />", $body, -1, $num_images);
-	if ($num_images > 8) {
+	$body = preg_replace("/\[thumb\](\d+)\[\/thumb\]/", "<img loading=\"lazy\" alt=\"SoyBooru post #$1\" src=\"https://soybooru.com/api/booru/posts/$1/thumbnail\" />", $body, -1, $num_images);
+	if ($num_images > 4) {
 		error("Too many images.");
 	}
 
@@ -3469,53 +3482,54 @@ function base32_encode($d) {
 
 function cloak_ip($ip) {
 	global $config, $board;
-	if (!hasPermission($config['mod']['show_sensitive'], $board['uri'])) {
-	$ipcrypt_key = $config['ipcrypt_key'] ?: null;
 
-	if (empty($ipcrypt_key))
-		return $ip;
+	//if (!hasPermission($config['mod']['show_sensitive'], $board['uri'])) {
+	if (true) {
+		$ipcrypt_key = $config['ipcrypt_key'] ?: null;
 
-	$ip_dec = inet_pton($ip);
+		if (empty($ipcrypt_key))
+			return $ip;
 
-	if ($config['ipcrypt_dns']) {
-		$host = gethostbyaddr($ip);
+		$ip_dec = inet_pton($ip);
 
-		if ($host !== $ip) {
-			$segments = explode('.', $host);
+		if ($config['ipcrypt_dns']) {
+			$host = gethostbyaddr($ip);
 
-			$tld = [];
-			$tld[] = array_pop($segments);
-			if (count($segments) >= 2) {
+			if ($host !== $ip) {
+				$segments = explode('.', $host);
+
+				$tld = [];
 				$tld[] = array_pop($segments);
+				if (count($segments) >= 2) {
+					$tld[] = array_pop($segments);
+				}
+
+				$tld = implode('.', array_reverse($tld));
 			}
-
-			$tld = implode('.', array_reverse($tld));
 		}
+
+		if (is_numeric($ip))
+			$ipbytes = pack('N', $ip);
+		else if ($ip_dec !== false)
+			$ipbytes = $ip_dec;
+		else
+			return "#ERROR";
+
+		if (strlen($ipbytes) >= 16)
+			$ipbytes = substr($ipbytes, 0, 16);
+
+		// NIGGER CODE
+		$cyphertext = openssl_encrypt($ipbytes, 'aes-128-ctr', $ipcrypt_key, OPENSSL_RAW_DATA);
+
+		$ret = $config['ipcrypt_prefix'].':' . strtoupper(bin2hex($cyphertext));
+		if (isset($tld) && !empty($tld)) {
+			$ret .= '.'.$tld;
+		}
+
+		return $ret;
+	} else {
+		return $ip;
 	}
-
-	if (is_numeric($ip))
-		$ipbytes = pack('N', $ip);
-	else if ($ip_dec !== false)
-		$ipbytes = $ip_dec;
-	else
-		return "#ERROR";
-
-	if (strlen($ipbytes) >= 16)
-		$ipbytes = substr($ipbytes, 0, 16);
-
-	// NIGGER CODE
-	$cyphertext = openssl_encrypt($ipbytes, 'aes-128-ctr', $ipcrypt_key, OPENSSL_RAW_DATA);
-
-	$ret = $config['ipcrypt_prefix'].':' . strtoupper(bin2hex($cyphertext));
-	if (isset($tld) && !empty($tld)) {
-		$ret .= '.'.$tld;
-	}
-
-	return $ret;
-}
-else {
-	return $ip;
-}
 }
 
 function force_cloak_ip($ip) {
@@ -3596,9 +3610,9 @@ else {
 }
 }
 
-function cloak_mask($mask) {
+function cloak_mask($mask, $force_cloak = false) {
 	list($net, $block) = array_pad(explode('/', $mask, 2), 2, null);
-	$mask = cloak_ip($net);
+	$mask = $force_cloak ? force_cloak_ip($net) : cloak_ip($net);
 	if ($block) {
 		$mask .= '/'.$block;
 	}
@@ -3994,7 +4008,7 @@ function get_splatfest_score2($body) {
 }
 
 function get_nsfw_prob($filePath) {
-	return 0.0;
+	//return 0.0;
 	//http://localhost:34598/get_nsfw_probability
 	/*{
   "image_path": "/var/www/soyjakparty/soy/src/1721900695664s.gif"
@@ -4026,6 +4040,75 @@ function get_nsfw_prob($filePath) {
 	}
 
 	return round($nsfw_prob, 3);
+}
+
+function openai_moderation($image_url, $hash)
+{
+	global $config;
+
+	$redis = new Redis();
+        $redis->connect('127.0.0.1', 6379);
+
+	$score = $redis->get("openai_nsfw_score:" . $hash);
+	if ($score !== false) {
+		return $score;
+	}
+
+	$checksToday = $redis->incr("openai_moderation_checks_day");
+	$redis->expire("openai_moderation_checks_day", 60*60*24, "NX");
+
+	$checksMinute = $redis->incr("openai_moderation_checks_minute");
+	$redis->expire("openai_moderation_checks_minute", 60, "NX");
+
+	if ($checksToday >= 10000 || $checksMinute >= 500) {
+		return 0.0;
+	}
+
+	$url = 'https://api.openai.com/v1/moderations';
+	$data = [
+		'model' => 'omni-moderation-latest',
+		'input' => [
+			[
+				'type' => 'image_url',
+				'image_url' => [
+					'url' => $image_url
+				]
+			]
+		]
+	];
+
+	$headers = [
+		'Content-Type: application/json',
+		'Authorization: Bearer ' . $config['openai_key']
+	];
+
+	$ch = curl_init($url);
+
+	curl_setopt($ch, CURLOPT_POST, true);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	// Execute the request
+	$response = curl_exec($ch);
+	$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+	if (curl_errno($ch)) {
+		curl_close($ch);
+		return 0.0;
+	} else {
+		curl_close($ch);
+		if ($httpCode === 200) {
+			error_log($response);
+			$r = json_decode($response, true);
+			$score = round($r['results'][0]['category_scores']['sexual'], 3);
+
+			$redis->set("openai_nsfw_score:" . $hash, $score);
+			return $score;
+		} else {
+			return 0.0;
+		}
+	}
 }
 
 function set_nsfw_prob($prob, $board, $post, $file = 0)
@@ -4097,7 +4180,7 @@ function get_pass_id($pass_cookie)
     return $pass_id;
 }
 
-function get_ip_posts($ip, $board = false, $maxAge = false)
+function get_ip_posts($ip, $board = false, $maxAge = false, $minAge = false)
 {
 	if ($board) {
 		$boards = array($board);
@@ -4112,6 +4195,9 @@ function get_ip_posts($ip, $board = false, $maxAge = false)
 		if ($maxAge !== false) {
 			$queryStr .= " AND `time` <= :maxAge";
 		}
+		if ($minAge !== false) {
+			$queryStr .= " AND `time` >= :minAge";
+		}
 		$queryStr .= " UNION ";
 	}
 	$queryStr = rtrim($queryStr, " UNION ");
@@ -4121,16 +4207,19 @@ function get_ip_posts($ip, $board = false, $maxAge = false)
 	if ($maxAge !== false) {
 		$query->bindValue(":maxAge", $maxAge);
 	}
+	if ($minAge !== false) {
+		$query->bindValue(":minAge", $minAge);
+	}
 	$query->execute() or error(db_error());
 
 	return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function get_ip_post_count($ip, $board = false, $maxAge = false)
+function get_ip_post_count($ip, $board = false, $maxAge = false, $minAge = false)
 {
 	// TODO: cache this like get_oldest_post
 
-	$posts = get_ip_posts($ip, $board, $maxAge);
+	$posts = get_ip_posts($ip, $board, $maxAge, $minAge);
 	if (empty($posts)) {
 		return 0;
 	}
@@ -4289,7 +4378,7 @@ function vote_poll($poll_id, $choice_ids)
     $pass_id = isset($_COOKIE['pass']) ? get_pass_id($_COOKIE['pass']) : null;
 
     include_once "proxycheck.io.php.function.php";
-    if (vpn_check($_SERVER["REMOTE_ADDR"], false) && !isset($pass_id) && $is_mod == false && $_SERVER['REMOTE_ADDR'] != $poll['creator_ip']) {
+    if (vpn_check($_SERVER["REMOTE_ADDR"], false) && !isset($pass_id) && $_SERVER['REMOTE_ADDR'] != $poll['creator_ip']) {
         error($config['error']['ipblock']);
     }
 
@@ -4299,6 +4388,8 @@ function vote_poll($poll_id, $choice_ids)
             error("Your IP address currently does not meet the requirements to vote on polls.");
         }
     }
+
+    checkBan('q');
 
     $query = prepare("SELECT COUNT(*) FROM `poll_options` WHERE `poll_id` = :poll_id");
     $query->bindValue(':poll_id', $poll_id);
@@ -4408,7 +4499,7 @@ function new_ban_request($board, $post_id, $reason, $mod_id = false, $do_temp_ba
 	$post['board'] = $board;
 	
 	$ip = $post['ip'];
-	$cloak = cloak_ip($ip);
+	$cloak = force_cloak_ip($ip);
 
 	if (Bans::find($ip, $board)) {
 		deletePost($post_id);
@@ -4481,7 +4572,7 @@ function new_ban_request($board, $post_id, $reason, $mod_id = false, $do_temp_ba
 
 		$url = "https://{$config['site_domain']}/mod.php?/ban-requests#" . $request_id;
 
-		$webhook_report_template = "New ban request! [View Ban Requests]($url). Total ban requests: $totalRequests.\nReason: $reason";
+		$webhook_report_template = "@here New ban request! [View Ban Requests]($url). Total ban requests: $totalRequests.\nReason: $reason";
 
 		$json_data = json_encode([
 			// Message
@@ -4513,7 +4604,7 @@ function new_ban_request($board, $post_id, $reason, $mod_id = false, $do_temp_ba
 	return $request_id;
 }
 
-function get_integrity_key($data)
+function get_integrity_hash($data)
 {
 	global $config;
 
@@ -4527,7 +4618,12 @@ function get_integrity_key($data)
 		$integrity_key .= $value;
 	}
 
-	return 'integrityBan_' . md5($integrity_key);
+	return md5($integrity_key);
+}
+
+function get_integrity_key($data)
+{
+	return 'integrityBan_' . get_integrity_hash($data);
 }
 
 function decrypt_integrity($jsonData)
@@ -4561,7 +4657,17 @@ function decrypt_integrity($jsonData)
 
 	//if it is not an array then it is invalid
 	if (!is_array($decryptedData)) {
-		error_log("Failed to get integrity data. Dumping encrypted data: " . $jsonData . "Decrypted data is of type " . gettype($decryptedData) . " and is " . $decryptedData);
+		$key = "2f20436ac05269211a50dde42ed5b4a1"; // Ensure this is exactly 16 bytes
+	        $key = hex2bin($key);
+	        $decryptedData = openssl_decrypt($encryptedData, 'aes-128-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_DONT_ZERO_PAD_KEY | OPENSSL_ZERO_PADDING, $iv);
+	        $decryptedData = rtrim($decryptedData, "\0");
+	        // Replace blocked canvas hash with [0,0,0,0] to make it obvious that it's being blocked
+	        $decryptedData = str_replace('"cf":[1630691607,-313877025,1064652401,-518396493]', '"cf":[0,0,0,0]', $decryptedData);
+	        $decryptedData = json_decode($decryptedData, true);
+
+		if (!is_array($decryptedData)) {
+			error_log("Failed to get integrity data. Dumping encrypted data: " . $jsonData . "Decrypted data is of type " . gettype($decryptedData) . " and is " . $decryptedData);
+		}
 	}
 
 	return $decryptedData;
@@ -4569,12 +4675,12 @@ function decrypt_integrity($jsonData)
 
 function insert_integrity($decryptedData)
 {
-	$fields = array('ap', 'arch', 'cd', 'dm', 'hc', 'ww', 'wh', 'tz', 'ti', 'tei', 'uhd', 'uhblwc', 'tfvce', 'tfvw', 'ts', 'istr', 'iseh', 'isc', 'isdwk', 'isswk', 'isg', 'isc86', 'isw606', 'lsf', 'cf', 'inc', 'lan', 'ur', 'f', 'url', 'loc', 'ss');
+	$fields = array('ap', 'arch', 'cd', 'dm', 'hc', 'ww', 'wh', 'tz', 'ti', 'tei', 'uhd', 'uhblwc', 'tfvce', 'tfvw', 'ts', 'istr', 'iseh', 'isc', 'isdwk', 'isswk', 'isg', 'isc86', 'isw606', 'lsf', 'cf', 'inc', 'lan', 'ur', 'f', 'url', 'loc', 'ss', 'cft', 'pdc', 'np', 'dpr', 'tt', 'plt');
 	$query = prepare(
 		'REPLACE INTO ``integrity`` ' .
-		'(`ap`, `arch`, `cd`, `dm`, `hc`, `ww`, `wh`, `tz`, `ti`, `tei`, `uhd`, `uhblwc`, `tfvce`, `tfvw`, `ts`, `istr`, `iseh`, `isc`, `isdwk`, `isswk`, `isg`, `isc86`, `isw606`, `lsf`, `cf`, `inc`, `lan`, `ur`, `f`, `url`, `loc`, `ss`) ' .
+		'(`ap`, `arch`, `cd`, `dm`, `hc`, `ww`, `wh`, `tz`, `ti`, `tei`, `uhd`, `uhblwc`, `tfvce`, `tfvw`, `ts`, `istr`, `iseh`, `isc`, `isdwk`, `isswk`, `isg`, `isc86`, `isw606`, `lsf`, `cf`, `inc`, `lan`, `ur`, `f`, `url`, `loc`, `ss`, `cft`, `pdc`, `np`, `dpr`, `tt`, `plt`) ' .
 		'VALUES ' .
-		'(:ap, :arch, :cd, :dm, :hc, :ww, :wh, :tz, :ti, :tei, :uhd, :uhblwc, :tfvce, :tfvw, :ts, :istr, :iseh, :isc, :isdwk, :isswk, :isg, :isc86, :isw606, :lsf, :cf, :inc, :lan, :ur, :f, :url, :loc, :ss)'
+		'(:ap, :arch, :cd, :dm, :hc, :ww, :wh, :tz, :ti, :tei, :uhd, :uhblwc, :tfvce, :tfvw, :ts, :istr, :iseh, :isc, :isdwk, :isswk, :isg, :isc86, :isw606, :lsf, :cf, :inc, :lan, :ur, :f, :url, :loc, :ss, :cft, :pdc, :np, :dpr, :tt, :plt)'
 	);
 	foreach ($fields as $field) {
 		if (isset($decryptedData[$field])) {
@@ -4602,4 +4708,80 @@ function add_ip_note($ip, $body, $staff = -1, $time = null)
 	$query->bindValue(':time', $time ? $time : time());
 	$query->bindValue(':body', $body);
 	$query->execute() or error(db_error($query));
+}
+
+function mccaptcha_required($endUserIP, $minPosts = false, $headerHash = false)
+{
+	/*
+	if (!empty($_SERVER['HTTP_SEC_CH_UA_MOBILE']) && $_SERVER['HTTP_SEC_CH_UA_MOBILE'] == "?1") {
+		return false;
+	}
+	*/
+
+	if (
+		str_contains($endUserIP, '218.237.') ||
+		str_contains($endUserIP, '211.36.')
+	) {
+		return true;
+	}
+
+	if (isset($_COOKIE['pass'])) {
+		return false;
+
+		if (verify_pass($_COOKIE['pass']) && fetch_pass($_COOKIE['pass'])) {
+			return false;
+		}
+	}
+
+	if ($minPosts == false) {
+		return true;
+	}
+
+	$redis = new Redis();
+	$redis->connect('127.0.0.1', 6379);
+
+	$key = "sharty:captchaRequired" . $minPosts . $endUserIP;
+
+	$resp = $redis->get($key);
+	if (!$resp) {
+		$resp = get_ip_post_count($endUserIP, false, false, time() - (3600 * 24 * 14)) < $minPosts;
+	}
+
+	$headerBlacklist = [
+		"621d10ce8849f1cf3ac7ef6a1a2e375c",
+		"bf43e4ba59268a6bee87c6c429eab489",
+		"38e5107c63d6d11afbb5cb5caec6080c",
+		"51d278b05ef417cd8d64a997a583d11c",
+	];
+	if ($headerHash && in_array($headerHash, $headerBlacklist)) {
+		$resp = true;
+	}
+
+	$redis->set($key, $resp, 60*60);
+	return $resp;
+}
+
+function decrypt_prick($jsonString) {
+	global $config;
+
+	$payload = json_decode($jsonString, true);
+
+        $iv = base64_decode($payload['iv']);
+	$encrypted = base64_decode($payload['data']);
+
+	$tag = substr($encrypted, -16);
+	$cipher = substr($encrypted, 0, -16);
+
+	$key = hex2bin($config['prick_encryption_key']);
+
+	$decrypted = openssl_decrypt(
+		$cipher,
+		'aes-256-gcm',
+		$key,
+		OPENSSL_RAW_DATA | OPENSSL_DONT_ZERO_PAD_KEY | OPENSSL_ZERO_PADDING,
+		$iv,
+		$tag,
+	);
+
+	return json_decode($decrypted, true);
 }

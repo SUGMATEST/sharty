@@ -5,7 +5,7 @@ require_once 'inc/bootstrap.php';
 use GeoIp2\Database\Reader as GeoIp2Reader;
 
 $reader = new GeoIp2Reader('inc/lib/geoip2/GeoLite2-City.mmdb');
-$record = $reader->city('68.202.228.155');
+$record = $reader->city('79.136.140.213');
 
 echo var_dump($record);
 

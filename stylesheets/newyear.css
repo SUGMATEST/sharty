@@ -1,0 +1,274 @@
+/* Theme made by legochud */ 
+ 
+* {
+    font-family: "Futura", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+}
+ 
+body {
+    background:
+    linear-gradient( /* Black overlay for visiblity*/
+            rgba(0, 0, 0, 0.6),
+            rgba(0, 0, 0, 0.6)
+        ),
+     url(https://soybooru.com/_images/bc7201c9f584ad96dd025d7864857091/156225%20-%20SoyBooru.gif)
+        no-repeat center fixed;
+ 
+    background-size: cover; /* ensures the image fills the screen */
+ 
+    color: #FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0 4px;
+    min-height: 100vh;
+}
+ 
+a:visited, .intro a.email span.name {
+    color: #0000CD;
+    text-decoration: underline;
+}
+a {
+    color: #4B4BCC;
+}
+ 
+a:hover, .intro a.post_no:hover {
+    color: #FFD700;
+}
+ 
+header div.subtitle,
+h1 {
+        animation: flashColors3 5s infinite steps(1, end);
+	text-align: center;
+}
+ 
+a.post_no {
+    color: #006400;
+    text-decoration: none;
+}
+ 
+.intro a.post_no {
+    color: inherit;
+}
+ 
+div.post.reply {
+    color: #FFFFFF;
+    background: linear-gradient(to bottom, #545454, #363636);
+    border: 0px solid #000000;
+}
+ 
+div.post.reply.highlighted {
+    background: linear-gradient(to bottom, #5E5E5E, #737373);
+    color: #00FFFF;
+    animation: flashColors 6s infinite linear;
+    border: 0px solid #000000;
+}
+ 
+div.post.reply div.body a {
+    color: #4682B4;
+}
+ 
+div.post div.body {
+        color: #FFFFFF;
+	word-wrap: break-word;
+	white-space: pre-wrap;
+}
+ 
+.intro span.subject {
+    text-shadow: 0 0 10px #FF0073;
+    color: #FF0073;
+    font-weight: bold;
+}
+ 
+.intro span.name {
+    color: #D600CD;
+    font-weight: bold;
+}
+ 
+div.banner {
+        color: #000000;
+        animation: flashColors2 5s infinite steps(1, end);
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+ 
+div.banner a {
+	color: #000000;
+}
+form table tr th {
+    background: #D600CD;
+    color: #FFFFFF;
+    font-weight: 700;
+    border: 1px solid #404040;
+    font-size: 10pt;
+}
+ 
+div.ban {
+    background: linear-gradient(to bottom, #F5F5F5, #E0FFFF);
+    border: 1px solid #006400;
+    max-width: 700px;
+}
+ 
+div.ban h2 {
+    background: linear-gradient(to right, #90EE90, #98FB98);
+    color: #006400;
+    font-size: 12pt;
+}
+ 
+div.ban p {
+    color: black;
+    font-size: 12px;
+}
+ 
+div.pages {
+    background: linear-gradient(to bottom, #545454, #363636);
+    border-right: 1px solid #60DCEA;
+    border-bottom: 1px solid #60DCEA;
+    color: #89A;
+}
+ 
+div.pages a.selected {
+    color: #006400;
+    font-weight: bolder;
+}
+ 
+h1 {
+    font-family: Tahoma;
+    letter-spacing: -2px;
+    font-size: 20pt;
+}
+ 
+header div.subtitle {
+    font-size: 8pt;
+}
+ 
+hr {
+    border: none;
+    border-top: 1px solid #00E0FF;
+}
+ 
+div.boardlist {
+    color: #79498C;
+    font-size: 9pt;
+    background: linear-gradient(to bottom, #545454, #363636);
+}
+ 
+div.boardlist a {
+    color: #D600CD;
+    text-decoration: none;
+}
+ 
+table.modlog tr th {
+    background: linear-gradient(to right, #545454, #363636);
+}
+ 
+#options_div, #alert_div {
+    background: linear-gradient(to bottom, #545454, #363636);
+    border: 1px solid #60DCEA;
+}
+ 
+div.ban {
+        background: linear-gradient(to bottom, #363636, #545454);
+	border: 1px solid #00FFF7;
+	max-width: 700px;
+	margin: 30px auto;
+}
+ 
+div.ban h2 {
+    background: linear-gradient(to right, #00FFF7, #00FFF7);
+    color: #005956;
+    font-size: 12pt;
+}
+ 
+div.ban p {
+    color: red;
+    font-size: 12px;
+}
+ 
+.desktop-style div.boardlist:nth-child(1) {
+    background: linear-gradient(to bottom, #545454, #363636);
+    z-index: 30;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid #60DCEA;
+}
+ 
+span.quote { color: #789922; }
+span.quote2 { color: #f6750b; }
+span.spoiler { 
+    background: black; 
+    color: black; 
+}
+span.spoiler:hover, div.post.reply div.body span.spoiler:hover a { 
+    color: white; 
+}
+div.post.reply div.body span.spoiler a { 
+    color: black; 
+}
+span.heading { 
+    color: #AF0A0F; 
+    font-size: 11pt; 
+    font-weight: bold; 
+}
+span.heading2 { 
+    color: #2424ad; 
+    font-size: 11pt; 
+    font-weight: bold; 
+}
+span.omitted { 
+    display: block; 
+    margin-top: 1em; 
+    color: #707070; 
+}
+input[type="text"], input[type="password"], textarea { 
+    border: 1px solid #a9a9a9; 
+}
+textarea { width: 100%; }
+div.banner a:hover { 
+    color: #EEF2FF; 
+    text-decoration: none; 
+}
+img.banner, img.board_image { 
+    border: 1px solid #a9a9a9; 
+}
+ 
+textarea, input {
+    background-color: #242424; 
+    color: #60DCEA;
+}
+td#upload_selection {
+    background: linear-gradient(to bottom, #545454, #363636);
+}
+div.dropzone-wrap {
+    background: linear-gradient(to bottom,#545454, #363636);
+}
+ 
+.flash-border {
+    border: 2px solid #04FF00 !important;
+}
+ 
+@keyframes flashColors {
+    0%   { box-shadow: 0 0 10px #04FF00; }
+    20%  { box-shadow: 0 0 10px #FF0000; }
+    40%  { box-shadow: 0 0 10px #0000FF; }
+    60%  { box-shadow: 0 0 10px #FFFF00; }
+    80%  { box-shadow: 0 0 10px #FF00FF; }
+    100% { box-shadow: 0 0 10px #04FF00; }
+}
+ 
+@keyframes flashColors2 {
+    0%   { background-color: #04FF00; }
+    20%  { background-color: #FF0000; }
+    40%  { background-color: #0000FF; }
+    60%  { background-color:  #FFFF00; }
+    80%  { background-color:  #FF00FF; }
+    100% { background-color: #04FF00; }
+}
+ 
+@keyframes flashColors3 {
+    0%   { color: #04FF00; }
+    20%  { color: #FF0000; }
+    40%  { color: #0000FF; }
+    60%  { color:  #FFFF00; }
+    80%  { color:  #FF00FF; }
+    100% { color: #04FF00; }
+}

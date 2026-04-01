@@ -1,8 +1,6 @@
 <?php
 require 'inc/bootstrap.php';
 
-header('Cache-Control: public, max-age=180');
-
 $query = query('SELECT * FROM `bans` ORDER BY `id` DESC LIMIT 100');
 $query->execute() or error(db_error($query));
 $bans = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -22,8 +20,13 @@ foreach ($bans as &$ban) {
 		$post = new Post($post);
 		$ban['post'] = $post->build(true);
 	}
+
+	if ($config['mod_ids']) {
+		$ban['mod_id'] = get_identifier_code_for_number($ban['creator']);
+	}
 }
 
+header('Cache-Control: public, max-age=60');
 die(
 	Element($config['file_page_template'], array(
 		'title' => 'Ban List',

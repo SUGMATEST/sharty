@@ -95,7 +95,7 @@ else if ($board == 'booru') {
 	$href = 'https://soybooru.com/';
 }
 else if ($board == 'irc') {
-        $href = 'https://irc.soyjak.st';
+        $href = 'https://webirc.soyjak.st';
 }
 else if (isset($_GET['mod']) && $_GET['mod']) {
 	$href = "/mod.php?/$board/";

@@ -21,6 +21,7 @@
 	{{ boardlist.top }}
 	
 	{% if pm %}<div class="top_notice">You have <a href="?/PM/{{ pm.id }}">an unread PM</a>{% if pm.waiting > 0 %}, plus {{ pm.waiting }} more waiting{% endif %}.</div><hr />{% endif %}
+	{% if mod and mod|hasPermission(config.mod.panic_button) and config.mandate_soy_history %}<h1 style="font-size: 64px;">PANIC MODE IS ENABLED</h1><hr>{% endif %}
 	{% if config.url_banner %}<img class="board_image" src="{{ config.url_banner }}" style="max-width:300px" width="300" height="100" alt="A banner for soyjak.party" />{% endif %}
 	
 	{% include 'board_header.html' %}

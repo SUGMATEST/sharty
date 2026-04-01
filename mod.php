@@ -29,6 +29,7 @@ $pages = array(
 	'/new_PM/([^/]+)'			=> 'secure_POST new_pm',	// create a new pm
 	'/PM/(\d+)(/reply)?'			=> 'pm',			// read a pm
 	'/inbox'				=> 'inbox',			// pm inbox
+	'/inbox/(\d+)'				=> 'inbox',			// inbox for mod ID
 	
 	'/log'					=> 'log',			// modlog
 	'/log/(\d+)'				=> 'log',			// modlog
@@ -62,6 +63,9 @@ $pages = array(
 	
 	'/IP/([\w.:]+)'				=> 'secure_POST ip',		// view ip address
 	'/IP/([\w.:]+)/remove_note/(\d+)'	=> 'secure ip_remove_note',	// remove note from ip address
+
+	'/HID/([a-z0-9]{32})'			=> 'header_hash',
+	'/IID/([a-z0-9]{32})'			=> 'integrity_hash',
 
 	'/ban'					=> 'secure_POST ban',		// new ban
 	'/bans'					=> 'secure_POST bans',		// ban list
@@ -118,6 +122,7 @@ $pages = array(
 	'/repair_tables'	=> 'repair_tables',
 	'/dismiss_all_reports' => 'secure dismiss_all_reports',
 	'/panic_button' => 'panic_button',
+	'/mccaptcha' => 'mccaptcha',
 	'/lockout' => 'lockout',
 	'/passes' => 'view_passes',
 	'/create-pass' => 'secure_POST create_pass',

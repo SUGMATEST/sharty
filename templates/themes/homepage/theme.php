@@ -22,8 +22,7 @@
 			if (!$lastBuild)
 				$lastBuild = 0;
 
-			if (time() - $lastBuild < 180) {
-				error_log("Skipping home build");
+			if (time() - $lastBuild < 120) {
 				return;
 			}
 			apcu_store('last_home_build', time());

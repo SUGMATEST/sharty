@@ -1,0 +1,306 @@
+/* ===============================
+   GLOBAL ALIGNMENT
+================================= */
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Center all images inside posts and threads */
+.file,
+.fileThumb {
+  float: none !important;
+  display: inline-flex !important;   /* shrink-wrap to content */
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 0.5rem auto !important;
+  text-align: center !important;
+  width: fit-content !important;     /* only as wide as the image */
+  max-width: 100% !important;        /* don’t overflow on small screens */
+  box-sizing: border-box;
+}
+
+.file img,
+.fileThumb img,
+div.post img {
+  display: block !important;
+  margin: 0 auto !important;
+  float: none !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Shrink .files wrapper */
+div.files, p.intro {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  display: inline-block !important;  /* shrink to content */
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin: 0.5rem auto !important;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: 90px;
+}
+
+/* ===============================
+   LABELS, TEXT, QUOTES
+================================= */
+label:not(:has(span.capcode)) span.name {
+  color: #00BF3A !important;
+}
+
+span.quote {
+  font-weight: bold;
+  color: #38F527;
+}
+
+/* ===============================
+   POSTS
+================================= */
+div.post {
+  color: #000;
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  border-radius: px;
+  border: 25px solid #A3088E;
+  padding: 20px;
+  font-family: Frutiger;
+  font-size: 14px;
+}
+
+div.post.reply {
+  color: #000;
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  border-radius: 25px;
+  border: 15px solid #A3088E;
+  padding: 20px;
+  font-family: Frutiger;
+  font-size: 14px;
+}
+
+div.post.reply.highlighted {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+/* ===============================
+   HEADERS & TITLES
+================================= */
+h1 {
+  color: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  width: fit-content;
+  margin: auto;
+}
+
+div.subtitle {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  width: 100px;
+  border-radius: 25px;
+  margin: auto;
+}
+
+/* ===============================
+   TABLES & FORMS
+================================= */
+form table tr th {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+td#upload_selection {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+/* ===============================
+   NAVIGATION & PAGES
+================================= */
+.boardlist {
+  background: #3F5EFB !important;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%) !important;
+}
+
+div.pages,
+div.pages.top {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+div#expand-all-images {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  width: fit-content;
+  margin-left: auto;
+}
+
+/* ===============================
+   NEWS, BLOTTER, DROPZONE
+================================= */
+div#news {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  border-radius: 25px;
+}
+
+div.blotter {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  width: fit-content;
+  margin: auto;
+}
+
+div.dropzone-wrap {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+div.mix {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+/* ===============================
+   THREAD / META ELEMENTS
+================================= */
+div#post-moderation-fields,
+span#thread-links,
+span#updater,
+div#thread_stats,
+fieldset,
+div.center {
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+}
+
+/* ===============================
+   BACKGROUND (RESPONSIVE)
+================================= */
+@media only screen and (max-width: 767px) {
+body {
+    background: #404040;
+    background-image: url('https://files.catbox.moe/hs8bji.gif');
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+}
+
+@media only screen and (min-width: 768px) {
+  body {
+      background: #404040;
+      background-image: 
+          url('https://files.catbox.moe/hs8bji.gif'),      /* first image */
+          url('https://files.catbox.moe/7egdq7.gif'),     /* second image */
+          url('https://files.catbox.moe/vr0siu.jpg');     /* third image */
+      background-position: 
+          bottom left,    /* first image */
+          bottom right,      /* second image */
+          top right;   /* third image */
+      background-repeat: 
+          no-repeat,      /* first image */
+          no-repeat,      /* second image */
+          no-repeat;      /* third image */
+      background-attachment: 
+          fixed,          /* first image */
+          fixed,          /* second image */
+          fixed;          /* third image */
+  }
+}
+
+.name:before {
+  content: '20ϪϪ '; }  
+} 
+
+.thread-controls {
+  display: flex !important;         /* ensure it's flex */
+  justify-content: center !important; /* center all children horizontally */
+  width: 100%;                       /* full width of the post container */
+}
+
+a.hide-thread-link {
+  float: none !important;            /* cancel the inline float */
+  margin: 0 !important;              /* reset margins */
+}
+
+/* ===============================
+   MOBILE ADJUSTMENTS
+================================= */
+@media only screen and (max-width: 767px) {
+  
+  /* Body background with first GIF and JPG only */
+  body {
+    display: block !important;
+    text-align: left !important;
+    align-items: unset !important;
+    background: #404040;
+    background-image: 
+      url('https://files.catbox.moe/hs8bji.gif'), /* first GIF */
+      url('https://files.catbox.moe/vr0siu.jpg');  /* JPG */
+    background-position: 
+      bottom left,   /* first GIF */
+      top right;     /* JPG */
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
+  }
+
+  /* Remove image centering */
+  .file,
+  .fileThumb,
+  div.files,
+  p.intro {
+    display: block !important;
+    margin: 0.5rem 0 !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .file img,
+  .fileThumb img,
+  div.post img {
+    margin: 0 !important;
+  }
+
+  /* Keep header and post form centered */
+  h1,
+  div#post-moderation-fields {
+    margin: auto !important;
+    width: fit-content !important;
+    text-align: center !important;
+  }
+
+  /* Blotter and expand-all left-aligned */
+  div.blotter,
+  div#expand-all-images {
+    margin: 0 !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  /* Thread controls left-aligned */
+  .thread-controls {
+    justify-content: flex-start !important;
+  }
+
+  a.hide-thread-link {
+    margin: 0 !important;
+    float: none !important;
+  }
+}
+
+div.post {
+  color: #000;
+  background: #3F5EFB;
+  background: radial-gradient(circle, rgba(63, 94, 251, 1) 0%, rgba(252, 70, 107, 1) 100%);
+  border-radius: 25px;
+  border: 25px solid #A3088E;
+  padding: 20px;
+  font-family: Frutiger;
+  font-size: 14px;
+}

@@ -1,33 +1,33 @@
 <?php
 $mode = @$_GET['mode'];
+
 function httpPost($url, $data)
 {
-
 	$header = array();
-	
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-    $response = curl_exec($curl);
-    curl_close($curl);
-    return $response;
+	$response = curl_exec($curl);
+	curl_close($curl);
+	return $response;
 }
+
 function httpPostGetCode($url, $data)
 {
-
 	$header = array();
-	
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+	$curl = curl_init($url);
+	curl_setopt($curl, CURLOPT_POST, true);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($data));
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-    $response = curl_exec($curl);
+	$response = curl_exec($curl);
 	$httpcode = curl_getinfo($curl,  CURLINFO_RESPONSE_CODE );
-    curl_close($curl);
-    return $httpcode;
+	curl_close($curl);
+
+	return $httpcode;
 }
 function httpGet($url) {
     $header = array();

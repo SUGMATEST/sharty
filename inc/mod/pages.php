@@ -1006,16 +1006,20 @@ function mod_ip_remove_note($cloaked_ip, $id)
 	$query->bindValue(':id', $id);
 	$query->execute() or error(db_error($query));
 
-	modLog("Removed a note for <a href=\"?/IP/{$cloaked_ip}\">{$cloaked_ip}</a>");
+	$force_cloaked_ip = force_cloak_ip($ip);
+
+	modLog("Removed a note for <a href=\"?/IP/{$force_cloaked_ip}\">{$force_cloaked_ip}</a>");
 
 	header('Location: ?/IP/' . $cloaked_ip . '#notes', true, $config['redirect_http']);
 }
 
 
-function mod_flag_vpn($unflag, $ip)
+function mod_flag_vpn($unflag, $cip)
 {
 	if (!hasPermission($config['mod']['flag_vpn']))
 		error($config['error']['noaccess']);
+
+	$ip = uncloak_ip($cip);
 
 	if (filter_var($ip, FILTER_VALIDATE_IP) === false)
 		error("Invalid IP address.");
@@ -1023,28 +1027,39 @@ function mod_flag_vpn($unflag, $ip)
 	$redis = new Redis();
 	$redis->connect('127.0.0.1', 6379);
 
+	$force_cloaked_ip = force_cloak_ip($ip);
+
 	if ($unflag) {
 		$redis->set($ip, 'false');
-		modLog("Unflagged {$ip} as a VPN");
+		modLog("Unflagged {$force_cloaked_ip} as a VPN");
 	}
 	else {
 		$redis->set($ip, 'true');
-		modLog("Flagged {$ip} as a VPN");
+		modLog("Flagged {$force_cloaked_ip} as a VPN");
 	}
 
 	$redis->close();
 
-	header('Location: ?/IP/' . $ip, true, $config['redirect_http']);
+	header('Location: ?/IP/' . $cip, true, $config['redirect_http']);
 }
 
 
 function mod_page_ip($cip)
 {
-	$ip = uncloak_ip($cip);
 	global $config, $mod;
 
+	if (hasPermission($config['mod']['show_sensitive']) && filter_var($cip, FILTER_VALIDATE_IP) !== false) {
+		$cip = cloak_ip($cip);
+		modlog("Converted raw IP to <a href=\"?/IP/{$cip}\">{$cip}</a>");
+		header('Location: ?/IP/' . $cip, true, $config['redirect_http']);
+		return;
+	}
+
+	$ip = uncloak_ip($cip);
 	if (filter_var($ip, FILTER_VALIDATE_IP) === false)
 		error("Invalid IP address.");
+
+	$force_cloaked_ip = force_cloak_ip($ip);
 
 	if (isset($_POST['ban_id'], $_POST['unban'])) {
 		if (!hasPermission($config['mod']['unban']))
@@ -1077,7 +1092,7 @@ function mod_page_ip($cip)
 		$query->bindValue(':body', $_POST['note']);
 		$query->execute() or error(db_error($query));
 
-		modLog("Added a note for <a href=\"?/IP/{$cip}\">{$cip}</a>");
+		modLog("Added a note for <a href=\"?/IP/{$force_cloaked_ip}\">{$force_cloaked_ip}</a>");
 
 		header('Location: ?/IP/' . $cip . '#notes', true, $config['redirect_http']);
 		return;
@@ -1096,7 +1111,7 @@ function mod_page_ip($cip)
 		openBoard($board['uri']);
 		if (!hasPermission($config['mod']['show_ip'], $board['uri']))
 			continue;
-		$query = prepare(sprintf('SELECT * FROM ``posts_%s`` WHERE `ip` = :ip AND `capcode` IS NULL ORDER BY `sticky` DESC, `id` DESC LIMIT :limit', $board['uri']));
+		$query = prepare(sprintf('SELECT * FROM ``posts_%s`` WHERE `ip` = :ip ORDER BY `sticky` DESC, `id` DESC LIMIT :limit', $board['uri']));
 		$query->bindValue(':ip', $ip);
 		$query->bindValue(':limit', $config['mod']['ip_recentposts'], PDO::PARAM_INT);
 		$query->execute() or error(db_error($query));
@@ -1179,8 +1194,19 @@ function mod_page_ip($cip)
 		$query->bindValue(':ip', $ip);
 		$query->execute() or error(db_error($query));
 		$integrity = $query->fetch(PDO::FETCH_ASSOC);
+		unset($integrity['ti']);
+		unset($integrity['tei']);
+		unset($integrity['uhd']);
+		unset($integrity['uhblwc']);
+		unset($integrity['tfvw']);
+		unset($integrity['url']);
 		$args['integrity_data'] = $integrity;
 		$args['integrity_key'] = get_integrity_key($integrity);
+	}
+
+	if (hasPermission($config['mod']['show_sensitive']) && isset($_POST['uncloak_ip'])) {
+		$args['raw_ip'] = $ip;
+		modlog("Retrieved raw IP for <a href=\"?/IP/{$force_cloaked_ip}\">{$force_cloaked_ip}</a>");
 	}
 
 	$args['security_token'] = make_secure_link_token('IP/' . $cip);
@@ -1189,6 +1215,88 @@ function mod_page_ip($cip)
 
 	mod_page(sprintf('%s: %s', _('IP'), htmlspecialchars($cip)), $config['file_mod_view_ip'], $args, $args['hostname']);
 }
+
+
+function mod_page_header_hash($hash)
+{
+	global $config, $mod;
+
+	$args = array();
+	$args['ip'] = $hash;
+	$args['posts'] = array();
+
+	$boards = listBoards();
+	foreach ($boards as $board) {
+		openBoard($board['uri']);
+		if (!hasPermission($config['mod']['show_ip'], $board['uri']))
+			continue;
+		$query = prepare(sprintf('SELECT * FROM ``posts_%s`` WHERE `sharty_browser_hash` = :hash ORDER BY `sticky` DESC, `id` DESC LIMIT :limit', $board['uri']));
+		$query->bindValue(':hash', $hash);
+		$query->bindValue(':limit', $config['mod']['ip_recentposts'], PDO::PARAM_INT);
+		$query->execute() or error(db_error($query));
+
+		while ($post = $query->fetch(PDO::FETCH_ASSOC)) {
+			if (!$post['thread']) {
+				$po = new Thread($post, '?/', $mod, false);
+			} else {
+				$po = new Post($post, '?/', $mod);
+			}
+
+			if (!isset($args['posts'][$board['uri']]))
+				$args['posts'][$board['uri']] = array('board' => $board, 'posts' => array());
+			$args['posts'][$board['uri']]['posts'][] = $po->build(true);
+		}
+	}
+
+	$args['boards'] = $boards;
+	$args['token'] = make_secure_link_token('ban');
+	$args['logs'] = array();
+	$args['vpn_status'] = false;
+	$args['security_token'] = make_secure_link_token('HID/' . $hash);
+
+	mod_page(sprintf('%s: %s', _('Header Fingerprint'), htmlspecialchars($hash)), $config['file_mod_view_ip'], $args, $args['hostname']);
+}
+
+function mod_page_integrity_hash($hash)
+{
+	global $config, $mod;
+
+	$args = array();
+	$args['ip'] = $hash;
+	$args['posts'] = array();
+
+	$boards = listBoards();
+	foreach ($boards as $board) {
+		openBoard($board['uri']);
+		if (!hasPermission($config['mod']['show_ip'], $board['uri']))
+			continue;
+		$query = prepare(sprintf('SELECT * FROM ``posts_%s`` WHERE `integrity_hash` = :hash ORDER BY `sticky` DESC, `id` DESC LIMIT :limit', $board['uri']));
+		$query->bindValue(':hash', $hash);
+		$query->bindValue(':limit', $config['mod']['ip_recentposts'], PDO::PARAM_INT);
+		$query->execute() or error(db_error($query));
+
+		while ($post = $query->fetch(PDO::FETCH_ASSOC)) {
+			if (!$post['thread']) {
+				$po = new Thread($post, '?/', $mod, false);
+			} else {
+				$po = new Post($post, '?/', $mod);
+			}
+
+			if (!isset($args['posts'][$board['uri']]))
+				$args['posts'][$board['uri']] = array('board' => $board, 'posts' => array());
+			$args['posts'][$board['uri']]['posts'][] = $po->build(true);
+		}
+	}
+
+	$args['boards'] = $boards;
+	$args['token'] = make_secure_link_token('ban');
+	$args['logs'] = array();
+	$args['vpn_status'] = false;
+	$args['security_token'] = make_secure_link_token('IID/' . $hash);
+
+	mod_page(sprintf('%s: %s', _('Integrity Fingerprint'), htmlspecialchars($hash)), $config['file_mod_view_ip'], $args, $args['hostname']);
+}
+
 
 function mod_edit_ban($ban_id)
 {
@@ -1433,7 +1541,7 @@ function mod_ban_appeals()
 			error(_('Ban appeal not found!'));
 		}
 
-		$ban['mask'] = cloak_mask(Bans::range_to_string(array($ban['ipstart'], $ban['ipend'])));
+		$ban['mask'] = cloak_mask(Bans::range_to_string(array($ban['ipstart'], $ban['ipend'])), true);
 
 		if (isset($_POST['unban'])) {
 			modLog('Accepted ban appeal #' . $ban['id'] . ' for ' . $ban['mask']);
@@ -1463,15 +1571,28 @@ function mod_ban_appeals()
 		return;
 	}
 
+	$redis = new Redis();
+	$redis->connect('127.0.0.1', 6379);
+
 	$query = query("SELECT *, ``ban_appeals``.`id` AS `id` FROM ``ban_appeals``
 		LEFT JOIN ``bans`` ON `ban_id` = ``bans``.`id`
 		LEFT JOIN ``mods`` ON ``bans``.`creator` = ``mods``.`id`
 		WHERE `denied` != 1 ORDER BY `time`") or error(db_error());
 	$ban_appeals = $query->fetchAll(PDO::FETCH_ASSOC);
+
+	$query = query("SELECT ban_appeals.id,mods.username AS username,ip_notes.* FROM ip_notes
+		INNER JOIN bans ON INET6_ATON(ip_notes.ip) = bans.ipstart
+		INNER JOIN ban_appeals ON ban_appeals.ban_id = bans.id
+		LEFT JOIN mods ON mods.id = ip_notes.mod
+		ORDER BY ip_notes.time DESC") or error(db_error());
+	$ip_notes = $query->fetchAll(PDO::FETCH_GROUP);
+
 	foreach ($ban_appeals as &$ban) {
 		if ($ban['post'])
 			$ban['post'] = json_decode($ban['post'], true);
 		$ban['mask'] = Bans::range_to_string(array($ban['ipstart'], $ban['ipend']));
+		$ban['ip_notes'] = $ip_notes[$ban['id']];
+		$ban['vpn'] = $redis->get($ban['mask']);
 
 		if ($ban['post'] && isset($ban['post']['board'], $ban['post']['id'])) {
 			if (openBoard($ban['post']['board'])) {
@@ -1866,8 +1987,8 @@ function mod_move($originBoard, $postID)
 		if ($targetBoard === $originBoard)
 			error(_('Target and source board are the same.'));
 
-		if ($redis->get($lockKey))
-			error("This post is already being moved.");
+//		if ($redis->get($lockKey))
+//			error("This post is already being moved.");
 		$redis->set($lockKey, "true", 180);
 		$redis->close();
 
@@ -2553,6 +2674,9 @@ function mod_deletebyip($boardName, $post, $global = false, $thread = false)
 		error($config['error']['invalidpost']);
 	if (!$time = $tempPost['time'])
 		error("No time");
+	if ($ip == "0.0.0.0") {
+		error("Can't delete all posts by this IP.");
+	}
 
 	$boards = $global ? listBoards() : array(array('uri' => $boardName));
 
@@ -2627,7 +2751,7 @@ function mod_deletebyip($boardName, $post, $global = false, $thread = false)
 	}
 
 	// Record the action
-	$cip = cloak_ip($ip);
+	$cip = force_cloak_ip($ip);
 	modLog("Deleted all posts by IP address: <a href=\"?/IP/$cip\">$cip</a>");
 }
 
@@ -2952,17 +3076,21 @@ function mod_pm($id, $reply = false)
 	}
 }
 
-function mod_inbox()
+function mod_inbox($mod_id = false)
 {
 	global $config, $mod;
 
+	if (!$mod_id || !hasPermission($config['mod']['master_pm'])) {
+		$mod_id = $mod['id'];
+	}
+
 	$query = prepare('SELECT `unread`,``pms``.`id`, `time`, `sender`, `to`, `message`, `username` FROM ``pms`` LEFT JOIN ``mods`` ON ``mods``.`id` = `sender` WHERE `to` = :mod ORDER BY `unread` DESC, `time` DESC');
-	$query->bindValue(':mod', $mod['id']);
+	$query->bindValue(':mod', $mod_id);
 	$query->execute() or error(db_error($query));
 	$messages = $query->fetchAll(PDO::FETCH_ASSOC);
 
 	$query = prepare('SELECT COUNT(*) FROM ``pms`` WHERE `to` = :mod AND `unread` = 1');
-	$query->bindValue(':mod', $mod['id']);
+	$query->bindValue(':mod', $mod_id);
 	$query->execute() or error(db_error($query));
 	$unread = $query->fetchColumn();
 
@@ -3191,9 +3319,9 @@ function mod_reject_file_approval($hash)
 			$file['postid'],
 			'File rejected.',
 			$mod['id'],
-			false,
+			true,
 			'*',
-			false
+			true
 		);
 		$modLogMsg .= " with post " . $file['postid'] . " in board " . $file['board'];
 	}
@@ -3289,7 +3417,15 @@ function mod_approve_file_approval($hash)
 		$query->bindValue(':id', $file['postid']);
 		$query->execute() or error(db_error($query));
 		$threadId = $query->fetch(PDO::FETCH_ASSOC)['thread'];
-		bumpThread(!empty($threadId) ? $threadId : $file['postid']);
+		$threadId = !empty($threadId) ? $threadId : $file['postid'];
+
+		$query = prepare(sprintf("SELECT `sage` FROM ``posts_%s`` WHERE `id` = :id", $file['board']));
+		$query->bindValue(':id', $threadId);
+		$query->execute() or error(db_error($query));
+
+		if (!$query->fetch(PDO::FETCH_ASSOC)['sage']) {
+			bumpThread($threadId);
+		}
 
 		// Rebuild board
 		buildIndex();
@@ -3386,7 +3522,7 @@ function mod_reports()
 function mod_view_passes() {
 	global $config, $mod;
 
-	if (!hasPermission($config['mod']['view_sensitive']))
+	if (!hasPermission($config['mod']['show_sensitive']))
 		error($config['error']['noaccess']);
 
 	$query = prepare("SELECT * FROM ``passes`` ORDER BY `registration_date` DESC");
@@ -3451,7 +3587,7 @@ mysql> exit;*/
 </form>*/
 function mod_create_pass() {
 	global $config, $mod;
-	if (!hasPermission($config['mod']['view_sensitive']))
+	if (!hasPermission($config['mod']['show_sensitive']))
 		error($config['error']['noaccess']);
 	if (isset($_POST['contact'])) {
 		$query = prepare("INSERT INTO ``passes`` VALUES (NULL, :contact, :passkey, :registration_date, :expiration_date)");
@@ -3474,7 +3610,7 @@ function mod_create_pass() {
 }
 function mod_delete_pass() {
 	global $config, $mod;
-	if (!hasPermission($config['mod']['view_sensitive']))
+	if (!hasPermission($config['mod']['show_sensitive']))
 		error($config['error']['noaccess']);
 	if (isset($_POST['pass_id'])) {
 		$query = prepare("DELETE FROM ``passes`` WHERE `pass_id` = :pass_id");
@@ -3511,7 +3647,7 @@ function mod_report_dismiss($id, $action)
 		$board = $report['board'];
 		$post = $report['post'];
 		$reason = $report['reason'];
-		$cip = cloak_ip($ip);
+		$cip = force_cloak_ip($ip);
 	} else
 		error($config['error']['404']);
 
@@ -4338,15 +4474,30 @@ function mod_approve_news($board, $post)
 		error($config['error']['noaccess']);
 
 
-	$query = prepare(sprintf('UPDATE `posts_%s` SET `news_approved` = 1 WHERE `id` = :id', $board));
+	$query = prepare(sprintf('UPDATE `posts_%s` SET `news_approved` = 1 WHERE `id` = :id AND `subject` IS NOT NULL', $board));
 	$query->bindValue(':id', $post);
 	$query->execute() or error(db_error($query));
 
+	if (!empty($_SERVER['HTTP_REFERER'])) {
+		header('Location: ' . $_SERVER['HTTP_REFERER'], true, $config['redirect_http']);
+	}
+	else {
+		header('Location: ?/' . sprintf($config['board_path'], $board) . $config['file_index'], true, $config['redirect_http']);
+	}
 
-	rebuild_all_board_index_and_threads();
+	if (function_exists('fastcgi_finish_request')) {
+		fastcgi_finish_request();
+	} elseif (!headers_sent()) {
+		header('Connection: close');
+		header('Content-Length: ' . ob_get_length());
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
 
-
+	rebuildThemes('post-delete', $board);
 }
+
 function mod_unapprove_news($board, $post)
 {
 	global $config;
@@ -4364,9 +4515,24 @@ function mod_unapprove_news($board, $post)
 	$query->bindValue(':id', $post);
 	$query->execute() or error(db_error($query));
 
+	if (!empty($_SERVER['HTTP_REFERER'])) {
+		header('Location: ' . $_SERVER['HTTP_REFERER'], true, $config['redirect_http']);
+	}
+	else {
+		header('Location: ?/' . sprintf($config['board_path'], $board) . $config['file_index'], true, $config['redirect_http']);
+	}
 
-	rebuild_all_board_index_and_threads();
+	if (function_exists('fastcgi_finish_request')) {
+		fastcgi_finish_request();
+	} elseif (!headers_sent()) {
+		header('Connection: close');
+		header('Content-Length: ' . ob_get_length());
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
 
+	rebuildThemes('post-delete', $board);
 }
 /*
 function mod_sticky($board, $unsticky, $post) {
@@ -4449,7 +4615,7 @@ function mod_uninvincible($board, $post)
 
 function mod_panic_button()
 {	global $config, $mod;
-	if (!hasPermission($config['mod']['panic_button'], false)) {
+	if (!hasPermission($config['mod']['panic_button'])) {
 		error($config['error']['noaccess']);
 	}
 	$config_file = 'inc/secrets.php';
@@ -4466,6 +4632,36 @@ function mod_panic_button()
 	file_put_contents($config_file, $config_append, FILE_APPEND);
 
 	header('Location: ?/', true, $config['redirect_http']);
+}
+
+function mod_mccaptcha()
+{	global $config, $mod;
+	if (!hasPermission($config['mod']['panic_button'])) {
+		error($config['error']['noaccess']);
+	}
+	$config_file = 'inc/secrets.php';
+
+	if (!$config['mccaptcha']) {
+		$config_append = '$config[\'mccaptcha\'] = true;';
+	}
+	else {
+		$config_append = '$config[\'mccaptcha\'] = false;';
+	}
+
+	$config_append = "\n// Changes made via web editor by \"" . $mod['username'] . "\" @ " . date('r') . ":\n" . $config_append . "\n";
+
+	file_put_contents($config_file, $config_append, FILE_APPEND);
+
+	header('Location: ?/', true, $config['redirect_http']);
+
+	/*
+	$_POST['boards_all'] = true;
+	$_POST['rebuild_index'] = true;
+	$_POST['rebuild_themes'] = true;
+	$_POST['rebuild_thread'] = true;
+	$config['mod']['rebuild'] = &$config['mod']['panic_button'];
+	mod_rebuild();
+	*/
 }
 
 function mod_lockout() {
@@ -4743,7 +4939,7 @@ function mod_ban_requests()
 			error(_('Ban request not found!'));
 		}
 
-		$request['ip'] = cloak_ip($request['ip']);
+		$request['ip'] = force_cloak_ip($request['ip']);
 
 		modLog('Denied ban request <small>(#' . $request['id'] . ')</small> for ' . $request['ip']);
 
@@ -4868,7 +5064,7 @@ function mod_accept_ban_request($request_id)
 			$redis->close();
 		}
 
-		modLog('Accepted ban request <small>(#' . $request['id'] . ')</small> for ' . cloak_ip($request['ip']));
+		modLog('Accepted ban request <small>(#' . $request['id'] . ')</small> for ' . force_cloak_ip($request['ip']));
 
 		if ($_post['num_files'] > 0) {
 			$files = json_decode($_post['files'], true);
@@ -4896,12 +5092,17 @@ function mod_accept_ban_request($request_id)
 	mod_page(_('New ban'), $config['file_mod_ban_form'], $args);
 }
 
-function mod_integrity_search($ip)
+function mod_integrity_search($cip)
 {
 	global $config, $mod;
 
 	if (!hasPermission($config['mod']['show_sensitive']))
 		error($config['error']['noaccess']);
+
+	$ip = uncloak_ip($cip);
+
+//	if (!hasPermission($config['mod']['debug_sql']))
+//		sleep(9999);
 
 	$query = prepare('SELECT * FROM ``integrity`` WHERE `ti` = :ip');
 	$query->bindValue(':ip', $ip);
@@ -4919,7 +5120,7 @@ function mod_integrity_search($ip)
 		$queryStr .= "`$field` = :$field OR ";
 	}
 	$queryStr = rtrim($queryStr, ' OR ');
-	$queryStr .= ')';
+	$queryStr .= ') ORDER BY `ts` DESC LIMIT 20000';
 
 	$query = prepare($queryStr);
 	$query->bindValue(':ip', $ip);
@@ -4947,9 +5148,9 @@ function mod_integrity_search($ip)
 
 		$match_count = count($matches);
 
-		if ($match_count > 3) {
+		if ($match_count > 5) {
 			$matches = implode(', ', $matches) . " ($match_count/$field_count)";
-			$results[] = array('ip' => $row['ti'], 'time' => $row['ts'], 'vpn' => $redis->get($row['ti']) == 'true', 'matches' => $matches, 'match_count' => $match_count);
+			$results[] = array('ip' => cloak_ip($row['ti']), 'time' => $row['ts'], 'vpn' => $redis->get($row['ti']) == 'true', 'matches' => $matches, 'match_count' => $match_count);
 		}
 	}
 
@@ -4963,5 +5164,5 @@ function mod_integrity_search($ip)
 		'result_count' => count($results),
 	);
 
-	mod_page(_('IPs with similar integrity data to ' . $ip), $config['file_mod_search_results'], $args);
+	mod_page(_('IPs with similar integrity data to ' . $cip), $config['file_mod_search_results'], $args);
 }

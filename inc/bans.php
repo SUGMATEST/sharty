@@ -244,7 +244,7 @@ class Bans {
 		                error($config['error']['noaccess']);
 			
 			$mask = self::range_to_string(array($ban['ipstart'], $ban['ipend']));
-			$cloaked_mask = cloak_mask($mask);
+			$cloaked_mask = cloak_mask($mask, true);
 			
 			modLog("Removed ban #{$ban_id} for " .
 				(filter_var($mask, FILTER_VALIDATE_IP) !== false ? "<a href=\"?/IP/$cloaked_mask\">$cloaked_mask</a>" : $cloaked_mask));
@@ -268,7 +268,7 @@ class Bans {
 				
 		$range = self::parse_range($mask);
 		$mask = self::range_to_string($range);
-		$cloaked_mask = cloak_mask($mask);
+		$cloaked_mask = cloak_mask($mask, true);
 		
 		$query = prepare(
 			"INSERT INTO ``bans`` " .

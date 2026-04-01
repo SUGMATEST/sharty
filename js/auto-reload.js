@@ -38,8 +38,8 @@ $(function(){
 	// Grab the settings
 	var settings = new script_settings('auto-reload-sse');
 	var poll_interval_mindelay        = settings.get('min_delay_bottom', 5000);
-	var poll_interval_maxdelay        = settings.get('max_delay', 30000);
-	var poll_interval_errordelay      = settings.get('error_delay', 30000);
+	var poll_interval_maxdelay        = settings.get('max_delay', 5000);
+	var poll_interval_errordelay      = settings.get('error_delay', 5000);
 
 	// number of ms to wait before reloading
 	var poll_interval_delay = poll_interval_mindelay;

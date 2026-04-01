@@ -145,34 +145,26 @@
 			<li><a href="?/repair_tables">{% trans 'Repair Tables' %}</a></li>
 		{% endif %}
 		{% if mod|hasPermission(config.mod.panic_button) %}
-			<li><a href="?/panic_button">{% trans '[Panic Button] Use if bots have made it through' %}  
-				 
+			<li><a href="?/panic_button">{% trans 'Panic Mode' %}  
+				(
 				{%if config.mandate_soy_history%}
 				Currently ON
 				{%else%}
 				Currently OFF
 				{%endif%}
-				
-			
+				)
 			</a></li>
 		{% endif %}
 		{% if mod|hasPermission(config.mod.panic_button) %}
-		<li>
-			<a href="?/lockout">Lockout - Use in case of rogue moderator</a>
-			<script>
-				var confirmed = false;
-				document.querySelector('a[href="?/lockout"]').addEventListener('click', function(e) {
-					if (!confirmed) {
-						e.preventDefault();
-						if (confirm('Are you sure you want to lockout the site? This will shut it down and is a serious action. ')) {
-							confirmed = true;
-							this.click();
-						}
-					}
-				});
-			</script>
-		</li>
-		
+			<li><a href="?/mccaptcha">{% trans 'McCaptcha' %}  
+				(
+				{%if config.mccaptcha%}
+				Currently ON
+				{%else%}
+				Currently OFF
+				{%endif%}
+				)
+			</a></li>
 		{% endif %}
 	</ul>
 </fieldset>

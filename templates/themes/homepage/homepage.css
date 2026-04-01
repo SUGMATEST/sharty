@@ -90,3 +90,39 @@ td, th {
 		display: none;
 	}
 }
+
+.box-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    max-width: 670px;
+    min-width: 332px;
+    margin: 30px auto;
+    overflow: auto;
+    gap: 5px;
+    padding: 2px;
+}
+.box.middle {
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #000000;
+    width: 100%;
+}
+
+.wrapper {
+    flex-grow: 1;
+    width: 330px;
+    box-sizing: border-box;
+}
+
+.box.left {
+    background: #efe;
+    color: #060;
+    border: 1px solid #060;
+}
+
+.box.right {
+    background: #eef;
+    color: #006;
+    border: 1px solid #006;
+}

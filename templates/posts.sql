@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS ``posts_{{ board }}`` (
    `mod_id` smallint(6) unsigned DEFAULT NULL,
    `integrity` text DEFAULT NULL,
    `decryption_key` varchar(32) DEFAULT NULL,
+   `integrity_hash` varchar(32) DEFAULT NULL,
    UNIQUE KEY `id` (`id`),
    KEY `thread_id` (`thread`,`id`),
    KEY `filehash` (`filehash`(1024)),

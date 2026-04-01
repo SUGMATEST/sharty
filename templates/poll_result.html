@@ -39,7 +39,7 @@
                     <a class="show-ips" href="javascript:void(0)">[+]</a>
                     <div hidden class="poll-ips">
                     {% for ip in option.ips %}
-                        <a href="/mod.php?/IP/{{ ip }}" target="_blank">{{ ip }}</a>
+                        <a href="/mod.php?/IP/{{ ip|cloak_ip }}" target="_blank">{{ ip|cloak_ip }}</a>
                     {% endfor %}
                     </div>
                 {% endif %}

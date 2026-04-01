@@ -26,7 +26,6 @@
 }
 .banlist-opts .checkboxes label {
   display: block;
-  color: black;
 }
 .banlist-opts .buttons {
   float: left;
@@ -49,7 +48,6 @@ tr.tblhead > th {
   box-sizing: border-box;
   float: left;
   padding: 0;
-  color: black;
 }
 tr.tblhead > th.sortable {
   cursor: pointer;

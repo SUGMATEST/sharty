@@ -66,7 +66,7 @@
 		</div>
 		<div class="file-info">
 			<p><a href="{{ files[0].img_src }}" target="_blank">Extension: {{ files[0].extension }}</a></p>
-			{% if files[0].extension == 'gif' %}
+			{% if files[0].extension == 'gif' or files[0].extension == 'webp' %}
 				<p><a href="https://imgops.com/get2post?x-form-enctype=multipart%2Fform%2Ddata&x-form-action=https%3A%2F%2Fezgif%2Ecom%2Fmaker&new-image-url=https%3A%2F%2F{{ config.site_domain|e('url') }}{{ files[0].img_src|e('url') }}" target="_blank">View frames on Ezgif</a></p>
 			{% endif %}
 			<p hidden>Hash: {{ hash }}</p>

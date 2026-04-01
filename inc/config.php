@@ -649,6 +649,8 @@
 	$config['blocked_states'] = array();
 	$config['allowed_states'] = false;
 
+	$config['blocked_locales'] = array();
+
 	// A wordfilter (sometimes referred to as just a "filter" or "censor") automatically scans users’ posts
 	// as they are submitted and changes or censors particular words or phrases.
 
@@ -751,7 +753,7 @@
 	$config['max_poll_choice_length'] = 25;
 
 	// Change name to unique identifier on ## Mod posts
-	$config['mod_ids'] = false;
+	$config['mod_ids'] = true;
 	// Force mods to tripfag with their unique identifiers
 	$config['force_mod_ids'] = false;
 
@@ -793,7 +795,7 @@
 	$config['integrity_ban_fields'] = 'cd,dm,hc,tz,ww,wh,lan,loc,cf';
 
 	// Fields to use when searching for IPs by integrity data
-	$config['integrity_search_fields'] = 'hc,ww,wh,tz,lan,loc,ur,cf,lsf,tei,ss';
+	$config['integrity_search_fields'] = 'ww,wh,dpr,tz,lan,loc,hc,ur,cf,np,pdc,ss,lsf';
 
 /*
  * ====================
@@ -927,7 +929,7 @@
 	$config['allowed_ext'][] = 'png';
 	//$config['allowed_ext'][] = 'bmp';
 	// $config['allowed_ext'][] = 'svg';
-	//$config['allowed_ext'][] = 'webp';
+	$config['allowed_ext'][] = 'webp';
 
 	// Allowed extensions for OP. Inherits from the above setting if set to false. Otherwise, it overrides both allowed_ext and
 	// allowed_ext_files (filetypes for downloadable files should be set in allowed_ext_files as well). This setting is useful
@@ -936,7 +938,6 @@
 
 	// Allowed additional file extensions (not images; downloadable files).
 	$config['allowed_ext_files'][] = 'txt';
-	$config['allowed_ext_files'][] = 'xml';
 	$config['allowed_ext_files'][] = 'css';
 	//$config['allowed_ext_files'][] = 'svg';
 	$config['allowed_ext_files'][] = 'mp4';
@@ -1086,7 +1087,7 @@
 	$config['locale'] = 'en'; // (en, ru_RU.UTF-8, fi_FI.UTF-8, pl_PL.UTF-8)
 
 	// Timezone to use for displaying dates/times.
-	$config['timezone'] = 'America/New_York';
+	$config['timezone'] = 'UTC';
 	// The format string passed to strftime() for displaying dates.
 	// http://www.php.net/manual/en/function.strftime.php
 	$config['post_date'] = '%m/%d/%y (%a) %H:%M:%S';
@@ -1135,22 +1136,21 @@
 
         $config['stylesheets']['Mint'] = 'mint.css';
 
-        $config['stylesheets']['Win7'] = 'win7.css';	
+        $config['stylesheets']['Win7'] = 'win7.css';
 	$config['stylesheets']['Photon'] = 'photon.css?v2';
 	$config['stylesheets']['Spooky'] = 'spooky.css?v2';
 	$config['stylesheets']['Yotsoyba'] = 'yotsuba.css';
-	 $config['stylesheets']['Futaba'] = 'futaba.css';
+	$config['stylesheets']['Yotsoybatrue'] = 'yotsoybatrue.css';
+	 $config['stylesheets']['Futaba'] = 'futaba+vichan.css';
 	 $config['stylesheets']['Burichan'] = 'burichan.css';
 	 $config['stylesheets']['Dark'] = 'dark.css';
 	 $config['stylesheets']['Glow'] = 'glow.css';
 	 $config['stylesheets']['Midnight'] = 'dark2.css';
 	 $config['stylesheets']['Mutt'] = 'mutt.css';
-	 $config['stylesheets']['Christmas'] = 'christmas.css';
+	 $config['stylesheets']['Christmas4'] = 'christmas4.css';
 	 $config['stylesheets']['Chadparty'] = 'chadparty.css';
 	 $config['stylesheets']['FrootigerAerthough'] = 'frootiger_aerthough.css';
-
          $config['stylesheets']['Pina Coalada'] = 'pinacoalada.css';
-
          $config['stylesheets']['His Theme'] = 'histheme.css';
          $config['stylesheets']['Calm'] = 'calm.css';
          $config['stylesheets']['Rage'] = 'rage.css';
@@ -1172,17 +1172,27 @@
 
 	$config['stylesheets']['Shaved Ice'] = 'dem.css';
 
+	$config['stylesheets']['Workaholic'] = 'workaholic.css';
+
+	$config['stylesheets']['Win95'] = 'win95.css';
+
+	$config['stylesheets']['America'] = 'america.css';
+
+	$config['stylesheets']['Solunar'] = 'solunar.css';
+	$config['stylesheets']['Solunar - Night'] = 'solunar/night.css';
+	$config['stylesheets']['Solunar - Day'] = 'solunar/day.css';
+
+	$config['stylesheets']['Soylent'] = 'soylent.css';
+	$config['stylesheets']['The Ribbit Rally'] = 'trr.css';
+
+	$config['stylesheets']['New Year'] = 'newyear.css';
+
 	//$config['stylesheets']['Pride'] = 'pride.css';
 	// The prefix for each stylesheet URI. Defaults to $config['root']/stylesheets/
 	// $config['uri_stylesheets'] = 'http://static.example.org/stylesheets/';
 
 	// The default stylesheet to use.
 	$config['default_stylesheet'] = array('Yotsoyba B', $config['stylesheets']['Yotsoyba B']);
-	//$config['default_stylesheet'] = array('Independence', $config['stylesheets']['Independence']);
-        //$config['default_stylesheet'] = array('Pina Coalada - Sunset', $config['stylesheets']['Pina Coalada - Sunset']);
-	//$config['default_stylesheet'] = array('Frooty', $config['stylesheets']['Frooty']);
-	//$config['default_stylesheet'] = array('Eater', $config['stylesheets']['Eater']);
-	//$config['default_stylesheet'] = array('Pride', $config['stylesheets']['Pride']);
 	// Make stylesheet selections board-specific.
 	$config['stylesheets_board'] = false;
 
@@ -1206,11 +1216,12 @@
 
 //		array('soy', 'mtv', 'int', 'a', 'pol', 'r9k', 'x', 'nate', 'qa', 'q'),
 //		array('a', 'fit', 'g', 'int', 'mtv', 'nate', 'pol', 'qa', 'q', 'r9k', 'soy', 'tech', 'tv', 'v', 'x'),
-		array('soy', 'qa', 'raid', 'r', 'dem'),
-		array('int', 'pol'),
-		array('a', 'asp', 'biz', 'fit', 'k', 'mtv', 'r9k', 'sude', 'tech', 'tv', 'v', 'x'),
-		array('q', 'news', 'chive', 'rules' => '/rules.html', 'pass' => '/pass.php', 'bans' => '/bans.php'),
-
+                array('soy', 'qa', 'raid', 'r'),
+                array('craft'),
+                array('int', 'pol'),
+                array('a', 'an', 'asp', 'biz', 'mtv', 'r9k', 'tech', 'v', 'sude', 'x'),
+		array('q', 'news', 'chive', 'rules' => '/rules.html', 'pass' => '/pass.php', 'bans' => '/bans.php', 'status' => 'https://status.soyjak.st'),
+		array('wiki' => 'https://soyjakwiki.org', 'booru' => 'https://soybooru.com', 'irc' => 'https://webirc.soyjak.st'),
 		/*
 		array('soy', 'qa'),
 		array('pol', 'int'),
@@ -1223,14 +1234,13 @@
 		//array('1488', '2988', 'a', 'an', 'anthro', 'au', 'bait', 'baldi', 'bar', 'bbc', 'biz', 'blepe', 'brim', 'c', 'caca', 'cel', 'chad', 'chive', 'chuck', 'clash', 'cn', 'co', 'craft', 'crb', 'data', 'deadnigger', 'dino', 'dnb', 'drizzy', 'dsp', 'f', 'f2', 'fnac', 'fort', 'fpe', 'froot', 'g', 'geg', 'gem', 'gen', 'gfc', 'giga5', 'hell', 'hf', 'hobby', 'int', 'jak', 'jarty', 'jew', 'jiren', 'joel', 'k', 'kiwi', 'lgbt', 'lime', 'mare', 'mex', 'mo', 'mol', 'mpa', 'mtv', 'nate', 'news', 'ng', 'noel', 'nu', 'off', 'ohio', 'p', 'plier', 'pol', 'pond', 'ps', 'ptb', 'q', 'qa', 'qa4', 'r', 'r9k', 'rage', 'raid', 'rbx', 'ru', 's', 'sc', 'sch', 'sci', 'skibidi', 'sneed', 'soy', 'sp', 'spl', 'sude', 'tan', 'tech', 'tttt', 'tw', 'twi', 'u', 'ud', 'un', 'uni', 'voice', 'vw', 'w', 'wef', 'wiki', 'wm', 'woj', 'wp', 'x', 'yyyyyyy', 'zellig'),
 		//array('1488', '2988', 'a', 'an', 'anthro', 'bait', 'baldi', 'bbc', 'biz', 'blepe', 'caca', 'chive', 'chuck', 'clash', 'craft', 'drizzy', 'dsp', 'fnac', 'fort', 'fpe', 'g', 'gem', 'giga5', 'hobby', 'int', 'j', 'jak', 'jew', 'jiren', 'joel', 'lgbt', 'lime', 'mediator', 'mtv', 'nate', 'news', 'ng', 'nu', 'off', 'ohio', 'plier', 'pol', 'pond', 'ptb', 'q', 'qa', 'qa4', 'r', 'r9k', 'rage', 'raid', 'rbx', 'sci', 'skibidi', 'sneed', 'soy', 'sude', 'tan', 'tech', 'test', 'tttt', 'uni', 'voice', 'w', 'x', 'yyyyyyy', 'zellig'),
 		//array('a', 'anthro', 'chive', 'craft', 'fpe', 'g', 'gem', 'int', 'mtv', 'news', 'pol', 'pond', 'q', 'qa', 'r', 'raid', 'skibidi', 'soy', 'sude', 'tech', 'tttt', 'uni'),
-		array('wiki' => 'https://wiki.soyjak.st/', 'booru' => 'https://booru.soyjak.st', 'irc' => 'https://irc.soyjak.st'),
 		//array('wiki' => 'https://wiki.soyjak.party/')
 		//array('booru' => 'https://booru.soy'),
 		//array('soysylum' => 'https://soysylum.org/'),
 		//array('dailyjak' => 'https://t.me/thedailyjak'),
 		//array('soycraft' => 'https://wiki.soyjak.party/Soycraft', fnac demo => 'https://soyjak.party/fnac.html', tf2' => 'https://wiki.soyjak.party/SOYTOPIA'),
 		//make everything spin
-		//array('<style>@keyframes spin {   0% {     transform: rotate(0deg);   }   100% {     transform: rotate(360deg);   } }</style><script>document.querySelectorAll(\'img\').forEach((img) => {   img.style.animation = "spin 64800s linear infinite"; });</script>' => ''),
+		//array('<style>@keyframes spin {   0% {     transform: rotate(0deg);   }   100% {     transform: rotate(360deg);   } }</style><script>document.querySelectorAll(\'img\').forEach((img) => {   img.style.animation = "spin 7400s linear infinite"; });</script>' => ''),
 		//array('log warehouse' => 'https://archive.soyjaks.party/'),
 		//array('merch' => 'https://www.redbubble.com/people/shirtteen/shop?asc=u'),
 		//array('donate' => 'https://soyjaks.party/donate.html'),
@@ -1374,7 +1384,7 @@
 	// Youtube.js embed HTML code
 	$config['youtube_js_html'] = '<div class="video-container" data-video="$2">'.
 		'<a href="https://youtu.be/$2" target="_blank" class="file">'.
-		'<img style="width:252px;height:189px;" src="https://yewtu.be/vi/$2/0.jpg" class="post-image"/>'.
+		'<img style="width:252px;height:189px;" src="https://img.youtube.com/vi/$2/0.jpg" class="post-image"/>'.
 		'</a></div>';
 
 	// Custom embedding (YouTube, vimeo, etc.)
@@ -1411,7 +1421,7 @@
 
 	// Embedding width and height.
 	$config['embed_width'] = 300;
-	$config['embed_height'] = 246;
+	$config['embed_height'] = 250;
 
 /*
  * ====================
@@ -1648,11 +1658,11 @@
 
 	// Set custom locations for stylesheets and the main script file. This can be used for load balancing
 	// across multiple servers or hostnames.
-	$config['url_stylesheet'] = '/stylesheets/style.css?v31'; // main/base stylesheet
-	$config['url_javascript'] = '/_main.js?v28';
+	$config['url_stylesheet'] = '/stylesheets/style.css?v57'; // main/base stylesheet
+	$config['url_javascript'] = '/_main.js?v56';
 
 	// Website favicon.
-	$config['url_favicon'] = '/favicon.ico?v1';
+	$config['url_favicon'] = '/favicon.ico?v2';
 	
 	// Try not to build pages when we shouldn't have to.
 	$config['try_smarter'] = true;
@@ -1782,10 +1792,10 @@
 		'color:purple' // Change tripcode style; optional
 	);
 
-	$config['custom_capcode']['Thanos'] = array(
-		'<span class="capcode" style="color:purple; font-weight:bold"> ## Thanos</span>',
-		'color:purple; font-weight:bold', // Change name style; optional
-		'color:purple' // Change tripcode style; optional
+	$config['custom_capcode']['Boomer'] = array(
+		'<span class="capcode" style="color:grey; font-weight:bold"> ## Boomer</span>',
+		'color:grey', // Change name style; optional
+		'color:grey' // Change tripcode style; optional
 	);
 
 	// "## Nigger" makes everything brown and bold, including the name and tripcode:
@@ -1799,8 +1809,8 @@
         $config['custom_capcode']['Admin'] = array(
 			'<span class="capcode" style="color:#ff0000"> ## Admin</span>',
 			'color:#ff0000; font-weight:bold', // Change name style; optional
-			'color:#ff0000;', // Change tripcode style; optional
-			'margin-left:0;' // Change tripcode style; optional
+	//		'color:#ff0000;', // Change tripcode style; optional
+	//		'margin-left:0;' // Change tripcode style; optional
 	);
 
 	$config['custom_capcode']['Chairman'] = array(
@@ -1894,11 +1904,11 @@
 			' <span class="capcode" style="color:#ff0000">(BOOSTER SHOT DUE, SEEK MEDICAL ATTENTION)</span>'
 	);
 
-	// "## Developer" makes everything pink and bold, including the name and tripcode:
-	$config['custom_capcode']['Developer'] = array(
-		'<span class="capcode" style="color:#ff3c9a;font-weight:bold"> ## %s</span>',
-		'color:#ff3c9a; font-weight:bold', // Change name style; optional
-		'color:#ff3c9a;' // Change tripcode style; optional
+	// "## Developer" makes everything gold and bold, including the name and tripcode:
+	$config['custom_capcode']['NewDeveloper'] = array(
+		'<span class="capcode" style="color:#f5cd00;font-weight:bold"> ## Developer</span>',
+		'color:#f5cd00; font-weight:bold', // Change name style; optional
+		'color:#f5cd00;' // Change tripcode style; optional
 	);
 
         // Blue Developer
@@ -1922,10 +1932,10 @@
 
 	// Manager
 	$config['custom_capcode']['Manager'] = array(
-		'<span class="capcode" style="color:#f5cd00;font-weight:bold"> ## %s</span>',
+		'<span class="capcode" style="color:#814a0d;font-weight:bold"> ## %s</span>',
 		//'<span class="capcode" style="color:#ff3c9a;font-weight:bold"> ## %s</span>',
-		'color:#f5cd00; font-weight:bold', // Change name style; optional
-		'color:#f5cd00;' // Change tripcode style; optional
+		'color:#814a0d; font-weight:bold', // Change name style; optional
+		'color:#814a0d;' // Change tripcode style; optional
 	);
 
         // Pink Manager
@@ -2009,24 +2019,26 @@
 
 	// Preset ban reasons and lengths
 	$config['mod']['ban_presets'] = [
-		['Illegal', '1. - You WILL NOT upload, post, request, or link to illegal content.', [''], true],
-		['Credible threat', '1. - Credible threats of real-world violence against people or places are FORBIDDEN.', [''], true],
+		['Illegal content', '1. - You WILL NOT upload, post, request, or link to illegal content.', [''], true],
+		['Violence/Terrorism', '8. - You WILL NOT make credible threats or promote real-world violence or terrorism.', [''], true],
 		['Swatting', '1. - Announcing or calling for "swattings" is FORBIDDEN.', [''], true],
-		['Pedophilia', '2. - You WILL NOT advocate, promote, or post pedophilia or pedophilic content.', ['3d', '7d', ''], false],
+		['Child abuse', '1. - Realistic depictions of child abuse are FORBIDDEN.', [''], true],
+		['Pedophilia', '2. - You WILL NOT post, promote, or advocate for pedophilia or pedophilic content, including pedophilic jokes.', ['3d', '7d', ''], false],
 		['Advertising', '3. - You WILL NOT advertise for imageboards, discord servers, telegram channels, crypto projects, etc.', ['1d', '7d', ''], true],
-		['Offsiter', '3. - Participation in hostile or disruptive off-site communities is FORBIDDEN.', [''], true],
-		['Spam', '4. - You WILL NOT excessively spam.', ['15m', '1h', '12h', '3d'], false],
-		['Lag post', '4. - Posts intended to disrupt users\' browsing experiences by slowing down their browsers are FORBIDDEN.', ['15m', '1h', '12h', '3d'], true],
+		['Offsiter', '3. - Participation in disruptive off-site communities is FORBIDDEN.', [''], true],
+		//['Spam', '4. - You WILL NOT excessively spam.', ['15m', '1h', '12h', '3d'], false],
+		['Lag post', '4. - You WILL NOT make posts intended to slow down others\' browsers.', ['15m', '1h', '12h', '3d'], true],
 		['Off-topic', '5. - You WILL adhere to the general topic or theme of the board you are posting on. Off-topic posts may be moved or deleted.', ['15m', '1h', '12h', '3d'], false],
-		['Animal abuse/bestiality', '6. - You WILL NOT promote or advocate for animal abuse or bestiality.', [''], false],
-		['Suicide', '7. - You WILL NOT post suicide announcements.', [''], true],
-		['Trying to take down the site', '8. - You WILL NOT attempt to get the site taken down.', [''], true],
-		['Embedded content', '9. - You WILL NOT post files containing embedded content.', ['1d', ''], false],
-		['Report spam', '10. - You WILL NOT spam false reports.', ['1h', '1d', ''], false],
-		['Urgent report abuse', '10. - You WILL NOT abuse the urgent report feature.', ['1h', '1d', ''], false],
-		['Botting', '11. - You WILL NOT use any sort of bot to automate posting on the site.', [''], false],
-		['Underage', '12. - You WILL NOT use this website if you are under the age of 16.', [''], false],
-		['NSFW', '13. - You WILL NOT post pornographic content or graphic gore unless the board\'s title starts with "18+/NSFW".', ['1h', '1d', '7d'], false],
+		['Animal abuse/bestiality', '6. - You WILL NOT post, promote, or advocate for animal abuse or bestiality.', [''], false],
+		['Suicide encouragement/announcement', '7. - You WILL NOT post suicide announcements or genuinely attempt to push others towards suicide or self-harm.', [''], true],
+		['Trying to take down the site', '9. - You WILL NOT attempt to get the site taken down.', [''], true],
+		['Embedded content', '10. - You WILL NOT post files containing embedded content.', ['1d', ''], false],
+		['Report spam', '11. - You WILL NOT spam false reports.', ['15m', '12h', '3d'], false],
+		['Urgent report abuse', '11. - You WILL NOT abuse the urgent report feature.', ['15m', '12h', '3d'], false],
+		['Botting', '12. - You WILL NOT use any sort of bot to automate posting on the site.', [''], false],
+		['Underage', '13. - You WILL NOT use this website if you are under the age of 18.', [''], false],
+		['Roblox', '13. - Roblox discussion and raids are FORBIDDEN.', ['3d', ''], false],
+		['Porn/Gore', '14. - You WILL NOT post pornographic content or graphic gore.', ['12h', '3d', '7d', '30d'], false],
 		['Ban evasion', 'Ban evasion.', [''], false],
 	];
 /*
@@ -2048,6 +2060,7 @@
 		13	=> 'Superjanny',
 		20	=> 'Mod',
 		21	=> 'BoardManager',
+		23	=> 'Soor',
 		25	=> 'Manager',
 		30	=> 'Admin',
 		// 98	=> 'God',
@@ -2066,9 +2079,10 @@
 	//	JANITOR		=> array('Janitor'),
 		JOKEJANNY	=> array('Councillor'),
 		PRESIDENT	=> array('President', 'Pope'),
-		MOD		=> array('Mod', 'FDL'),
+		MOD		=> array('Blue'),
 		BOARDMANAGER	=> array('Mod'),
-		MANAGER		=> array('Mod', 'Manager', 'Chairman', 'FDL', 'Thanos', 'Admin', 'Lord', 'Ogre', 'BIG BUDDY'),
+		SOOR		=> true,
+		MANAGER		=> array('Mod', 'ModMod', 'Manager', 'Chairman', 'FDL', 'Thanos', 'Admin', 'Lord', 'Ogre', 'BIG BUDDY'),
 		ADMIN		=> true
 	);
 
@@ -2090,7 +2104,7 @@
 	// View IP addresses
 	$config['mod']['show_ip'] = SUPERJANNY;
 	// View per-thread IDs in all threads if mod lacks permission show_ip
-	$config['mod']['show_id_everywhere'] = JANITOR;
+	$config['mod']['show_id_everywhere'] = DISABLED;
 	// View file hashes
 	$config['mod']['show_filehash'] = DISABLED;
 	// View browser hashes
@@ -2112,7 +2126,7 @@
 	// Ban from a specific thread
 	$config['mod']['threadban'] = ADMIN;
 	// Remove bans
-	$config['mod']['unban'] = MANAGER;
+	$config['mod']['unban'] = MOD;
 	// Ban multiple IPs with a subnet mask
 	$config['mod']['rangeban'] = MANAGER;
 	// Spoiler image
@@ -2122,11 +2136,11 @@
 	// Edit bans
 	$config['mod']['edit_ban'] = MOD;
 	// Delete file (and keep post)
-	$config['mod']['deletefile'] = SUPERJANNY;
+	$config['mod']['deletefile'] = MOD;
 	// Delete all posts by IP
 	$config['mod']['deletebyip'] = SUPERJANNY;
 	// Delete all posts by IP across all boards
-	$config['mod']['deletebyip_global'] = MANAGER;
+	$config['mod']['deletebyip_global'] = SOOR;
 	// Delete all posts by IP within a thread
 	$config['mod']['deletebyip_thread'] = SUPERJANNY;
 	// Hashban a file to prevent it from being posted again
@@ -2136,7 +2150,7 @@
 	// Invincible a thread
 	$config['mod']['invincible'] = BOARDMANAGER;
 	// Cycle a thread
-	$config['mod']['cycle'] = MANAGER;
+	$config['mod']['cycle'] = SOOR;
 	$config['cycle_limit'] = &$config['reply_limit'];
 	// Post on locked boards
 	$config['mod']['post_on_locked_board'] = JANITOR;
@@ -2153,14 +2167,14 @@
 	// Edit their own capcode posts
 	$config['mod']['editownpost'] = MOD;
 	// "Move" a thread to another board (EXPERIMENTAL; has some known bugs)
-	$config['mod']['move'] = SUPERJANNY;
+	$config['mod']['move'] = MOD;
 	// Bypass "field_disable_*" (forced anonymity, etc.)
 	$config['mod']['bypass_field_disable'] = MOD;
 	// Post bypass unoriginal content check on robot-enabled boards
 	$config['mod']['postunoriginal'] = MOD;
 	// Bypass flood check
 	$config['mod']['bypass_filters'] = DISABLED;
-	$config['mod']['flood'] = ADMIN;
+	$config['mod']['flood'] = DISABLED;
 	// Use capcodes
 	$config['mod']['use_capcode'] = NONE;
 	// Select any flag on flag boards
@@ -2168,7 +2182,7 @@
 	// Raw HTML posting
 	$config['mod']['rawhtml'] = ADMIN;
 	// Bypass bans
-	$config['mod']['bypass_bans'] = MANAGER;
+	$config['mod']['bypass_bans'] = DISABLED;
 	/* Administration */
 	// View the report queue
 	$config['mod']['reports'] = MEDIATOR;
@@ -2183,7 +2197,7 @@
 	// View list of bans
 	$config['mod']['view_banlist'] = MOD;
 	// View the username of the mod who made a ban
-	$config['mod']['view_banstaff'] = MANAGER;
+	$config['mod']['view_banstaff'] = SOOR;
 	// If the moderator doesn't fit the $config['mod']['view_banstaff''] (previous) permission, show him just
 	// a "?" instead. Otherwise, it will be "Mod" or "Admin".
 	$config['mod']['view_banquestionmark'] = true;
@@ -2198,13 +2212,13 @@
 	// Remote notes
 	$config['mod']['remove_notes'] = ADMIN;
 	// Create a new board
-	$config['mod']['newboard'] = MANAGER;
+	$config['mod']['newboard'] = SOOR;
 	// Manage existing boards (change title, etc)
-	$config['mod']['manageboards'] = MANAGER;
+	$config['mod']['manageboards'] = SOOR;
 	// Delete a board
 	$config['mod']['deleteboard'] = ADMIN;
 	// List/manage users
-	$config['mod']['manageusers'] = MANAGER;
+	$config['mod']['manageusers'] = SOOR;
 	// Promote/demote users
 	$config['mod']['promoteusers'] = ADMIN;
 	// Edit any users' login information
@@ -2216,9 +2230,9 @@
 	// Create a user
 	$config['mod']['createusers'] = ADMIN;
 	// View the moderation log
-	$config['mod']['modlog'] = MANAGER;
+	$config['mod']['modlog'] = SOOR;
 	// View IP addresses of other mods in ?/log
-	$config['mod']['show_ip_modlog'] = MANAGER;
+	$config['mod']['show_ip_modlog'] = SOOR;
 	// View relevant moderation log entries on IP address pages (ie. ban history, etc.) Warning: Can be
 	// pretty resource intensive if your mod logs are huge.
 	$config['mod']['modlog_ip'] = SUPERJANNY;
@@ -2238,17 +2252,17 @@
 	// Post to the moderator noticeboard
 	$config['mod']['noticeboard_post'] = MOD;
 	// Delete entries from the noticeboard
-	$config['mod']['noticeboard_delete'] = ADMIN;
+	$config['mod']['noticeboard_delete'] = SOOR;
 	// Public ban messages; attached to posts
-	$config['mod']['public_ban'] = MANAGER;
+	$config['mod']['public_ban'] = SOOR;
 	// Manage and install themes for homepage
 	$config['mod']['themes'] = ADMIN;
 	// Post news entries
-	$config['mod']['news'] = ADMIN;
+	$config['mod']['news'] = SOOR;
 	// Custom name when posting news
-	$config['mod']['news_custom'] = ADMIN;
+	$config['mod']['news_custom'] = SOOR;
 	// Delete news entries
-	$config['mod']['news_delete'] = ADMIN;
+	$config['mod']['news_delete'] = SOOR;
 	// Execute un-filtered SQL queries on the database (?/debug/sql)
 	$config['mod']['debug_sql'] = ADMIN;
 	// Look through all cache values for debugging when APC is enabled (?/debug/apc)
@@ -2258,13 +2272,13 @@
 	// View ban requests
 	$config['mod']['view_ban_requests'] = JANITOR;
 	// View ban appeals
-	$config['mod']['view_ban_appeals'] = MANAGER;
+	$config['mod']['view_ban_appeals'] = SOOR;
 	// Accept and deny ban appeals
-	$config['mod']['ban_appeals'] = MANAGER;
+	$config['mod']['ban_appeals'] = SOOR;
 	// View the recent posts page
 	$config['mod']['recent'] = MEDIATOR;
 	// Create pages
-	$config['mod']['edit_pages'] = MANAGER;
+	$config['mod']['edit_pages'] = ADMIN;
 	$config['pages_max'] = 10;
 	// Show sensitive info, such as passwords
 	$config['mod']['show_sensitive'] = MANAGER;
@@ -2437,9 +2451,9 @@
 	// $config['meta_keywords'] = 'chan,anonymous discussion,imageboard,vichan';
 
 	// Website name
-	$config['site_name'] = 'Soyjak.party';
+	$config['site_name'] = 'soyjak.party';
 	// Website domain
-	$config['site_domain'] = 'www.soyjak.st';
+	$config['site_domain'] = 'soyjak.st';
 
 	// Link imageboard to your Google Analytics account to track users and provide traffic insights.
 	// $config['google_analytics'] = 'UA-xxxxxxx-yy';
@@ -2546,7 +2560,8 @@
 	//$config['ipcrypt_key'] = '*%tHT6cSJkD!ma6j()K&iTd7GhA@PN8UuUxXRD*u';
 	//$config['ipcrypt_key'] = 'HtGb107FnFKVol7H';
 	//$config['ipcrypt_key'] = '';
-	$config['ipcrypt_key'] = 'CtHU7EH8BMldFzUZ';
+	//$config['ipcrypt_key'] = 'CtHU7EH8BMldFzUZ';
+	$config['ipcrypt_key'] = 'x1Vlo2M5MSh4PkNj4ZX20FdbaNJ5uLMrgMBq3mIdRMmqQK7zYdnQhkCOCIzBPmhqfgBatdcWK8nKhSXh1QRxB3V0LwTVYXqVimL2azX9fRfqvqWYdc5zhfxzyTLd0spw';
 
 	// IP cloak prefix
 	$config['ipcrypt_prefix'] = 'Cloak';
@@ -2556,6 +2571,7 @@
 
 	// McCaptcha
 	$config['mccaptcha'] = false;
+	$config['mccaptcha_bypass_posts'] = 1;
 
 	// rDrama style item shop
 	$config['item_shop'] = false;
@@ -2564,3 +2580,7 @@
 	$config['onion_addr'] = '0.0.0.0';
 
 	$config['pride_month_2025'] = false;
+
+	$config['time_soyfest'] = false;
+
+	$config['require_quote_op'] = false;

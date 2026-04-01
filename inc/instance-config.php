@@ -549,7 +549,7 @@ $config['markup'][] = array("/__(.+?)__/", "<u>\$1</u>");
 $config['markup'][] = array("/```(.+?)```/", "<code>\$1</code>");
 $config['markup'][] = array("/~~(.+?)~~/", "<s>\$1</s>");
 $config['markup'][] = array("/\+=(.+?)=\+/", "<big>\$1</big>");
-$config['markup'][] = array("/~-~(.+?)~-~/", "<span style=\"background: linear-gradient(to left, red, orange , yellow, green, cyan, blue, violet);-webkit-background-clip: text;-webkit-text-fill-color: transparent;\">$1</span>");
+//$config['markup'][] = array("/~-~(.+?)~-~/", "<span style=\"background: linear-gradient(to left, red, orange , yellow, green, cyan, blue, violet);-webkit-background-clip: text;-webkit-text-fill-color: transparent;\">$1</span>");
 $config['markup'][] = array("/-~-(.+?)-~-/", "<font color=\"FD3D98\"><b>\$1</b></font>");
 $config['markup'][] = array("/(\(\(\(.+?\)\)\))/", "<span style=\"background:#faf8f8;color:#3060a8\">$1</span>");
 $config['markup'][] = array("/-=(.+?)-=/", "<span style=\"color:#720b98; font-weight:bold;\">\$1</span>");
@@ -569,7 +569,7 @@ $config['markup'][] = array("/::(.+?)::/", "<span style=\"text-shadow:0px 0px 40
 $config['markup'][] = array("/;;(.+?);;/", "<span style=\"text-shadow:0px 0px 40px #36d7f7, 0px 0px 2px #36d7f7\">\$1</span>");
 
 //
-$config['markup'][]  = array("/!!([a-zA-Z0-9]+?)!!/", "<span style=\"text-shadow:0px 0px 40px #ff0000, 0px 0px 2px #ff0000\">\$1</span>");
+$config['markup'][]  = array("/$$(.+?)$$/", "<span style=\"text-shadow:0px 0px 40px #ff0000, 0px 0px 2px #ff0000\">\$1</span>");
 
 $config['inline_emotes'][] = array("soyak", "/static/inline_soyjaks/soyak25x25.png");
 $config['inline_emotes'][] = array("soyjak", "/static/inline_soyjaks/soyak25x25.png");
@@ -636,6 +636,7 @@ $config['inline_emotes'][] = array("wholesomeheart", "/static/inline_soyjaks/who
 $config['inline_emotes'][] = array("trvke", "/static/inline_soyjaks/trvke43x64.png");
 $config['inline_emotes'][] = array("perrojak", "/static/inline_soyjaks/perrojak57x53.png");
 $config['inline_emotes'][] = array("jacobson", "/static/inline_soyjaks/jacobson15x26.png");
+$config['inline_emotes'][] = array("htsm", "/static/inline_soyjaks/htsm56x64.png");
 
 // Code markup. This should be set to a regular expression, using tags you want to use. Examples:
 // "/\[code\](.*?)\[\/code\]/is"
@@ -648,6 +649,8 @@ $config['max_height'] = $config['max_width'];
 $config['secure_trip_salt'] = 'OSSL.4lNNPl85dg+m5OmYnDRgy4XmRZYmXYV7wN+1Pwkb9mjGZ8mmyHvoUZVXQvCvrl4FGKVIyWqhpQJu55N4RcW/rZd3wYABmCwd4hENkvQNUWD9d6Zc/k54LUn4q3yqj8ffHGokSh+yUnc/qhusSd/IzVbyBWjVkWmM6+Uf86uPHKU=';
 
 //$config['additional_javascript'][] = 'js/jquery2.min.js';
+
+$config['additional_javascript'][] = 'js/fix-storage.js';
 
 $config['additional_javascript'][] = 'js/jquery.min.js';
 $config['additional_javascript'][] = 'js/jquery-ui.min.js';
@@ -662,30 +665,30 @@ $config['additional_javascript'][] = 'js/mobile-style.js';
 
 $config['additional_javascript'][] = 'js/strftime.min.js';
 
-$config['additional_javascript'][] = 'js/toastify.js';
+//$config['additional_javascript'][] = 'js/toastify.js';
 
 //$config['additional_javascript'][] = 'js/mithril.js';
 
-$config['additional_javascript'][] = 'js/integrity/13/integrity.js';
+$config['additional_javascript'][] = 'js/integrity/20/integrity.js';
 
-$config['additional_javascript'][] = 'js/instance.settings.js?v3';
+$config['additional_javascript'][] = 'js/instance.settings.js?v6';
 
 $config['additional_javascript'][] = 'js/options.js?v1';
 $config['additional_javascript'][] = 'js/options/general.js?v3';
 $config['additional_javascript'][] = 'js/options/user-css.js?v3';
-$config['additional_javascript'][] = 'js/options/user-js.js?v2';
+//$config['additional_javascript'][] = 'js/options/user-js.js?v2';
 
 $config['additional_javascript'][] = 'js/post-menu.js';
 
 $config['additional_javascript'][] = 'js/hide-images.js?v2';
-//$config['additional_javascript'][] = 'js/nsfw-filter.js?v27';
+$config['additional_javascript'][] = 'js/nsfw-filter.js?v28';
 $config['additional_javascript'][] = 'js/post-filter.js?v9';
 
 $config['additional_javascript'][] = 'js/local-time.js';
 
 $config['additional_javascript'][] = 'js/style-select.js?v2';
 
-$config['additional_javascript'][] = 'js/___ajax.js?v14';
+$config['additional_javascript'][] = 'js/___ajax.js?v21';
 $config['additional_javascript'][] = 'js/multi-image.js?v2';
 $config['additional_javascript'][] = 'js/file-selector.js?v6';
 
@@ -715,7 +718,7 @@ $config['additional_javascript'][] = 'js/__show-own-posts.js';
 $config['additional_javascript'][] = 'js/ajax-post-controls.js?v2';
 $config['additional_javascript'][] = 'js/___quick-post-controls.js?v3';
 
-$config['additional_javascript'][] = 'js/auto-reload.js?v13';
+$config['additional_javascript'][] = 'js/auto-reload.js?v15';
 $config['additional_javascript'][] = 'js/thread-stats.js?v3';
 
 $config['additional_javascript'][] = 'js/youtube.js?v2';
@@ -731,7 +734,7 @@ $config['additional_javascript'][] = 'js/doquote.js?v2';
 
 $config['additional_javascript'][] = 'js/voice_button.js';
 
-$config['additional_javascript'][] = 'js/archive-buttons.js?v3';
+$config['additional_javascript'][] = 'js/archive-buttons.js?v6';
 
 $config['additional_javascript'][] = 'js/buttons.js';
 
@@ -747,14 +750,15 @@ $config['additional_javascript'][] = 'js/infinite-scroll.js?v5';
 
 $config['additional_javascript'][] = 'js/rotate-banners.js?v1';
 
-$config['additional_javascript'][] = 'js/theme-effects.js?v1';
+$config['additional_javascript'][] = 'js/theme-effects.js?v7';
 
-$config['additional_javascript'][] = 'js/load_service_worker.js';
+$config['additional_javascript'][] = 'js/load_service_worker.js?v5';
 
 include 'rangebans.php';
 
 //Browser hash filter
 
+/*
 $config['filters'][] = array(
 	'condition' => array(
 		'flood-match' => array('sharty_browser_hash'), // Only match IP address
@@ -763,6 +767,7 @@ $config['filters'][] = array(
 	'action' => 'reject',
 	'message' => &$config['error']['flood']
 );
+*/
 
 $config['max_threads_per_ip'] = 3000;
 $config['max_threads_per_image_hash'] = 5;
@@ -998,9 +1003,13 @@ $config['wordfilters'][] = array('basedgem.party', 'bantculture.com');
 $config['wordfilters'][] = array('shemmy.org', 'bantculture.com');
 
 $config['wordfilters'][] = array('swinny', 'jarty');
+$config['wordfilters'][] = array('swanny', 'jarty');
+$config['wordfilters'][] = array('swnny', 'jarty');
+$config['wordfilters'][] = array('sw*nny', 'jarty');
 $config['wordfilters'][] = array('swinni', 'jarty');
 $config['wordfilters'][] = array('swínny', 'jarty');
 $config['wordfilters'][] = array('swede splinter', 'jarty');
+$config['wordfilters'][] = array('swedish splinter', 'jarty');
 $config['wordfilters'][] = array('swedishwin.com', 'jakparty.soy');
 $config['wordfilters'][] = array('swedishwin', 'the jarty');
 $config['wordfilters'][] = array('swedewin', 'the jarty');
@@ -1017,7 +1026,7 @@ $config['wordfilters'][] = array('/b\W*b\W*c/i', 'johnson', true);
 $config['wordfilters'][] = array('big black cock', 'johnson');
 
 //$config['wordfilters'][] = array(' ', 'REDDITSPACE');
-$config['wordfilters'][] = array('shit', 'raisin');
+//$config['wordfilters'][] = array('shit', 'raisin');
 
 //$config['wordfilters'][] = array('sse', 'bibisi');
 
@@ -1082,25 +1091,62 @@ $config['wordfilters'][] = array('о', 'o');
 $config['wordfilters'][] = array('ѕ', 's');
 $config['wordfilters'][] = array('Ѕ', 'S');
 
-$config['wordfilters'][] = array('shit', 'raisin');
-$config['wordfilters'][] = array('snca', 'rnca');
+//$config['wordfilters'][] = array('shit', 'raisin');
+//$config['wordfilters'][] = array('snca', 'rnca');
 
 $config['wordfilters'][] = array('soytopia.party', 'tf2.soyjak.st');
 $config['wordfilters'][] = array('74.91.123.100', 'tf2.soyjak.st');
 
 $config['wordfilters'][] = array('swinny', 'jarty');
+$config['wordfilters'][] = array('swanny', 'jarty');
+$config['wordfilters'][] = array('swnny', 'jarty');
+$config['wordfilters'][] = array('sw*nny', 'jarty');
+$config['wordfilters'][] = array('swenny', 'jarty');
+$config['wordfilters'][] = array('swlnny', 'jarty');
 $config['wordfilters'][] = array('swinni', 'jarty');
 $config['wordfilters'][] = array('swínny', 'jarty');
 $config['wordfilters'][] = array('swedishwin.com', 'jakparty.soy');
 $config['wordfilters'][] = array('swedishwin', 'the jarty');
 $config['wordfilters'][] = array('swedewin', 'the jarty');
 
+$config['wordfilters'][] = array('https://soyjak.st:443/soy/thread/15301794.html',
+	'https://kiwifarms.st:443/threads/soyjak-party-the-sharty.145349/page-678#post-19631270'
+);
+$config['wordfilters'][] = array('https://soyjak.st/soy/thread/15301794.html',
+        'https://kiwifarms.st/threads/soyjak-party-the-sharty.145349/page-678#post-19631270'
+);
+
+$config['wordfilters'][] = array('/\bdoctos+\b/i',
+        'OMGSISA'
+);
+
+$config['wordfilters'][] = array('/\bdoktors+\b/i',
+        'OMGSISA'
+);
+
+$config['wordfilters'][] = array('doctos',
+        'OMGSISA'
+);
+
+$config['wordfilters'][] = array('DOCTOS',
+        'OMGSISA'
+);
+
 /*
-$config['wordfilters'][] = array("'p ", 'irl children being raped ');
-$config['wordfilters'][] = array("`p ", 'irl children being raped ');
-$config['wordfilters'][] = array("'р ", 'irl children being raped ');
-$config['wordfilters'][] = array(" р ", 'irl children being raped ');
+$config['wordfilters'][] = array("'p",
+        'child pornography'
+);
+
+$config['wordfilters'][] = array('failtroll',
+        'bogeyman'
+);
+
+$config['wordfilters'][] = array('\bepi\b',
+        'porn'
+);
 */
+
+$config['wordfilters'][] = array("Content hidden", "im trans btw");
 
 /*
 $config['wordfilters'][] = array('/Nigger/', 'Rog', true);
@@ -1215,18 +1261,52 @@ $config['wordfilters'][] = array('/bread/', '/thread/');
 
 $config['movefilters'] = array();
 
+/*
 $config['movefilters'][] = array('06eb', 'nate');
 $config['movefilters'][] = array('female jan', 'nate');
 $config['movefilters'][] = array('femjan', 'nate');
 $config['movefilters'][] = array('femq', 'nate');
 $config['movefilters'][] = array('fem q', 'nate');
+$config['movefilters'][] = array('/nate/', 'nate');
 $config['movefilters'][] = array('mrs bottom', 'nate');
 $config['movefilters'][] = array('mrs. bottom', 'nate');
 $config['movefilters'][] = array('miss bottom', 'nate');
+*/
 
 $config['blocked_countries'][] = 'in';
 $config['blocked_countries'][] = 'il';
 $config['blocked_countries'][] = 'lk';
+$config['blocked_countries'][] = 'kw';
+$config['blocked_countries'][] = 'vn';
+$config['blocked_countries'][] = 'tr';
+$config['blocked_locales'][] = 'tr';
+$config['blocked_locales'][] = 'tr-TR';
+$config['blocked_locales'][] = 'cy-GB';
+
+$config['blocked_countries'][] = 'tr';
+$config['blocked_countries'][] = 'br';
+$config['blocked_countries'][] = 'mx';
+$config['blocked_countries'][] = 'az';
+$config['blocked_countries'][] = 'cl';
+$config['blocked_countries'][] = 'ph';
+$config['blocked_countries'][] = 'th';
+$config['blocked_countries'][] = 'pe';
+$config['blocked_countries'][] = 'pr';
+$config['blocked_countries'][] = 'sg';
+$config['blocked_countries'][] = 'qa';
+$config['blocked_countries'][] = 've';
+$config['blocked_countries'][] = 'my';
+$config['blocked_countries'][] = 'dz';
+$config['blocked_countries'][] = 'sa';
+$config['blocked_countries'][] = 'id';
+$config['blocked_countries'][] = 'ar';
+
+$config['blocked_locales'][] = 'pt-BR';
+$config['blocked_locales'][] = 'es-MX';
+$config['blocked_locales'][] = 'es-419';
+$config['blocked_locales'][] = 'tr';
+$config['blocked_locales'][] = 'tr-TR';
+$config['blocked_locales'][] = 'cy-GB';
 
 $config['anyascii'] = true;
 $config['enforce_integrity'] = true;
@@ -1236,8 +1316,8 @@ $config['mediator_threshold'] = 8;
 $config['file_mod_file_approval'] = 'mod/file_approval.html';
 
 $config['splatfest_teams'] = array (
-	'John Cena' => array('/static/festival/john.png', '#000b98'),
-	'Cody Rhodes' => array('/static/festival/cody.png', '#d50000'),
+	'Early Bird' => array('/static/festival/worm.png', '#05fff6', true),
+	'Night Owl' => array('/static/festival/owl.png', '#00022b'),
 );
 $config['splatfest_enabled'] = false;
 
@@ -1287,7 +1367,7 @@ $config['anyascii'] = false;
 
 $config['images_only_thread_button'] = true;
 
-$config['hourly_ip_thread_limit'] = 10;
+$config['hourly_ip_thread_limit'] = 15;
 $config['max_threads_per_hour'] = 900;
 
 $config['block_vpn_posting'] = false;
@@ -1398,3 +1478,9 @@ $config['user_flags'] = array (
 $config['require_user_flag'] = true;
 $config['pride_month_2025'] = true;
 */
+
+$config['mod']['ban_presets'][] = ['/soy/ - Avatarfag', '/soy/ 3. - Making yourself identifiable between threads by avatarfagging, signing your posts, or abusing the subject or email fields as a name field is forbidden.', ['15m', '1h', '12h', '3d'], false];
+//$config['mod']['ban_presets'][] = ['/soy/ - NAS', '/soy/ 2. - The inclusion of Soyjaks and/or media relevant to the website (e.g., frogs, gigachads) in thread OPs is mandatory.',['15m', '1h', '12h', '3d'], false];
+$config['mod']['ban_presets'][] = ['/soy/ - Namefags', '/soy/  4. - The discussion of namefags, avatarfags and drama surrounding them is forbidden.', ['15m', '1h', '12h', '3d'], false];
+$config['mod']['ban_presets'][] = ['/pol/ - Porn', '/pol/ 3. - Pornography without relevance to discussion is forbidden.', ['1h', '12h', '3d'], false];
+

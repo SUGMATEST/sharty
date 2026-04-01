@@ -11,7 +11,13 @@
 			<td>{% if ban.reason is null %}No reason provided.{% else %}{{ ban.reason }}{% endif %}</td>
 			<td>{% if ban.board is null %}all{% else %}/{{ ban.board }}/{% endif %}</td>
 			<td>{% if ban.expires is null %}forever{% else %}{{ (ban.expires - ban.created)|seconds_to_human }}{% endif %}</td>
-			<td>{% if ban.creator == -1 %}<i>System</i>{% else %}<span style="color:purple; font-weight:bold">Mod</span>{% endif %}</td>
+			<td>{% if ban.creator == -1 %}
+				<i>System</i>
+			{% elseif ban.mod_id %}
+				<span style="color:purple; font-weight:bold">{{ ban.mod_id }}</span>
+			{% else %}
+				<span style="color:purple; font-weight:bold">Mod</span>
+			{% endif %}</td>
 		</tr>
 		{% if ban.post is not null %}
 			<tr class="ban-post" hidden><td>{{ ban.post }}</td></tr>

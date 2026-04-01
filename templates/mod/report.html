@@ -6,10 +6,7 @@
 	<br>
 	{% trans 'Report date' %}: {{ report.time|date(config.post_date) }}
 	<br>
-	{% if mod|hasPermission(config.mod.show_ip, report.board) and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
-		{% trans 'Reported by' %}: <a href="?/IP/{{ report.ip }}">{{ report.ip }}</a>
-		<br>
-	{% elseif mod|hasPermission(config.mod.show_ip, report.board) %}
+	{% if mod|hasPermission(config.mod.show_ip, report.board) %}
 		{% trans 'Reported by' %}: <a href="?/IP/{{ report.ip|cloak_ip }}">{{ report.ip|cloak_ip }}</a>
 		<br>
 	{% endif %}

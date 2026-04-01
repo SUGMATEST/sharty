@@ -1,9 +1,8 @@
 <?php
+header('Cache-Control: public, max-age=30');
 
-die();
-
+/*
 ini_set('display_errors', 1);
-
 if(getenv('TINYBOARD_PATH') !== false)
 	$dir = getenv('TINYBOARD_PATH');
 elseif(file_exists('inc/functions.php'))
@@ -24,8 +23,9 @@ if(!getenv('TINYBOARD_PATH')) {
 }
 
 putenv('TINYBOARD_PATH=' . getcwd());
+*/
 
-require 'inc/bootstrap.php';
+require_once 'inc/bootstrap.php';
 
 
 // Configuration for Splatfest teams
@@ -50,11 +50,10 @@ foreach ($config['splatfest_teams'] as $team => $details) {
 	$score *= 10.0;
 	//reduce to .2 decimal places
 	$score = round($score, 2);
-    $scores[] = array('name' => $team, 'score' => ($score), 'color' => $details[1]);
+    $scores[] = array('name' => $team, 'score' => ($score), 'color' => $details[1], 'black_text' => !empty($details[2]));
 }
 
 // Return scores as JSON
-header('Cache-Control: public, max-age=40');
 header('Content-Type: application/json');
 echo json_encode($scores);
 ?>

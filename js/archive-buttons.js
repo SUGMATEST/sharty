@@ -8,12 +8,11 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'ukko
         const Menu = window.Menu;
         const submenu = Menu.add_submenu('archive-menu', _('Archive post'));
 
-        submenu.add_item('archive-cellar', 'View post on The Cellar');
-        submenu.add_item('archive-archivetoday', 'Archive on archive.today');
+        //submenu.add_item('archive-cellar', 'View post on The Cellar');
+        //submenu.add_item('archive-archivetoday', 'Archive on archive.today');
         submenu.add_item('archive-ghostarchive', 'Archive on Ghostarchive');
-        if (domain != 'soyjak.party') {
-            submenu.add_item('archive-wayback', 'Archive on the Wayback Machine');
-        }
+        submenu.add_item('archive-megalodon', 'Archive on megalodon.jp');
+        //submenu.add_item('archive-wayback', 'Archive on the Wayback Machine');
 
         Menu.onclick(function (e, $buffer) {
             const $post = $(e.target.parentElement.parentElement);
@@ -40,6 +39,10 @@ if (active_page === 'thread' || active_page === 'index' || active_page === 'ukko
 
             $buffer.find('#archive-wayback').on('click', function() {
                 window.open('https://web.archive.org/save/' + threadUrl, '_blank');
+            });
+
+            $buffer.find('#archive-megalodon').on('click', function() {
+                window.open('https://gyo.tc/' + threadUrl, '_blank');
             });
         });
     });

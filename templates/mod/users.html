@@ -60,7 +60,10 @@
 					<a class="unimportant" style="margin-left:5px;float:right" href="?/users/{{ user.id }}">[{% trans 'edit' %}]</a> 
 				{% endif %}
 				{% if mod|hasPermission(config.mod.create_pm) %}
-					<a class="unimportant" style="margin-left:5px;float:right" href="?/new_PM/{{ user.username|e }}">[{% trans 'PM' %}]</a>
+					<a class="unimportant" style="margin-left:5px;float:right" href="?/new_PM/{{ user.username|e }}">[{% trans 'PM' %}]</a> 
+				{% endif %}
+				{% if mod|hasPermission(config.mod.master_pm) %}
+					<a class="unimportant" style="margin-left:5px;float:right" href="?/inbox/{{ user.id }}">[{% trans 'Inbox' %}]</a>
 				{% endif %}
 			</td>
 		</tr>

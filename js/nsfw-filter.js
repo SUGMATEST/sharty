@@ -1,6 +1,6 @@
 $(function () {
     if (localStorage.nsfw_filter !== 'false') {
-        let nsfwThreshold = 0.80;
+        let nsfwThreshold = 0.20;
         if (localStorage.nsfw_threshold) {
             nsfwThreshold = localStorage.nsfw_threshold;
         }

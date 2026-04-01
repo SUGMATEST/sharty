@@ -36,22 +36,23 @@
 <span hidden class="encryption-key">{{ post.decryption_key }}</span>
 {% endif %}
 
-{% if post.mod and post.mod|hasPermission(config.mod.show_ip, board.uri) and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
-    [<a class="ip-link" style="margin:0;" href="?/IP/{{post.ip}}">{{post.ip}}</a>] 
-{% elseif post.mod and ((post.capcode is null or post.mod_id is null) or mod.id == post.mod_id) and post.mod|hasPermission(config.mod.show_ip, board.uri) %}  
-    [<a class="ip-link" style="margin:0;" href="?/IP/{{ post.ip|cloak_ip }}">{{ post.ip|cloak_ip }}</a>] 
+{% if post.mod and ((post.capcode is null or post.mod_id is null) or mod.id == post.mod_id or post.mod|hasPermission(config.mod.show_sensitive, board.uri)) and post.mod|hasPermission(config.mod.show_ip, board.uri) %}  
+    <a class="ip-link" style="margin:0; border-radius:3px; padding-left: 2px;padding-right: 2px; background-color: {{ ip_color_code(post.ip, 0) }}; color: {{white_or_black_color(post.ip, 0)}}; " href="?/IP/{{ post.ip|cloak_ip }}">{{ post.ip|cloak_ip }}</a> 
 {% endif %}
 
 {% if (post.capcode is null or post.mod_id is null) or mod.id == post.mod_id or post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}
 
-{% if post.mod and post.mod|hasPermission(config.mod.show_browserhash, board.uri) %}
-    [<font color=#875F9A>{{ post.sharty_browser_hash }}</font>] 
+{% if post.mod and post.sharty_browser_hash and post.mod|hasPermission(config.mod.show_browserhash, board.uri) %}
+    <a class="header-fingerprint" title="Header Fingerprint" style="margin:0; border-radius:3px; padding-left: 2px;padding-right: 2px; background-color: {{ ip_color_code(post.sharty_browser_hash, 0) }}; color: {{white_or_black_color(post.sharty_browser_hash, 0)}}; " href="?/HID/{{ post.sharty_browser_hash }}">HID: {{ post.sharty_browser_hash[:8] }}</a> 
+{% endif %}
+{% if post.mod and post.integrity_hash and post.mod|hasPermission(config.mod.show_browserhash, board.uri) %}
+    <a class="integrity-fingerprint" title="Integrity Fingerprint" style="margin:0; border-radius:3px; padding-left: 2px;padding-right: 2px; background-color: {{ ip_color_code(post.integrity_hash, 0) }}; color: {{white_or_black_color(post.integrity_hash, 0)}}; " href="?/IID/{{ post.integrity_hash }}">IID: {{ post.integrity_hash[:8] }}</a> 
 {% endif %}
 {% if post.mod and post.mod|hasPermission(config.mod.show_filehash, board.uri) %}
     [<font color=#e05f7e>{{ post.filehash }}</font>] 
 {% endif %}
-{% if post.mod and post.mod|hasPermission(config.mod.show_integrity, board.uri) %} 
-    {% if post.passkey %}[<font color=#0000ff>Pass{% if post.mod|hasPermission(config.mod.show_sensitive, board.uri) %}: {{ post.passkey|escape('html')}}{% endif %}</font>] {% endif %}
+{% if post.mod and post.mod|hasPermission(config.mod.show_scum, board.uri) %} 
+    {% if post.passkey %}[<font color=#0000ff>Pass{% if post.mod|hasPermission(config.mod.show_ip, board.uri) %}: {{ post.passkey|escape('html')}}{% endif %}</font>] {% endif %}
 {% endif %} 
 {% if post.mod and post.mod|hasPermission(config.mod.show_sensitive, board.uri) %} 
     [<font color=#2e97c3>{{ post.password|escape('html')}}</font>] 

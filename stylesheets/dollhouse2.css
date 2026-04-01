@@ -1,0 +1,115 @@
+body {
+    /* THIS OVERRIDES THE BACKGROUND IMAGE/COLOR ENTIRELY */
+    background: #0A2B66; 
+    
+    color: #FFFFFF; /* White text for readability on the dark background */
+    font-family: arial, helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.desktop-style body {
+    padding-top: 20px;
+}
+
+/* --- LINKS --- */
+a,
+a:visited,
+.bl {
+    text-decoration: none;
+    color: #FD3D99; /* Pink links */
+}
+
+a:hover,
+.intro a.post_no:hover,
+.intro a.email:hover span.name {
+    color: #FFEC40; /* Bright Yellow on hover */
+}
+
+.intro a.email span.name {
+    color: #FD3D99; /* Pink for email link names */
+}
+
+/* --- POST CONTAINERS AND REPLIES --- */
+div.post, .thread {
+    background-color: #1A3C88; /* Slightly lighter dark blue for post background */
+    border-color: #FD3D99;
+    color: #FFFFFF;
+}
+
+div.post.reply {
+    background: #0A2B66; /* Dark Blue background for reply boxes */
+    margin: 0.2em 4px;
+    padding: 0.2em 0.3em 0.5em 0.6em;
+    border-width: 1px;
+    border-style: none solid solid none;
+    border-color: #FD3D99; /* Pink border */
+    display: inline-block;
+    max-width: 94% !important;
+}
+
+div.post.reply.highlighted {
+    background: #2D58A0; /* Lighter Blue for highlighted replies */
+}
+
+/* --- POST INFORMATION (NAMES, SUBJECTS, METADATA) --- */
+.intro span.name {
+    color: #FD3D99; /* Pink for the name/ID */
+    font-weight: bold;
+}
+
+.intro span.subject {
+    color: #99FF99; /* Bright Green for the subject line */
+    font-weight: bold;
+}
+
+.intro span.capcode,
+p.intro a.capcode,
+p.intro a.nametag {
+    color: #FD3D99; /* Pink for capcode/nametag */
+}
+
+/* --- QUOTE TEXT --- */
+span.quote {
+    color: #99FF99; /* Bright Green for standard quotes (>) */
+}
+
+span.quote2 {
+    color: #FFEC40; /* Bright Yellow for secondary quotes */
+}
+
+/* --- HEADERS/TABLES/PAGES --- */
+h2, h1, header div.subtitle, span.heading {
+    color: #FD3D99; /* Pink for all main headers */
+}
+
+div.ban h2,
+form table tr th,
+table.modlog tr th,
+table.test tr.h th {
+    background: #FD3D99; /* Pink background for table headers */
+    color: #000000; /* Black text on bright background */
+}
+
+div.ban {
+    background: #1A3C88; /* Dark post color for ban boxes */
+    border: 1px solid #FD3D99; /* Pink border */
+}
+
+div.pages {
+    color: #FFFFFF; /* White text for page numbers */
+    background: #1A3C88; /* Dark post color for pagination box */
+    border-right: 1px solid #FD3D99;
+    border-bottom: 1px solid #FD3D99;
+}
+
+.desktop-style div.boardlist:nth-child(1) {
+    border-bottom: 1px solid #FD3D99;
+    background-color: #1A3C88; 
+}
+
+hr {
+    border-top: 1px solid #FD3D99; /* Pink HR line */
+}

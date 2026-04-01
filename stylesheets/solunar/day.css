@@ -1,0 +1,316 @@
+* {
+    font-family: "Futura", "Trebuchet MS", "Arial", "Helvetica", sans-serif;
+}
+
+/* Body with a sky-to-ocean gradient */
+body {
+    background: linear-gradient(to bottom, #87CEEB 0%, #4682B4 100%);
+    color: #006400;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0 4px;
+    min-height: 100vh;
+}
+
+/* Sun styling with pseudo-element to create a larger sun in the background */
+body::before {
+    content: '';
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 245, 84, 1) 0%, rgba(255, 205, 0, 1) 100%);
+    border-radius: 50%;
+    top: var(--sun-top, 60%);
+    left: var(--sun-left, 0);
+    z-index: -3; /* Below clouds (z-index: -2) */
+    box-shadow: 0 0 30px #FFCD00, 0 0 60px #FFCD00;
+    transition: left 2s linear, top 2s linear;
+}
+
+/* Sun element for JS to target */
+#dynamic-sun {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    top: 40%;
+    left: 0;
+    z-index: -1;
+}
+
+/* Links with ocean-inspired colors */
+a:visited, .intro a.email span.name {
+    color: #0000CD;
+    text-decoration: underline;
+}
+a {
+    color: #4B4BCC;
+}
+
+a:hover, .intro a.post_no:hover {
+    color: #FFD700;
+}
+
+a.post_no {
+    color: #006400;
+    text-decoration: none;
+}
+
+.intro a.post_no {
+    color: inherit;
+}
+
+/* Posts with sandy gradient */
+div.post.reply {
+    background: linear-gradient(to bottom, #FFFACD, #F4E4BC);
+    border: 1px solid #BDB76B;
+    box-shadow: 0 0 5px #FFCD00;
+}
+
+div.post.reply.highlighted {
+    background: linear-gradient(to bottom, #FFEFD5, #FFDAB9);
+    border-color: #DAA520;
+}
+
+div.post.reply div.body a {
+    color: #4682B4;
+}
+
+.intro span.subject {
+    color: #FFA500;
+    font-weight: bold;
+}
+
+.intro span.name {
+    color: #117743;
+    font-weight: bold;
+}
+
+/* Form tables with tropical gradient */
+form table tr th {
+    background: linear-gradient(to right, #2E8B57, #3CB371);
+    color: #FFFACD;
+    font-weight: 700;
+    border: 1px solid #FFFACD;
+    font-size: 10pt;
+}
+
+/* Ban styling with lush foliage gradient */
+div.ban {
+    background: linear-gradient(to bottom, #F5F5F5, #E0FFFF);
+    border: 1px solid #006400;
+    max-width: 700px;
+}
+
+div.ban h2 {
+    background: linear-gradient(to right, #90EE90, #98FB98);
+    color: #006400;
+    font-size: 12pt;
+}
+
+div.ban p {
+    color: black;
+    font-size: 12px;
+}
+
+/* Pagination with sandy gradient */
+div.pages {
+    background: linear-gradient(to bottom, #FFFACD, #F4E4BC);
+    border-right: 1px solid #BDB76B;
+    border-bottom: 1px solid #BDB76B;
+    color: #89A;
+}
+
+div.pages a.selected {
+    color: #006400;
+    font-weight: bolder;
+}
+
+h1 {
+    font-family: Tahoma;
+    letter-spacing: -2px;
+    font-size: 20pt;
+}
+
+header div.subtitle {
+    font-size: 8pt;
+}
+
+/* Horizontal rules with wet sand */
+hr {
+    border: none;
+    border-top: 1px solid #BDB76B;
+}
+
+/* Board list with sunny gradient */
+div.boardlist {
+    color: #DAA520;
+    font-size: 9pt;
+    background: linear-gradient(to right, #FFFACD, #FFEFD5);
+}
+
+div.boardlist a {
+    color: #006400;
+    text-decoration: none;
+}
+
+/* Modlog table with tropical gradient */
+table.modlog tr th {
+    background: linear-gradient(to right, #2E8B57, #3CB371);
+}
+
+/* Options and alert dialogs with sandy gradient */
+#options_div, #alert_div {
+    background: linear-gradient(to bottom, #FFFACD, #F4E4BC);
+    border: 1px solid #BDB76B;
+}
+
+/* Fixed boardlist with sandy gradient */
+.desktop-style div.boardlist:nth-child(1) {
+    background: linear-gradient(to bottom, #FFFACD, #F4E4BC);
+    z-index: 30;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid #BDB76B;
+}
+
+span.quote { color: #789922; }
+span.quote2 { color: #f6750b; }
+span.spoiler { 
+    background: black; 
+    color: black; 
+}
+span.spoiler:hover, div.post.reply div.body span.spoiler:hover a { 
+    color: white; 
+}
+div.post.reply div.body span.spoiler a { 
+    color: black; 
+}
+span.heading { 
+    color: #AF0A0F; 
+    font-size: 11pt; 
+    font-weight: bold; 
+}
+span.heading2 { 
+    color: #2424ad; 
+    font-size: 11pt; 
+    font-weight: bold; 
+}
+span.omitted { 
+    display: block; 
+    margin-top: 1em; 
+    color: #707070; 
+}
+input[type="text"], input[type="password"], textarea { 
+    border: 1px solid #a9a9a9; 
+}
+textarea { width: 100%; }
+div.banner a:hover { 
+    color: #EEF2FF; 
+    text-decoration: none; 
+}
+img.banner, img.board_image { 
+    border: 1px solid #a9a9a9; 
+}
+
+textarea, input {
+    background-color: #FFF554; 
+    border: 2px solid #ffcd00 !important;
+    color: #60DCEA;
+}
+td#upload_selection {
+    background: linear-gradient(180deg, rgba(255, 245, 84, 1) 0%, rgba(255, 205, 0, 1) 100%);
+}
+div.dropzone-wrap {
+    background: linear-gradient(180deg, rgba(255, 245, 84, 1) 0%, rgba(255, 205, 0, 1) 100%);
+}
+
+/* Cloud container for multiple clouds */
+.cloud {
+    position: fixed;
+    z-index: -2; /* Above sun (z-index: -3) */
+    pointer-events: none; /* Prevent interaction */
+}
+
+/* Individual cloud styling */
+.cloud div {
+    position: absolute;
+    background: rgb(255, 255, 255); /* Fully opaque */
+    border-radius: 100px; /* More elongated for distinct shape */
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.9), 0 0 10px rgba(200, 200, 200, 0.5); /* Enhanced shadow */
+    transition: left 2s linear, top 2s linear; /* Smooth transition for resets */
+}
+
+/* Cloud cluster sizes and offsets for variety (more elements for distinct shape) */
+.cloud1 div:nth-child(1) { width: 80px; height: 40px; top: 0; left: 0; }
+.cloud1 div:nth-child(2) { width: 60px; height: 30px; top: 10px; left: 50px; }
+.cloud1 div:nth-child(3) { width: 70px; height: 35px; top: -10px; left: 20px; }
+.cloud1 div:nth-child(4) { width: 50px; height: 25px; top: 5px; left: 70px; }
+
+.cloud2 div:nth-child(1) { width: 100px; height: 50px; top: 0; left: 0; }
+.cloud2 div:nth-child(2) { width: 80px; height: 40px; top: 15px; left: 60px; }
+.cloud2 div:nth-child(3) { width: 90px; height: 45px; top: -15px; left: 30px; }
+.cloud2 div:nth-child(4) { width: 60px; height: 30px; top: 10px; left: 80px; }
+
+.cloud3 div:nth-child(1) { width: 70px; height: 35px; top: 0; left: 0; }
+.cloud3 div:nth-child(2) { width: 50px; height: 25px; top: 8px; left: 40px; }
+.cloud3 div:nth-child(3) { width: 60px; height: 30px; top: -8px; left: 15px; }
+.cloud3 div:nth-child(4) { width: 45px; height: 22px; top: 0px; left: 60px; }
+
+.cloud4 div:nth-child(1) { width: 90px; height: 45px; top: 0; left: 0; }
+.cloud4 div:nth-child(2) { width: 70px; height: 35px; top: 12px; left: 55px; }
+.cloud4 div:nth-child(3) { width: 80px; height: 40px; top: -12px; left: 25px; }
+.cloud4 div:nth-child(4) { width: 55px; height: 27px; top: 8px; left: 70px; }
+
+.cloud5 div:nth-child(1) { width: 85px; height: 42px; top: 0; left: 0; }
+.cloud5 div:nth-child(2) { width: 65px; height: 32px; top: 10px; left: 50px; }
+.cloud5 div:nth-child(3) { width: 75px; height: 37px; top: -10px; left: 20px; }
+.cloud5 div:nth-child(4) { width: 50px; height: 25px; top: 5px; left: 65px; }
+
+.cloud6 div:nth-child(1) { width: 95px; height: 47px; top: 0; left: 0; }
+.cloud6 div:nth-child(2) { width: 75px; height: 37px; top: 14px; left: 60px; }
+.cloud6 div:nth-child(3) { width: 85px; height: 42px; top: -14px; left: 30px; }
+.cloud6 div:nth-child(4) { width: 60px; height: 30px; top: 10px; left: 75px; }
+
+/* Wave container for water effect */
+.wave {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 1000%; /* Wider for seamless looping */
+    height: 15%; /* Bottom 15% of screen */
+    z-index: -4; /* Below sun (z-index: -3) and clouds (z-index: -2) */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Individual wave layers */
+.wave div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 105, 148, 0.6), rgba(0, 70, 100, 0.8));
+    clip-path: polygon(
+        0% 100%, 
+        5% 50%, 10% 70%, 15% 30%, 20% 60%, 25% 20%, 30% 50%, 35% 80%, 40% 40%, 45% 60%, 
+        50% 20%, 55% 60%, 60% 30%, 65% 70%, 70% 40%, 75% 80%, 80% 50%, 85% 20%, 90% 60%, 95% 30%, 
+        100% 50%, 100% 100%
+    ); /* Sinusoidal wave shape */
+}
+
+/* Wave animations */
+.wave1 { animation: wave 25s linear infinite; animation-delay: -5s; }
+.wave2 { animation: wave 30s linear infinite reverse; animation-delay: -10s; }
+.wave3 { animation: wave 35s linear infinite; animation-delay: -15s; }
+.wave4 { animation: wave 40s linear infinite; animation-delay: -20s; transform: scaleY(0.8); }
+.wave5 { animation: wave 45s linear infinite reverse; animation-delay: -25s; transform: scaleY(0.7); }
+
+@keyframes wave {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-90%); } /* Adjusted for 1000% width */
+}
+
+header div.subtitle, 
+h1 {
+    background: linear-gradient(180deg, rgba(253, 255, 254, 1) 0%, rgba(236, 250, 253, 1) 25%, rgba(221, 244, 252, 1) 75%, rgba(179, 231, 245, 1) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

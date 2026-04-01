@@ -42,9 +42,6 @@
 		if (strtolower($_GET['board']) == 'raid') {
 			error("Board not found"); //hacky way of doing it
 		}
-		if (strtolower($_GET['board']) == 'chive') {
-			error("Board not found"); //hacky way of doing it
-		}
 		if (strtolower($_GET['board']) == 'shrk') {
 			error("Board not found"); //hacky way of doing it
 		}

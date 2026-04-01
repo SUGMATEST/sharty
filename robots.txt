@@ -1,1 +1,7 @@
-Sitemap: http://soyjak.party/sitemap.xml
+User-agent: *
+Disallow: /*.php
+Disallow: /*/thread/*-50.html
+Disallow: /*/thread/*-page_*.html
+Disallow: /raid/
+
+Sitemap: https://soyjak.st/sitemap.xml

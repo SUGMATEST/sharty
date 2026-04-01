@@ -12,6 +12,33 @@
  *
  */
 
+window.last_prick = 0;
+
+async function prick() {
+	const p4 = fetch("https://4.prick.soyjak.st/", { signal: AbortSignal.timeout(5000) });
+	const p6 = fetch("https://6.prick.soyjak.st/", { signal: AbortSignal.timeout(5000) });
+	window.last_prick = Date.now();
+
+	try {
+		await p4.then(async(r) => {
+			if (!r.ok) {
+				throw new Error("Failed to fetch prick-4");
+			}
+			window.prick4 = await r.text();
+		});
+		await p6.then(async(r) => {
+			if (!r.ok) {
+				throw new Error("Failed to fetch prick-6");
+			}
+			window.prick6 = await r.text();
+		});
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+$(prick);
+
 $(function () {
 	var settings = new script_settings('ajax');
 	var do_not_ajax = false;
@@ -43,8 +70,24 @@ $(function () {
 			formData.append('post', submit_txt);
 			//formData.append('g-recaptcha-response-v3', token);
 			//Module.ccall("x", "string");
+
+			if (window.last_prick < Date.now() - (15*60*1000)) {
+				await prick();
+			}
+
+			if (window.prick4) {
+				formData.append("prick-4", window.prick4);
+			}
+			if (window.prick6) {
+				formData.append("prick-6", window.prick6);
+			}
+
 			if (typeof Module !== 'undefined' && !location.hostname.includes('.onion')) {
-				formData.append("integrity-v2", await Module.ccall("x", "string"));
+				try {
+					formData.append("integrity-v2", await Module.ccall("x", "string"));
+				} catch (error) {
+					console.error(error);
+				}
 			}
 			$(document).trigger("ajax_before_post", formData);
 

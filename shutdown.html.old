@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>It's over - for good this time.</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .signature {
+            font-size: 1.5em;
+            font-style: italic;
+        }
+        iframe {
+            width: 560px;
+            height: 315px;
+            border: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .links {
+            margin-top: 30px;
+        }
+        .links a {
+            color: #ffd700; /* gold to stand out against black */
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="font-size:32px;font-weight:700;display:block;margin-block-end:21.44px;margin-block-start:21.44px;margin-inline-end:0px;margin-inline-start:0px;">It's over - for good this time.</h1>       
+        <div style="display:block;margin-block-end:16px;margin-block-start:16px;margin-inline-end:0px;margin-inline-start:0px;">
+            I am sad to say this, but the party will be shutting down as of tonight. I was not able to raise enough money personally to keep the site online. This page is meant as a memorial for the fun times we all had on the site and all the memories we made along the way laughing at funny soyjaks and spreading our culture everywhere across the internet. If at some point in the future there is a person willing to purchase the site from me and pay the bills for the site, then I will restore the site and all of us can return to the home of 'jakking. I love you all, and I really wish things could of been any other way. Thank (You) for being a true gem, and I pray that I will see you all again soon.
+        </div>
+        <div style="display:block;margin-block-end:16px;margin-block-start:16px;margin-inline-end:0px;margin-inline-start:0px;">
+            With love and regret,<br><br>
+            <big style="font-size:19.2px;"><i style="font-style:italic;">Quote - balrog@goatse.email</i></big>
+        </div>
+        <iframe width="420" height="315"
+            src="https://www.youtube.com/embed/6W6HhdqA95w">	
+        </iframe>
+
+        <div class="links">
+            <a href="https://soyjak.st/bunker/index.html">Wiki Bunker</a> |
+            <a href="https://soyjak.st/jarty/index.html">Jakparty.soy</a> |
+            <a href="https://soyjak.st/tfp/index.html">The Frog Pond</a>
+        </div>
+    </div>
+</body>
+</html>

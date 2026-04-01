@@ -95,6 +95,9 @@ function error($message, $priority = true, $debug_stuff = false) {
 	}
 
 	if (isset($_POST['json_response'])) {
+		if ($_SERVER['HTTP_USER_AGENT'] == 'uptime-check/1.0') {
+			http_response_code(500);
+		}
 		header('Content-Type: text/json; charset=utf-8');
 		die(json_encode(array(
 			'error' => $message

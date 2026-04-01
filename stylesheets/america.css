@@ -1,0 +1,196 @@
+div.post {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(113,0,0,1) 94%);}
+
+div.post.reply {color: black; background: #ffffff;}
+
+body {
+  color: white;
+  background: #0A3161;
+  background-image: url('/static/america/bg.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: bottom;
+  background-size: cover; }
+
+label:not(:has(span.capcode)) span.name {color:#0A3161 !important;}
+
+div.files {background: #ffffff}
+
+form table tr th{background: #B31942;}
+
+div.post.reply.highlighted {color: white; background: #B31942;}
+
+div.pages.top {background: #ffffff;}
+
+div.mix {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);}
+
+div.pages {background: #ffffff;}
+
+div#news {background: #ffffff;}
+
+td#upload_selection {background: #ffffff;}
+
+div.subtitle {background: #ffffff;
+width: 100px;
+margin: auto;
+border-radius: 25px;}
+
+span#thread-links {background: #B31942;}
+
+span#updater {background: #B31942;}
+
+div#thread_stats {background: #B31942;}
+
+fieldset {background: #B31942;}
+
+div#post-moderation-fields {background: #B31942;}
+
+div.boardlist.bottom {background: #B31942;}
+
+div.boardlist {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);}
+
+div.boardlist a { color: white; }
+
+h1 {background: linear-gradient(90deg, rgba(179,25,66,1) 0%, rgba(255,255,255,1) 50%, rgba(10,49,97,1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+width: 200px;
+margin: auto;}
+
+div.dropzone-wrap { background: #ffffff;}
+div.center { background: #ffffff;}
+div.file.multifile { background: #ffffff;}
+h1::before {
+content: "The United States of ";
+}
+
+$size: 100px;
+
+body {
+  margin: 0;
+}
+
+img, div {
+  width: $size;
+  height: $size;
+}
+
+.x {
+  animation: x 13s linear infinite alternate;
+}
+
+.y {
+  animation: y 7s linear infinite alternate;
+}
+
+@keyframes x {
+  100% {
+    transform: translateX( calc(100vw - #{$size}) );
+  }
+}
+
+@keyframes y {
+  100% {
+    transform: translateY( calc(100vh - #{$size}) );
+  }
+}
+
+body {
+  overflow-x: hidden;
+overflow-y: auto;
+}
+
+@keyframes firework {
+  0% { 
+    transform: translate(-50%, 60vh);
+    width: 0.5vmin;
+    opacity: 1;
+  }
+  50% { 
+    width: 0.5vmin;
+    opacity: 1;
+  }
+  100% { 
+    width: 45vmin; 
+    opacity: 0; 
+  }
+}
+
+.firework,
+.firework::before,
+.firework::after {
+  --top: 60vh;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0.5vmin;
+  aspect-ratio: 1;
+  background:
+    /* random backgrounds */
+    radial-gradient(circle, #ff0000 0.2vmin, #0000 0) 50% 00%, /* Red */
+    radial-gradient(circle, #ffffff 0.3vmin, #0000 0) 00% 50%, /* White */
+    radial-gradient(circle, #0000ff 0.5vmin, #0000 0) 50% 99%, /* Blue */
+    radial-gradient(circle, #ff0000 0.2vmin, #0000 0) 99% 50%, /* Red */
+    radial-gradient(circle, #ffffff 0.3vmin, #0000 0) 80% 90%, /* White */
+    radial-gradient(circle, #0000ff 0.5vmin, #0000 0) 95% 90%, /* Blue */
+    radial-gradient(circle, #ff0000 0.5vmin, #0000 0) 10% 60%, /* Red */
+    radial-gradient(circle, #ffffff 0.2vmin, #0000 0) 31% 80%, /* White */
+    radial-gradient(circle, #0000ff 0.3vmin, #0000 0) 80% 10%, /* Blue */
+    radial-gradient(circle, #ff0000 0.2vmin, #0000 0) 90% 23%, /* Red */
+    radial-gradient(circle, #ffffff 0.3vmin, #0000 0) 45% 20%, /* White */
+    radial-gradient(circle, #0000ff 0.5vmin, #0000 0) 13% 24%; /* Blue */
+  background-size: 0.5vmin 0.5vmin;
+  background-repeat: no-repeat;
+  animation: firework 2s infinite;
+}
+
+.firework::before {
+  transform: translate(-50%, -50%) rotate(25deg) !important; 
+}
+
+.firework::after {
+  transform: translate(-50%, -50%) rotate(-37deg) !important;
+}
+
+/* Restore vertical scroll but hide horizontal overflow */
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Fixed container to keep burger bouncing in viewport */
+.bounce-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.bounce-container .x {
+  animation: x 13s linear infinite alternate;
+  position: absolute;
+}
+
+.bounce-container .y {
+  animation: y 7s linear infinite alternate;
+  width: 100px;
+  height: 100px;
+}
+
+/* X-axis animation */
+@keyframes x {
+  100% {
+    transform: translateX(calc(100vw - 100px));
+  }
+}
+
+/* Y-axis animation */
+@keyframes y {
+  100% {
+    transform: translateY(calc(100vh - 100px));
+  }
+}

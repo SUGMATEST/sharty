@@ -1,5 +1,6 @@
 <?php
 require 'inc/bootstrap.php';
+include_once "proxycheck.io.php.function.php";
 
 if (!empty($_GET['ip'])) {
 	header('Content-Type: application/json; charset=utf-8');
@@ -25,6 +26,7 @@ if (!empty($_GET['ip'])) {
 
 	$ageCheck = true;
 	$postCheck = true;
+	$vpnCheck = vpn_check($ip, false);
 
 	if (get_ip_post_count($ip, $board) < $minPosts) {
 		$postCheck = false;
@@ -34,7 +36,13 @@ if (!empty($_GET['ip'])) {
 		$ageCheck = false;
 	}
 
-	echo json_encode(array('passed' => $postCheck && $ageCheck));
+	$passed = !$vpnCheck || ($postCheck && $ageCheck);
+
+	echo json_encode(array(
+		'vpn' => $vpnCheck,
+		'passed' => $passed,
+		'failed' => !$passed
+	));
 }
 
 else {

@@ -1,4 +1,8 @@
 {% if config.splatfest_enabled and post.modifiers.festival_team %}
- <span class="festival_team" style="border-radius:3px; padding-left: 2px;padding-right: 2px; background-color: {{ config.splatfest_teams[post.modifiers.festival_team][1] }}; color: #fff; "><img src="{{ config.splatfest_teams[post.modifiers.festival_team][0] }}" style="height: 16px; width: 16px; margin: auto;vertical-align: middle;">Team {{ post.modifiers.festival_team }}</span>
+ <span class="festival_team" 
+	style="border-radius:3px; padding-left: 2px;padding-right: 2px; background-color: {{ config.splatfest_teams[post.modifiers.festival_team][1] }}; color: {% if not config.splatfest_teams[post.modifiers.festival_team][2] %}#fff{% else %}#000{% endif %}; ">
+	<img src="{{ config.splatfest_teams[post.modifiers.festival_team][0] }}" 
+		style="height: 16px; width: 16px; margin: auto;vertical-align: middle;" />
+	{{ post.modifiers.festival_team }}
 </span>
 {% endif %}

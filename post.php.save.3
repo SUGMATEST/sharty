@@ -1,0 +1,4275 @@
+<?php
+/*
+ *  Copyright (c) 2010-2014 Tinyboard Development Group
+ */
+
+require_once 'inc/bootstrap.php';
+
+use GeoIp2\Database\Reader as GeoIp2Reader;
+
+function has_user_posted_on_board_before($board, $ip)
+{
+	//$ip = $_SERVER['REMOTE_ADDR'];
+	$queryStr = "SELECT * FROM `posts_%s` WHERE `ip` = :ip";
+	//prepare(sprintf("SELECT `sticky`,`locked`,`cycle`,`sage`,`slug` FROM ``posts_%s`` WHERE `id` = :id AND `thread` IS NULL LIMIT 1", $board['uri']));
+	$query = prepare(sprintf($queryStr, $board));
+	$query->bindValue(":ip", $ip);
+
+	if (!$query->execute()) {
+		error(db_error($query)); // assuming error() is a function you've defined to handle errors
+	}
+
+	if ($query->rowCount() == 0) {
+		return false;
+	}
+	return true;
+}
+
+function has_user_posted_on_any_board_before($ip)
+{
+	$boards = listBoards(true);
+	foreach ($boards as $board) {
+		if (has_user_posted_on_board_before($board, $ip)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+$dropped_post = false;
+
+// Is it a post coming from NNTP? Let's extract it and pretend it's a normal post.
+if (isset($_GET['Newsgroups']) && $config['nntpchan']['enabled']) {
+	if ($_SERVER['REMOTE_ADDR'] != $config['nntpchan']['trusted_peer']) {
+		error("NNTPChan: Forbidden. $_SERVER[REMOTE_ADDR] is not a trusted peer");
+	}
+
+	$_POST = array();
+	$_POST['json_response'] = true;
+
+	$headers = json_encode($_GET);
+
+	if (!isset($_GET['Message-Id'])) {
+		if (!isset($_GET['Message-ID'])) {
+			error("NNTPChan: No message ID");
+		} else
+			$msgid = $_GET['Message-ID'];
+	} else
+		$msgid = $_GET['Message-Id'];
+
+	$groups = preg_split("/,\s*/", $_GET['Newsgroups']);
+	if (count($groups) != 1) {
+		error("NNTPChan: Messages can go to only one newsgroup");
+	}
+	$group = $groups[0];
+
+	if (!isset($config['nntpchan']['dispatch'][$group])) {
+		error("NNTPChan: We don't synchronize $group");
+	}
+	$xboard = $config['nntpchan']['dispatch'][$group];
+
+	$ref = null;
+	if (isset($_GET['References'])) {
+		$refs = preg_split("/,\s*/", $_GET['References']);
+
+		if (count($refs) > 1) {
+			error("NNTPChan: We don't support multiple references");
+		}
+
+		$ref = $refs[0];
+
+		$query = prepare("SELECT `board`,`id` FROM ``nntp_references`` WHERE `message_id` = :ref");
+		$query->bindValue(':ref', $ref);
+		$query->execute() or error(db_error($query));
+
+		$ary = $query->fetchAll(PDO::FETCH_ASSOC);
+
+		if (count($ary) == 0) {
+			error("NNTPChan: We don't have $ref that $msgid references");
+		}
+
+		$p_id = $ary[0]['id'];
+		$p_board = $ary[0]['board'];
+
+		if ($p_board != $xboard) {
+			error("NNTPChan: Cross board references not allowed. Tried to reference $p_board on $xboard");
+		}
+
+		$_POST['thread'] = $p_id;
+	}
+
+	$date = isset($_GET['Date']) ? strtotime($_GET['Date']) : time();
+
+	list($ct) = explode('; ', $_GET['Content-Type']);
+
+	$query = prepare("SELECT COUNT(*) AS `c` FROM ``nntp_references`` WHERE `message_id` = :msgid");
+	$query->bindValue(":msgid", $msgid);
+	$query->execute() or error(db_error($query));
+
+	$a = $query->fetch(PDO::FETCH_ASSOC);
+	if ($a['c'] > 0) {
+		error("NNTPChan: We already have this post. Post discarded.");
+	}
+
+	if ($ct == 'text/plain') {
+		$content = file_get_contents("php://input");
+	} elseif ($ct == 'multipart/mixed' || $ct == 'multipart/form-data') {
+		_syslog(LOG_INFO, "MM: Files: " . print_r($GLOBALS, true)); // Debug
+
+		$content = '';
+
+		$newfiles = array();
+		foreach ($_FILES['attachment']['error'] as $id => $error) {
+			if ($_FILES['attachment']['type'][$id] == 'text/plain') {
+				$content .= file_get_contents($_FILES['attachment']['tmp_name'][$id]);
+			} elseif ($_FILES['attachment']['type'][$id] == 'message/rfc822') { // Signed message, ignore for now
+			} else { // A real attachment :^)
+				$file = array();
+				$file['name'] = $_FILES['attachment']['name'][$id];
+				$file['type'] = $_FILES['attachment']['type'][$id];
+				$file['size'] = $_FILES['attachment']['size'][$id];
+				$file['tmp_name'] = $_FILES['attachment']['tmp_name'][$id];
+				$file['error'] = $_FILES['attachment']['error'][$id];
+
+				$newfiles["file$id"] = $file;
+			}
+		}
+
+		$_FILES = $newfiles;
+	} else {
+		error("NNTPChan: Wrong mime type: $ct");
+	}
+
+	$_POST['subject'] = isset($_GET['Subject']) ? ($_GET['Subject'] == 'None' ? '' : $_GET['Subject']) : '';
+	$_POST['board'] = $xboard;
+
+	if (isset($_GET['From'])) {
+		list($name, $mail) = explode(" <", $_GET['From'], 2);
+		$mail = preg_replace('/>\s+$/', '', $mail);
+
+		$_POST['name'] = $name;
+		//$_POST['email'] = $mail;
+		$_POST['email'] = '';
+	}
+
+	if (isset($_GET['X_Sage'])) {
+		$_POST['email'] = 'sage';
+	}
+
+	$content = preg_replace_callback('/>>([0-9a-fA-F]{6,})/', function ($id) use ($xboard) {
+		$id = $id[1];
+
+		$query = prepare("SELECT `board`,`id` FROM ``nntp_references`` WHERE `message_id_digest` LIKE :rule");
+		$idx = $id . "%";
+		$query->bindValue(':rule', $idx);
+		$query->execute() or error(db_error($query));
+
+		$ary = $query->fetchAll(PDO::FETCH_ASSOC);
+		if (count($ary) == 0) {
+			return ">>>>$id";
+		} else {
+			$ret = array();
+			foreach ($ary as $v) {
+				if ($v['board'] != $xboard) {
+					$ret[] = ">>>/" . $v['board'] . "/" . $v['id'];
+				} else {
+					$ret[] = ">>" . $v['id'];
+				}
+			}
+			return implode($ret, ", ");
+		}
+	}, $content);
+
+	$_POST['body'] = $content;
+
+	$dropped_post = array(
+		'date' => $date,
+		'board' => $xboard,
+		'msgid' => $msgid,
+		'headers' => $headers,
+		'from_nntp' => true,
+	);
+} elseif (isset($_GET['Newsgroups'])) {
+	error("NNTPChan: NNTPChan support is disabled");
+}
+
+/*session_start();
+if (!isset($_POST['captcha_cookie']) && isset($_SESSION['captcha_cookie'])) {
+	$_POST['captcha_cookie'] = $_SESSION['captcha_cookie'];
+}*/
+
+if (isset($_POST['delete'])) {
+	// Delete
+
+	if (!isset($_POST['board'], $_POST['password']))
+		error($config['error']['bot']);
+
+	$password = &$_POST['password'];
+
+	if ($password == '')
+		error($config['error']['invalidpassword']);
+
+	$delete = array();
+	foreach ($_POST as $post => $value) {
+		if (preg_match('/^delete_(\d+)$/', $post, $m)) {
+			$delete[] = (int) $m[1];
+		}
+	}
+
+	//checkDNSBL();
+
+	// Check if board exists
+	if (!openBoard($_POST['board']))
+		error($config['error']['noboard']);
+
+
+	check_login(false);
+	$is_mod = isset($mod);
+
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked']) {
+		error($config['error']['board_locked']);
+	}
+
+	// Check if banned
+	checkBan($board['uri']);
+
+	// Check if deletion enabled
+	if (!$config['allow_delete'])
+		error(_('Post deletion is not allowed!'));
+
+	if (empty($delete))
+		error($config['error']['nodelete']);
+
+	foreach ($delete as &$id) {
+		$query = prepare(sprintf("SELECT `id`,`thread`,`time`,`password` FROM ``posts_%s`` WHERE `id` = :id", $board['uri']));
+		$query->bindValue(':id', $id, PDO::PARAM_INT);
+		$query->execute() or error(db_error($query));
+
+		if ($post = $query->fetch(PDO::FETCH_ASSOC)) {
+			$thread = false;
+			if ($config['user_moderation'] && $post['thread']) {
+				$thread_query = prepare(sprintf("SELECT `time`,`password` FROM ``posts_%s`` WHERE `id` = :id", $board['uri']));
+				$thread_query->bindValue(':id', $post['thread'], PDO::PARAM_INT);
+				$thread_query->execute() or error(db_error($query));
+
+				$thread = $thread_query->fetch(PDO::FETCH_ASSOC);
+			}
+
+			if ($post['time'] < time() - $config['max_delete_time'] && $config['max_delete_time'] != false) {
+				error(sprintf($config['error']['delete_too_late'], until($post['time'] + $config['max_delete_time'])));
+			}
+
+			if ($password != '' && $post['password'] != $password && (!$thread || $thread['password'] != $password))
+				error($config['error']['invalidpassword']);
+
+			if ($post['time'] > time() - $config['delete_time'] && (!$thread || $thread['password'] != $password)) {
+				error(sprintf($config['error']['delete_too_soon'], until($post['time'] + $config['delete_time'])));
+			}
+
+			if (isset($_POST['file'])) {
+				if (!$config['allow_file_delete'])
+					error(_('File deletion is not allowed!'));
+
+				// Delete just the file
+				deleteFile($id);
+				modLog("User deleted file from their own post #$id");
+			} else {
+				// Delete entire post
+				deletePost($id);
+				modLog("User deleted their own post #$id");
+			}
+
+			_syslog(
+				LOG_INFO,
+				'Deleted post: ' .
+					'/' . $board['dir'] . $config['dir']['res'] . link_for($post) . ($post['thread'] ? '#' . $id : '')
+			);
+		}
+	}
+
+	buildIndex();
+
+	$is_mod = isset($_POST['mod']) && $_POST['mod'];
+	$root = $is_mod ? $config['root'] . $config['file_mod'] . '?/' : $config['root'];
+
+	if (!isset($_POST['json_response'])) {
+		header('Location: ' . $root . $board['dir'] . $config['file_index'], true, $config['redirect_http']);
+	} else {
+		header('Content-Type: text/json');
+		echo json_encode(array('success' => true));
+	}
+
+	// We are already done, let's continue our heavy-lifting work in the background (if we run off FastCGI)
+	if (function_exists('fastcgi_finish_request')) {
+		fastcgi_finish_request();
+	} elseif (!headers_sent()) {
+		header('Connection: close');
+		header('Content-Length: ' . ob_get_length());
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
+
+
+	rebuildThemes('post-delete', $board['uri']);
+} elseif (isset($_POST['report'])) {
+	if ($_SERVER['REMOTE_ADDR'] == "83.24.78.190")
+		error("approve my fucking files nigga");
+
+	if (!isset($_POST['board'], $_POST['reason']))
+		error($config['error']['bot']);
+
+	$report = array();
+	foreach ($_POST as $post => $value) {
+		if (preg_match('/^delete_(\d+)$/', $post, $m)) {
+			$report[] = (int) $m[1];
+		}
+	}
+
+	//checkDNSBL();
+
+	// Check if board exists
+	if (!openBoard($_POST['board']))
+		error($config['error']['noboard']);
+
+	//check for mod cookie
+
+
+	check_login(false);
+
+	$is_mod = isset($mod);
+
+	$hasPass = false;
+	if (isset($_COOKIE['pass'])) {
+		//verify_pass
+		$verified = verify_pass($_COOKIE['pass']);
+
+		if ($verified) {
+			$pass = fetch_pass($_COOKIE['pass']);
+			if ($pass) {
+				$hasPass = true;
+			} else {
+				setcookie('pass', '', time() - 7200);
+				error("Invalid passkey. (1)");
+			}
+		} else {
+			setcookie('pass', '', time() - 7200);
+			error("Invalid passkey. (2)");
+		}
+	}
+
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked']) {
+		error($config['error']['board_locked']);
+	}
+	/*			_('1. You WILL NOT post, link to, or request illegal content.'),
+					  _('1a. Attempting to get the site taken down via DDOS, false reports, etc. is FORBIDDEN.'),
+					  _('2. You WILL NOT advocate, promote, or post pedophilia or pedophilic content.'),
+					  _('2a. The posting of "soylita", "shoyta" and its derivatives is not permitted.'),
+					  _('3. You WILL NOT advertise for imageboards, discord servers, telegram channels, crypto projects, etc.'),
+					  _('3a. Participation in hostile or disruptive off-site communities or servers is FORBIDDEN.'),
+					  _('4. You WILL NOT excessively spam threads or boards via means of botting.'),
+					  _('4a. Sending false reports is FORBIDDEN.'),
+					  _('4b. Certain types of manual spam may still be punishable. See "Grey Areas"'),
+					  _('5. You WILL adhere to the general topic or theme of the board you are posting on. Posts that do not pertain to the topic or theme of the board WILL be moved or removed.'),
+					  _('6. You WILL NOT post in an identifiable manner on the site. This includes avatarfagging and namefagging.'),
+					  _('7. Residential proxies or residential VPNs are forbidden.')
+		  */
+	if (!$is_mod) {
+		$reasons = array(
+			'1. You WILL NOT post, link to, or request illegal content.',
+			'1a. Attempting to get the site taken down via DDOS, false reports, etc. is FORBIDDEN.',
+			'2. You WILL NOT advocate, promote, or post pedophilia or pedophilic content.',
+			'2a. The posting of \'soylita\', \'shoyta\' and its derivatives is not permitted.',
+			'3. You WILL NOT advertise for imageboards, discord servers, telegram channels, crypto projects, etc.',
+			'3a. Participation in hostile or disruptive off-site communities or servers is FORBIDDEN.',
+			'4. You WILL NOT excessively spam threads or boards via means of botting.',
+			'4a. Sending false reports is FORBIDDEN.',
+			'4b. Certain types of manual spam may still be punishable. See "Grey Areas"',
+			'5. You WILL adhere to the general topic or theme of the board you are posting on. Posts that do not pertain to the topic or theme of the board WILL be moved or removed.',
+			'6. You WILL NOT post in an identifiable manner on the site. This includes avatarfagging and namefagging.',
+			'7. Residential proxies or residential VPNs are forbidden.',
+			'Hurt my feelings'
+		);
+
+		if (empty($_POST['reason'])) {
+			error("Invalid reason");
+		}
+
+		/*
+		if (!in_array($_POST['reason'], $reasons)) {
+			error("Invalid reason");
+		}
+		*/
+	}
+	$urgent = false;
+
+	if (isset($_POST['urgent'])) {
+		if ($_POST['urgent'] == "true") {
+			$urgent = true;
+		}
+	}
+
+	$gi_reader = new GeoIp2Reader('inc/lib/geoip2/GeoLite2-City.mmdb');
+
+	try {
+		$gi_record = $gi_reader->city($_SERVER["REMOTE_ADDR"]);
+	}
+	catch (Exception $e) {
+		$gi_record = $gi_reader->city('76.230.242.131');
+	}
+
+	if (in_array(strtolower($gi_record->country->isoCode), $config['blocked_countries']) && $hasPass == false) {
+		error($config['error']['countryblock']);
+	}
+
+	//check vpn
+	if (isset($config['block_vpn_posting']) && $config['block_vpn_posting'] && $is_mod == false && $hasPass == false) {
+		include_once "proxycheck.io.php.function.php";
+		if (vpn_check($_SERVER["REMOTE_ADDR"], $config['mandate_soy_history'])) {
+			error($config['error']['ipblock']);
+		}
+	}
+
+	if (!has_user_posted_on_any_board_before($_SERVER['REMOTE_ADDR']) && $is_mod == false && $hasPass == false) {
+		header('Content-Type: text/json');
+		echo json_encode(array('success' => true));
+		return;
+	}
+	// Check if banned
+	checkBan($board['uri']);
+	if ($board['uri'] == "bp")
+                error($config['error']['bot']);
+	if (empty($report))
+		error($config['error']['noreport']);
+
+	if (count($report) > $config['report_limit'])
+		error($config['error']['toomanyreports']);
+
+	if ($config['report_captcha'] && !isset($_POST['captcha_text'], $_POST['captcha_cookie'])) {
+		error($config['error']['bot']);
+	}
+
+
+
+	if ($config['report_captcha']) {
+		$ch = curl_init($config['domain'] . '/' . $config['captcha']['provider_check'] . "?" . http_build_query([
+			'mode' => 'check',
+			'text' => $_POST['captcha_text'],
+			'extra' => $config['captcha']['extra'],
+			'cookie' => $_POST['captcha_cookie']
+		]));
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$resp = curl_exec($ch);
+
+		if ($resp !== '1') {
+			error($config['error']['captcha']);
+		}
+	}
+
+	$reason = escape_markup_modifiers($_POST['reason']);
+	markup($reason);
+
+	foreach ($report as &$id) {
+		$query = prepare(sprintf("SELECT `id`, `thread`, `filehash` FROM ``posts_%s`` WHERE `id` = :id", $board['uri']));
+		$query->bindValue(':id', $id, PDO::PARAM_INT);
+		$query->execute() or error(db_error($query));
+
+		$post = $query->fetch(PDO::FETCH_ASSOC);
+
+		$error = event('report', array('ip' => $_SERVER['REMOTE_ADDR'], 'board' => $board['uri'], 'post' => $post, 'reason' => $reason, 'link' => link_for($post)));
+
+		if ($error) {
+			error($error);
+		}
+
+		if ($config['syslog'])
+			_syslog(
+				LOG_INFO,
+				'Reported post: ' .
+					'/' . $board['dir'] . $config['dir']['res'] . link_for($post) . ($post['thread'] ? '#' . $id : '') .
+					' for "' . $reason . '"'
+			);
+		$query = prepare("INSERT INTO ``reports`` VALUES (NULL, :time, :ip, :board, :post, :reason)");
+		$query->bindValue(':time', time(), PDO::PARAM_INT);
+		$query->bindValue(':ip', $_SERVER['REMOTE_ADDR'], PDO::PARAM_STR);
+		$query->bindValue(':board', $board['uri'], PDO::PARAM_STR);
+		$query->bindValue(':post', $id, PDO::PARAM_INT);
+		$query->bindValue(':reason', $reason, PDO::PARAM_STR);
+		$query->execute() or error(db_error($query));
+	}
+
+	$root = $is_mod ? $config['root'] . $config['file_mod'] . '?/' : $config['root'];
+
+	if (!isset($_POST['json_response'])) {
+		$index = $root . $board['dir'] . $config['file_index'];
+		echo Element($config['file_page_template'], array('config' => $config, 'body' => '<div style="text-align:center"><a href="javascript:window.close()">[ ' . _('Close window') . " ]</a> <a href='$index'>[ " . _('Return') . ' ]</a></div>', 'title' => _('Report submitted!')));
+	} else {
+		header('Content-Type: text/json');
+		echo json_encode(array('success' => true));
+	}
+	//early return
+	if (function_exists('fastcgi_finish_request')) {
+		fastcgi_finish_request();
+	} elseif (!headers_sent()) {
+		header('Connection: close');
+		header('Content-Length: ' . ob_get_length());
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
+	if ($urgent) {
+		$webhookUrl = "https://discord.com/api/webhooks/1319314454739161139/6hpheY_MLQN03FbnNyk4Zq1YdSatZi3wYbIIhM3IjaitCGHnIhoTfkH02V8t9-RJcnXM?wait=true";
+		$webhookUsername = "Report Queue";
+
+		$totalReports = 0;
+
+		$query = prepare("SELECT COUNT(*) AS `c` FROM ``reports``");
+		$query->execute() or error(db_error($query));
+		$a = $query->fetch(PDO::FETCH_ASSOC);
+		$totalReports = $a['c'];
+
+		$_reason = escape_markup_modifiers($_POST['reason']);
+		markup($_reason);
+
+		$url = "https://" . $config['site_domain'] . "/mod.php?/" . $board['dir'] . $config['dir']['res'];
+
+		if (!$post['thread']) {
+			$url .= $post['id'] . ".html";
+		} else {
+			$url .= $post['thread'] . ".html#" . $post['id'];
+		}
+
+		$cloak = force_cloak_ip($_SERVER['REMOTE_ADDR']);
+
+		$webhook_report_template = "New urgent report! [View Post]($url) @here\nTotal reports: $totalReports [View Report Queue](https://" . $config['site_domain'] . "/mod.php?/reports)\nReporter: [$cloak](https://" . $config['site_domain'] . "/mod.php?/IP/$cloak)\nReason: $_reason";
+
+		if ($post['filehash']) {
+			$webhook_report_template .= "\nFilehash: " . $post['filehash'];
+		}
+
+
+		$json_data = json_encode([
+			// Message
+			"content" => $webhook_report_template,
+
+			// Username
+			"username" => $webhookUsername,
+
+			// Avatar URL.
+			// Uncoment to replace image set in webhook
+			//"avatar_url" => "https://ru.gravatar.com/userimage/28503754/1168e2bddca84fec2a63addb348c571d.jpg?size=512",
+
+			// Text-to-speech
+			"tts" => false,
+		], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+
+		$ch = curl_init($webhookUrl);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+	}
+} elseif (isset($_POST['post']) || $dropped_post) {
+	if (!isset($_POST['body'], $_POST['board']) && !$dropped_post)
+		error($config['error']['bot']);
+
+	if (isset($config['freeze_posts']) && $config['freeze_posts']) {
+		$timeFrozen = $config['freeze_posts']; // unix time (assumed to be in UTC)
+		$currentTime = time(); // current unix time in UTC
+
+		if ($currentTime < $timeFrozen) {
+			$remainingTime = $timeFrozen - $currentTime;
+
+
+			$interval = date_diff(date_create("@0"), date_create("@$remainingTime"));
+
+			$thetime = [];
+			foreach (array('y' => 'year', 'm' => 'month', 'd' => 'day', 'h' => 'hour', 'i' => 'minute', 's' => 'second') as $format => $desc) {
+				if ($interval->$format >= 1) {
+					$thetime[] = $interval->$format . ($interval->$format == 1 ? " $desc" : " {$desc}s");
+				}
+			}
+
+			$remainingTimeString = isset($thetime) ? implode(' ', $thetime) . ($interval->invert ? ' ago' : '') : NULL;
+			error("Posting is frozen on this board for " . $remainingTimeString .". Please try using a different board.");
+		}
+	}
+
+	//Total babybot death
+	/*if ($_SERVER['HTTP_USER_AGENT'] === 'Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101 Firefox/102.0') {
+						  error("You have been rate-limited.");
+					  }*/
+	$endUserIP = $_SERVER['REMOTE_ADDR'];
+
+	$redis = new Redis();
+	$redis->connect('127.0.0.1', 6379);
+
+	check_login(false);
+
+	$is_mod = isset($mod);
+
+	if (str_contains($_POST['body'], '==(')) {
+		error("Flood detected, post discarded.");
+	}
+
+
+	$hasPass = false;
+	$passUid = 0;
+	$passSinceString = "Since ";
+	$passKey = "";
+	if (isset($_COOKIE['pass']) && $_COOKIE['pass']) {
+		//verify_pass
+		$verified = verify_pass($_COOKIE['pass']);
+
+		if ($verified) {
+			$pass = fetch_pass($_COOKIE['pass']);
+			if ($pass) {
+				$hasPass = true;
+				$passUid = $pass['pass_id'];
+				$passSinceString = "Passholder since";
+				//Convert to Date/Time like Passholder since July 2024
+				$passSinceString .= " " . date("F Y", strtotime($pass['registration_date']));
+				$passKey = $pass['passkey'];
+			} else {
+				setcookie('pass', '', time() - 7200);
+				error("Invalid passkey. (1)");
+			}
+			//
+
+		} else {
+			setcookie('pass', '', time() - 7200);
+			error("Invalid passkey. (2)");
+		}
+	}
+
+	$post = array('board' => $_POST['board'], 'files' => array(), 'post_flags' => (int) 0);
+
+	// Check if board exists
+	if (!openBoard($post['board']))
+		error($config['error']['noboard']);
+
+	$isQuote = preg_match('/^((?:>|<|\^|v).*|\s)+$/', $_POST['body']);
+	if ($config['require_quote_op'] && empty($_POST['thread']) && !$isQuote) {
+		checkBan($board['uri']);
+		Bans::new_ban($endUserIP, '5. Posts that do not pertain to the topic or theme of the board may be moved or removed.', 120, $board['uri'], -1);
+		//error('No arrow.');
+		$post['board'] = 'qa';
+		if (!openBoard($post['board'])) {
+			error($config['error']['noboard']);
+		}
+	}
+
+	if (empty($_POST['thread']) && !$isQuote) {
+		checkBan($board['uri']);
+		$body = strtolower(AnyAscii::transliterate($_POST['body']));
+		foreach ($config['movefilters'] as $filter) {
+			if (isset($filter[2]) && $filter[2]) {
+				if (preg_match($filter[0], $body)) {
+					Bans::new_ban($endUserIP, '5. Posts that do not pertain to the topic or theme of the board may be moved or removed.', 180, $board['uri'], -1);
+					$post['board'] = $filter[1];
+					break;
+				}
+			}
+			else {
+				if (str_contains($body, strtolower($filter[0]))) {
+					Bans::new_ban($endUserIP, '5. Posts that do not pertain to the topic or theme of the board may be moved or removed.', 180, $board['uri'], -1);
+					$post['board'] = $filter[1];
+					break;
+				}
+			}
+		}
+
+		if (!openBoard($post['board'])) {
+			error($config['error']['noboard']);
+		}
+	}
+
+	if ($endUserIP == $config['onion_addr'] && $hasPass == false && $is_mod == false) {
+		error('You must use an <a href="/ip-token.php">IP token</a> or a <a href="/pass.php">Soygem pass</a> to post from the hidden service.');
+	}
+
+
+	if ($config['mandate_soy_history'] && get_ip_post_count($endUserIP) < 5 && $is_mod == false && $hasPass == false) {
+		error('Something went wrong. Please try again later.');
+	}
+
+
+	include_once "proxycheck.io.php.function.php";
+	if (isset($config['block_vpn_posting']) && $config['block_vpn_posting'] && $is_mod == false && $hasPass == false) {
+		if (vpn_check($endUserIP, $config['mandate_soy_history'])) {
+			error($config['error']['ipblock']);
+		}
+	}
+
+	if (vpn_check($endUserIP, false)) {
+		$post['post_flags'] |= 1 << 11;
+	}
+
+	if ((rand() % 30000) == 0) {
+		error("Are you REALLY sure you want to make that post? Do you know what you're doing? Maybe you'd like to reconsider that?");
+	}
+	if (!hasPermission($config['mod']['post_on_locked_board']) && $config['board_locked'] && $_POST['thread'] != 15412) {
+		error($config['error']['board_locked']);
+	}
+	if ($config['board_thread_creation_locked'] && !isset($_POST['thread']) && !hasPermission($config['mod']['sticky'], $board['uri'])) {
+		error("Thread creation is locked");
+	}
+
+	// Block posting without a pass if enabled
+	if (isset($config['pass_only']) && $config['pass_only'] && $hasPass == false) {
+		error("A Soygem pass is required to post on this board.");
+	}
+
+	if (!isset($_POST['name']))
+		$_POST['name'] = $config['anonymous'];
+
+	if (!isset($_POST['email']))
+		$_POST['email'] = '';
+
+	if (!isset($_POST['subject']))
+		$_POST['subject'] = '';
+
+	if (!isset($_POST['password']))
+		$_POST['password'] = '';
+
+	//	if ($_POST['password'] == '')
+	//		error("Spam suspected. Post discarded.");
+
+	if (isset($_POST['thread'])) {
+		$post['op'] = false;
+		$post['thread'] = round($_POST['thread']);
+	} else
+		$post['op'] = true;
+
+	$gi_reader = new GeoIp2Reader('inc/lib/geoip2/GeoLite2-City.mmdb');
+
+	try {
+		$gi_record = $gi_reader->city($endUserIP);
+	}
+	catch (Exception $e) {
+		$gi_record = $gi_reader->city('76.230.242.131');
+	}
+
+	$post['country'] = strtolower($gi_record->country->isoCode);
+	if (!empty($gi_record->subdivisions)) {
+		$post['region'] = $gi_record->subdivisions[0]->name;
+	}
+
+	$visa = apcu_fetch('visa_posts_remaining_' . $endUserIP);
+
+	if (in_array($post['country'], $config['blocked_countries']) && $hasPass == false) {
+		if ($visa <= 0 || $visa == false) {
+			error($config['error']['countryblock']);
+		}
+		else {
+			apcu_store('visa_posts_remaining_' . $endUserIP, $visa - 1);
+			$post['visa'] = true;
+		}
+	}
+
+	else if ($config['allowed_countries'] !== false && !in_array($post['country'], $config['allowed_countries']) && $hasPass == false) {
+		if ($visa <= 0 || $visa == false) {
+			error($config['error']['countryblock']);
+		}
+		else {
+			apcu_store('visa_posts_remaining_' . $endUserIP, $visa - 1);
+			$post['visa'] = true;
+		}
+	}
+
+	else if (!empty($post['region']) && $post['country'] == 'us' && in_array($post['region'], $config['blocked_states'])) {
+		if ($visa <= 0 || $visa == false) {
+			error('Your state has been blocked from posting on this board.');
+		}
+		else {
+			apcu_store('visa_posts_remaining_' . $endUserIP, $visa - 1);
+			$post['visa'] = true;
+		}
+	}
+
+	else if ($config['allowed_states'] !== false && !empty($post['region']) && $post['country'] == 'us' && !in_array($post['region'], $config['allowed_states'])) {
+		if ($visa <= 0 || $visa == false) {
+			error('Your state has been blocked from posting on this board.');
+		}
+		else {
+			apcu_store('visa_posts_remaining_' . $endUserIP, $visa - 1);
+			$post['visa'] = true;
+		}
+	}
+
+	if ($is_mod) {
+		$post['mod_id'] = $mod['id'];
+	}
+
+	//$post['passkey'] = $passKey;
+	//$passCool = "UID " . $passUid;
+	if ($hasPass)
+		$post['passkey'] = "UID " . $passUid;
+	else
+		$post['passkey'] = "";
+	if (!$dropped_post) {
+		// Check if banned
+		checkBan($board['uri']);
+
+
+
+		if (
+			!(($post['op'] && $_POST['post'] == $config['button_newtopic']) ||
+				(!$post['op'] && $_POST['post'] == $config['button_reply']))
+		)
+			error($config['error']['bot']);
+
+		// Check the referrer
+		if (
+			$config['referer_match'] !== false &&
+			(!isset($_SERVER['HTTP_REFERER']) || !preg_match($config['referer_match'], rawurldecode($_SERVER['HTTP_REFERER'])))
+		)
+			error($config['error']['referer']);
+
+		//checkDNSBL();
+
+		//getallheaders only works on apache servers
+		if (!function_exists('getallheaders')) {
+			function getallheaders()
+			{
+				$headers = array();
+				foreach ($_SERVER as $name => $value) {
+					if (substr($name, 0, 5) == 'HTTP_') {
+						$headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+					}
+				}
+				return $headers;
+			}
+		}
+
+		function getallheaders_except_cookie_content_type()
+		{
+			$headers = array();
+			foreach ($_SERVER as $name => $value) {
+				if (
+					substr($name, 0, 5) == 'HTTP_' &&
+					$name != 'HTTP_COOKIE' &&
+					$name != 'HTTP_CONTENT_TYPE' &&
+					$name != 'HTTP_CONTENT_LENGTH' &&
+					$name != 'HTTP_REFERER' &&
+					strpos($name, 'HTTP_CF_') !== 0 &&
+					strpos($name, 'HTTP_CDN_') !== 0 &&
+					strpos($name, 'HTTP_CONTENT_') !== 0 &&
+					strpos($name, 'HTTP_X_') !== 0
+				) {
+					$formattedName = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
+					$headers[$formattedName] = $value;
+				}
+			}
+			return $headers;
+		}
+
+		$headersForHash = getallheaders_except_cookie_content_type();
+		$headersHash = md5(serialize($headersForHash));
+
+		$post['browser_hash'] = $headersHash;
+		function GetBrowser()
+		{
+			$ua = $_SERVER['HTTP_USER_AGENT'];
+			return str_contains($ua, "Firefox/") ? "Firefox" : (str_contains($ua, "Chrome/") ? "Chrome" : (str_contains($ua, "Safari/") ? "Safari" : "Other"));
+		}
+
+		function GetPlatform()
+		{
+			$ua = $_SERVER['HTTP_USER_AGENT'];
+			return (
+				str_contains($ua, "iPhone") ? "IOS" :
+				(str_contains($ua, "iPad") ? "IOS" :
+				(str_contains($ua, "Android") ? "Android" :
+				(str_contains($ua, "Windows") ? "Windows" :
+				(str_contains($ua, "Macintosh") ? "Mac" :
+				(str_contains($ua, "Linux") ? "Linux" :
+				"Unknown")))))
+			);
+		}
+
+		//bool: legit?
+		function CheckMultipart()
+		{
+			$userAgent = $_SERVER['HTTP_USER_AGENT'];
+			if ($userAgent == "uptime-check/1.0") {
+				return true;
+			}
+
+			$browser = GetBrowser();
+			if ($browser == "Other") {
+				//Discard user agents not part of the trinity
+				return false;
+			}
+
+			$headers = getallheaders();
+			if (!isset($headers["Content-Type"])) {
+				return true;
+			}
+
+			$ctype = $headers["Content-Type"];
+			if (!str_contains($ctype, "multipart/form-data")) {
+				return false;
+			}
+
+			if ($browser == "Chrome") {
+				return str_contains($ctype, "WebKitFormBoundary");
+			} elseif ($browser == "Firefox") {
+				return (str_contains($ctype, "-------------------") || str_contains($ctype, "geckoformboundary"));
+			} elseif ($browser == "Safari") {
+				return true;
+			}
+
+			return true;
+		}
+
+		if (CheckMultipart() == false || str_contains($_SERVER['HTTP_USER_AGENT'], "Headless")) {
+			error($config['error']['bot']);
+		}
+
+		if ($post['mod'] = isset($_POST['mod']) && $_POST['mod']) {
+			check_login(false);
+			if (!$mod) {
+				// Liar. You're not a mod.
+				error($config['error']['notamod']);
+			}
+
+
+			$post['sticky'] = $post['op'] && isset($_POST['sticky']);
+			$post['locked'] = $post['op'] && isset($_POST['lock']);
+			$post['raw'] = isset($_POST['raw']);
+
+			if ($post['sticky'] && !hasPermission($config['mod']['sticky'], $board['uri']))
+				error($config['error']['noaccess']);
+			if ($post['locked'] && !hasPermission($config['mod']['lock'], $board['uri']))
+				error($config['error']['noaccess']);
+			if ($post['raw'] && !hasPermission($config['mod']['rawhtml'], $board['uri']))
+				error($config['error']['noaccess']);
+		}
+
+		//Ronald: this check is no longer needed thanks to Cloudflare. If Cloudflare Pro ever expires, turn this back on to BTFO dumb bots.
+		//Ronald here again, I'm adding it back due to the new browser hash.
+		//Ronald: disabled temporarily
+		//if (!$post['mod']) {
+		//	$post['antispam_hash'] = checkSpam(array($board['uri'], isset ($post['thread']) ? $post['thread'] : ($config['try_smarter'] && isset ($_POST['page']) ? 0 - (int) $_POST['page'] : null)));
+		//	if ($post['antispam_hash'] === true)
+		//		error($config['error']['spam']);
+		//}
+		$shouldCheckCaptcha = true;
+		if ($post['mod']) {
+			$shouldCheckCaptcha = false;
+		}
+		if ($hasPass)
+			$shouldCheckCaptcha = false;
+		if (isset($config['captcha_for_new_posters_only']) && $config['captcha_for_new_posters_only']) {
+			$shouldCheckCaptcha = !has_user_posted_on_board_before($board['uri'], $endUserIP);
+		}
+
+		if (isset($_POST['mod'])) {
+			//check if mediator
+			if ($mod['type'] == MEDIATOR) {
+				$post['post_flags'] |= 1 << 6;
+			} else {
+				$post['post_flags'] |= 1 << 0;
+			}
+		}
+
+		if (!empty($trueClientIP)) {
+			$post['post_flags'] |= 1 << 10;
+		}
+
+		$newUser = false; {
+			$totalPostsBefore = 0;
+			//Check if the user has posted before
+			$boards2 = listBoards(true);
+			//build query
+			$queryStr = "";
+			if ($post['post_flags'] & (1 << 11) /* VPN */) {
+				foreach ($boards2 as $board2) {
+					$queryStr .= "SELECT * FROM `posts_" . $board2 . "` WHERE `password` = :password UNION ";
+				}
+				$queryStr = rtrim($queryStr, " UNION ");
+				$query = prepare($queryStr);
+				$query->bindValue(":password", $_POST['password']);
+			} else {
+				foreach ($boards2 as $board2) {
+					$queryStr .= "SELECT * FROM `posts_" . $board2 . "` WHERE `ip` = :ip UNION ";
+				}
+				$queryStr = rtrim($queryStr, " UNION ");
+				$query = prepare($queryStr);
+				$query->bindValue(":ip", $endUserIP);
+			}
+			$query->execute() or error(db_error());
+
+			$totalPostsBefore = $query->rowCount();
+			if ($totalPostsBefore == 0) {
+				$newUser = true;
+			}
+		}
+
+		if ($redis->get('robotEnabled_' . $endUserIP)) {
+			$config['robot_enable'] = true;
+			$config['robot_mute'] = true;
+		}
+
+		if (str_contains($_SERVER['HTTP_USER_AGENT'], "Firefox/135.0")) {
+			die();
+		}
+
+		if ($endUserIP == "173.172.178.249" && $post['thread'] == 11488145) {
+			sleep(999);
+		}
+
+		$tz = timezone_open($gi_record->location->timeZone);
+		$tz_offset = (timezone_offset_get($tz, new DateTime("now", $tz)) / 60) * -1;
+
+		$integrityFound = false;
+		$pink = false;
+		if (isset($_POST['integrity-v2'])) {
+			/*    sprintf(_json,
+									   "{"
+									   "\"ap\":%d,"
+									   "\"arch\":%d,"
+									   "\"cd\":%d,"
+									   "\"dm\":%d,"
+									   "\"tz\":%d,"
+									   "\"ti\":\"%s\","
+									   "\"tei\":\"%s\","
+									   "\"uhd\":%d,"
+									   "\"uhblwc\":%d,"
+									   "\"tfvce\":%d,"
+									   "\"tfvw\":%d,"
+									   "\"ts\":%d,"
+									   "\"istr\":%d,"
+									   "\"iseh\":%d,"
+									   "\"isc\":%d,"
+									   "\"isdwk\":%d,"
+									   "\"isswk\":%d,"
+									   "\"isg\":%d,"
+									   "\"isc86\":%d,"
+									   "\"isw606\":%d"
+									   "}",
+									   fingerprint.ApplePayStatus,
+									   fingerprint.Architecture, 
+									   fingerprint.ColorDepth,
+									   fingerprint.DeviceMemory,
+									   fingerprint.TimeZone,
+									   fingerprint.TrueIP,
+									   fingerprint.TuxlerExposedIP,
+									   fingerprint.UserHasDiscord,
+									   fingerprint.UserHasBlockedLocalhostWebsocketConnections,
+									   fingerprint.TuxlerFoundViaChromeExtension,
+									   fingerprint.TuxlerFoundViaWebsocket,
+									   fingerprint.Timestamp,
+									   fingerprint.IsTrident,
+									   fingerprint.IsEdgeHTML,
+									   fingerprint.IsChromium,
+									   fingerprint.IsDesktopWebKit,
+									   fingerprint.IsSafariWebKit,
+									   fingerprint.IsGecko,
+									   fingerprint.IsChromium86OrNewer,
+									   fingerprint.IsWebKit606OrNewer
+									   );*/
+			$decryptedData = decrypt_integrity($_POST['integrity-v2']);
+
+			//if it is not an array then it is invalid
+			if (!is_array($decryptedData)) {
+				error("Integrity check failed. Try clearing your cache and make sure you have WASM and Javascript enabled.");
+			}
+
+			//trim ti and tei
+			$decryptedData['ti'] = trim($decryptedData['ti']);
+			$decryptedData['tei'] = trim($decryptedData['tei']);
+
+			$jsonData = json_encode($decryptedData);
+			error_log($jsonData);
+			$post['integrity'] = $jsonData;
+			$decryptedData = json_decode($jsonData, true);
+
+			$hashRate = $redis->get("McChallenge:hashRate" . $endUserIP);
+
+			insert_integrity($decryptedData);
+
+			if (isset($decryptedData['inc'])) {
+				if ($decryptedData['inc']) {
+					$post['post_flags'] |= 1 << 4;
+				}
+			}
+
+			if ($decryptedData['uhd'] == 1) {
+				$post['post_flags'] |= 1 << 1;
+			}
+			if ($decryptedData['arch'] == 127) {
+				$post['post_flags'] |= 1 << 3;
+				if ($config['desktop_only']) {
+					error('This board is in desktop only mode.');
+				}
+			}
+
+			/*
+										  $reason = $hashban['reason'];
+										  $expires = false;
+										  Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, $expires, false, $hashban['creator'], $post);*/
+			$shouldBan = false;
+			$reason = "1. You will not post, link to, or request illegal content.";
+
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['hc'] == 2 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['tz'] == 0 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['cf'] == array(0,0,0,0) &&
+				$decryptedData['inc'] == 1 &&
+				$decryptedData['dpr'] == 2 &&
+				$decryptedData['lan'] == 'en-US,en' &&
+				$decryptedData['loc'] == 'en-US' &&
+				$decryptedData['ur'] == 'None detected' &&
+				$post['post_flags'] & (1 << 11) &&
+				$newUser && $is_mod == false && $hasPass == false
+			) {
+//				$reason = "11. - You WILL NOT use any sort of bot to automate posting on the site.";
+//				$shouldBan = true;
+			}
+
+			// GNUschizo
+			if (
+				$decryptedData['isc'] == 0 &&
+				$decryptedData['isg'] == 0 &&
+				$decryptedData['isdwk'] == 0 &&
+				$decryptedData['isswk'] == 0 &&
+				$decryptedData['loc'] == 'en-US-u-va-posix'
+			) {
+				$reason = "2. Pedophile.";
+				$shouldBan = true;
+			}
+
+                        // Russian CP spammer
+                        if (
+                                $decryptedData['dpr'] == 2.993 &&
+                                $decryptedData['tz'] == -180 &&
+				$decryptedData['ww'] == 361 &&
+				$decryptedData['wh'] == 682 &&
+                                $decryptedData['lan'] == "ru-RU" &&
+                                $decryptedData['loc'] == "ru" &&
+                                $decryptedData['ur'] == 'Mali-G52 MC2'
+                        ) {
+                                $reason = "Ban evasion. 1. You will not post, link to, or request illegal content.";
+                                $shouldBan = true;
+                        }
+
+                        // DNB spammer
+                        if(
+                                $decryptedData['dpr'] == 1 &&
+                                $decryptedData['lan'] == "en-IE,en,en-GB,en-US" &&
+                                $decryptedData['loc'] == "en-GB" &&
+                                $decryptedData['tz'] == -120 &&
+                                $decryptedData['arch'] == 255 &&
+                                $decryptedData['ur'] == 'ANGLE (NVIDIA, NVIDIA GeForce GTX 1650 (0x00001F82) Direct3d11 vs_5_0 ps_5_0, D3D11)' &&
+                                $decryptedData['np'] == "Windows"
+                        ) {
+                                $reason = "Realistic depictions of child abuse are FORBIDDEN.";
+                                $shouldBan = true;
+                        }
+			// Anonimos or some other Brazilian cordmonkey
+			if(
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['ww'] == 384 &&
+				$decryptedData['lan'] == "pt-BR" &&
+				$decryptedData['loc'] == "pt-BR" &&
+				$decryptedData['tz'] == 180 &&
+				$decryptedData['arch'] == 127 &&
+				$decryptedData['ur'] == 'Mali-G68' &&
+				$decryptedData['np'] == "Linux"
+			) {
+				$reason = "Ban evasion";
+				$shouldBan = true;
+			}
+
+			// polackbowl (CP SPAMMER)
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['ww'] == 1280 &&
+				$decryptedData['wh'] == 984 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['tz'] == -120 &&
+				$decryptedData['ur'] == 'ANGLE (NVIDIA, NVIDIA GeForce GTX 750 Ti (0x00001380) Direct3D11 vs_5_0 ps_5_0, D3D11)'
+			) {
+				$shouldBan = true;
+                        }
+
+			// Russian swinnycuck
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['hc'] == 4 &&
+			//	$decryptedData['ww'] == 1294 &&
+			//	$decryptedData['wh'] == 694 &&
+				$decryptedData['dpr'] == 1.25 &&
+				$decryptedData['tz'] == -180 &&
+			//	$decryptedData['lan'] == 'ru-RU,ru,en-US,en' &&
+			//	$decryptedData['loc'] == 'ru-RU' &&
+				$decryptedData['ur'] == 'ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar'
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['ww'] == 1280 &&
+				$decryptedData['wh'] == 680 &&
+				$decryptedData['dpr'] == 1.25 &&
+				$decryptedData['tz'] == -180
+			//	$decryptedData['lan'] == 'ru-RU,ru,en-US,en' &&
+			//	$decryptedData['loc'] == 'ru-RU' &&
+			//	$decryptedData['ur'] == ''
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// Polish pedo
+			if (
+				$decryptedData['arch'] == 127 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['ww'] == 384 &&
+				$decryptedData['dpr'] == 3 &&
+				$decryptedData['tz'] == -120 &&
+				$decryptedData['lan'] == "pl" &&
+				$decryptedData['loc'] == "pl" &&
+				$decryptedData['ur'] == "Adreno (TM) 750"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 6 &&
+				$decryptedData['ww'] == 1920 &&
+				$decryptedData['wh'] == 931 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['tz'] == 0 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US" &&
+				$decryptedData['ur'] == "None detected"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// gigachads.fit russian shill
+			if (
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['tz'] == -240 &&
+				$decryptedData['lan'] == "ru-RU" &&
+				$decryptedData['loc'] == "ru" &&
+				$decryptedData['ur'] == "ANGLE (NVIDIA, NVIDIA GeForce GTX 1650 (0x00001F82) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['ww'] == 1294 &&
+				$decryptedData['wh'] == 694 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['pdc'] == 0 &&
+				$decryptedData['tz'] == -180 &&
+				$decryptedData['lan'] == "ru-RU,ru,en-US,en" &&
+				$decryptedData['loc'] == "ru-RU" &&
+				$decryptedData['ur'] == "ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_5_0 ps_5_0), or similar"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// /raisin/ botter
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 16 &&
+				$decryptedData['ww'] == 2420 &&
+				$decryptedData['wh'] == 1310 &&
+				$decryptedData['dpr'] == 0 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['lan'] == "en-GB,en" &&
+				$decryptedData['loc'] == "en-GB" &&
+				$decryptedData['ur'] == "ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), or similar"
+			) {
+				$reason = "11. - You WILL NOT use any sort of bot to automate posting on the site.";
+				$shouldBan = true;
+			}
+
+			// /raisin/ botter
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['ww'] > 2500 &&
+				$decryptedData['wh'] > 1200 && $decryptedData['wh'] < 1300 &&
+				$decryptedData['dpr'] == 0 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['lan'] == "en-GB" &&
+				$decryptedData['loc'] == "en-GB" &&
+				$decryptedData['ur'] == "ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 (0x00002206) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+			) {
+				$reason = "11. - You WILL NOT use any sort of bot to automate posting on the site.";
+				$shouldBan = true;
+			}
+
+
+			// /raisin/ botter
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['inc'] == 1 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['loc'] == "en-GB" &&
+				$decryptedData['ur'] == "ANGLE (NVIDIA, NVIDIA GeForce RTX 3080 (0x00002206) Direct3D11 vs_5_0 ps_5_0, D3D11)" &&
+				$newUser
+			) {
+				$reason = "11. - You WILL NOT use any sort of bot to automate posting on the site.";
+				$shouldBan = true;
+			}
+
+                        // Turkish Discord faggot
+                        if (
+                                $decryptedData['arch'] == 127 &&
+                                $decryptedData['cd'] == 24 &&
+                                $decryptedData['ww'] == 384 &&
+                                $decryptedData['dpr'] == 2 &&
+                                $decryptedData['tz'] == -180 &&
+                                $decryptedData['lan'] == "en-GB,tr-TR" &&
+                                $decryptedData['loc'] == "en-GB" &&
+                                $decryptedData['ur'] == "Adreno (TM) 650, or similar"
+                        ) {
+                                $reason = "Ban evasion.";
+                                $shouldBan = true;
+                        }
+			if (
+                                $decryptedData['arch'] == 255 &&
+                                $decryptedData['cd'] == 24 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['pdc'] == 1 &&
+                                $decryptedData['ww'] == 1550 &&
+				$decryptedData['wh'] == 838 &&
+                                $decryptedData['dpr'] == 1 &&
+                                $decryptedData['tz'] == -180 &&
+                                $decryptedData['lan'] == "en-US,en,tr" &&
+                                $decryptedData['loc'] == "en-US" &&
+                                $decryptedData['ur'] == "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar"
+                        ) {
+                                $reason = "Ban evasion.";
+                                $shouldBan = true;
+                        }
+			// Lithuanian Pedophile
+			if (
+				$decryptedData['tz'] == -180 &&
+				$decryptedData['lan'] == "en-GB" &&
+				$decryptedData['loc'] == "de" &&
+				$decryptedData['ur'] == 'ANGLE (AMD, AMD Radeon RX 6600 (0x000073FF) Direct3D11 vs_5_0 ps_5_0, D3D11)'
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// shemmypedo
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 16 &&
+				$decryptedData['ww'] == 2576 &&
+				$decryptedData['wh'] == 1408 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['tz'] == 300 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['ur'] == "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar" &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US"
+			) {
+				$reason = "1. - You WILL NOT upload, post, request, or link to illegal content.\n68.11.167.160";
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['hc'] == 16 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['tz'] == 300 &&
+				$decryptedData['pdc'] == 0 &&
+				$decryptedData['ur'] == "ANGLE (AMD, AMD Radeon RX 7900 XTX (0x0000744C) Direct3D11 vs_5_0 ps_5_0, D3D11)" &&
+				$decryptedData['lan'] == "en-US" &&
+				$decryptedData['loc'] == "en-US" && $newUser
+			) {
+				$reason = "1. - You WILL NOT upload, post, request, or link to illegal content.";
+				$shouldBan = true;
+			}
+
+			// Azvohuf
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['dm'] == 0 &&
+				$decryptedData['hc'] == 12 &&
+				$decryptedData['ww'] == 1382 &&
+				$decryptedData['wh'] == 736 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['tz'] == 240 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['lan'] == "es-MX,es,en-US,en" &&
+				$decryptedData['loc'] == "es-MX"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			if (
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['tz'] == 420 &&
+				$decryptedData['isc'] == 1 &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['ur'] == "None detected" &&
+				$decryptedData['lan'] == "en-US" &&
+				$decryptedData['loc'] == "en-US"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// German pedo that cuckjeet told me to ban
+			if (
+				$decryptedData['arch'] == 127 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['ww'] == 384 &&
+				$decryptedData['wh'] > 600 && $decryptedData['wh'] < 700 &&
+				$decryptedData['dpr'] == 2 &&
+				$decryptedData['tz'] == -120 &&
+				$decryptedData['lan'] == "en-DE" &&
+				$decryptedData['loc'] == "en-GB" &&
+				$decryptedData['ur'] == "ANGLE (Samsung Xclipse 540) on Vulkan 1.3.279"
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// Israeli botter
+			if (
+				str_contains($decryptedData['ur'], "GTX 1660 SUPER") &&
+				$hasPass == false &&
+				$is_mod == false &&
+				$post['post_flags'] & (1 << 11)
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+			if (
+			) {
+				
+			}
+
+			$lowerBody = strtolower(AnyAscii::transliterate($_POST['body']));
+			$spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $lowerBody);
+
+			if ((str_contains($lowerBody, "quote") && str_contains($lowerBody, "pedo")) && $newUser) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			if ((str_contains($lowerBody, "catbox")) && $newUser) {
+				$shouldBan = true;
+			}
+
+			if (($lowerBody == "test" || str_contains($lowerBody, "datamin") || str_contains($lowerBody, "webgl") || str_contains($spaces_removed, "discord")) && $newUser) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// puppeteer-stealth
+			if (
+				$decryptedData['ur'] == "Intel Iris OpenGL Engine"
+			) {
+				$reason = "4. Using bots to post on the site is not permitted.";
+				$shouldBan = true;
+			}
+
+			if (empty($decryptedData['tei']) && $newUser && $post['post_flags'] & (1 << 11) && $decryptedData['hc'] == 12) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+			// Generic windows VM
+			if (str_contains($decryptedData['ur'], "Microsoft Basic Render Driver")) {
+				error("You look like a bot.");
+			}
+
+			// Linux VM
+			if (str_contains($decryptedData['ur'], "llvmpipe")) {
+				error("You look like a bot.");
+			}
+
+			/*
+			if (
+				isset($_POST['thread']) &&
+				$_POST['thread'] == 10996263 &&
+				get_ip_post_count($endUserIP) < 3
+			) {
+				$shouldBan = true;
+				$reason = "3. Participation in hostile or disruptive off-site communities or servers is forbidden.";
+			}
+			*/
+
+			// 176.25.139.252 CP spammer (gecko)
+			if (
+				$decryptedData['ap'] == 0 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['ww'] == 1550 &&
+				$decryptedData['wh'] == 838 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US"
+			) {
+				$shouldBan = true;
+			}
+
+			// 176.25.139.252 CP spammer (gecko)
+			if (
+				$decryptedData['ap'] == 0 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['ww'] == 1550 &&
+				$decryptedData['wh'] == 838 &&
+				$decryptedData['lan'] == "uk-UA,uk,en-US,en" &&
+				$decryptedData['loc'] == "uk"
+			) {
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['ap'] == 0 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "ru-UA"
+			) {
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['ap'] == 0 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['ww'] >= 1500 && $decryptedData['ww'] <= 1600 &&
+				$decryptedData['dpr'] == 1 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['pdc'] == 0 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US" &&
+				$newUser
+			) {
+				$shouldBan = true;
+			}
+
+
+			// 176.25.139.252 CP spammer (chromium)
+			if (
+				$decryptedData['ap'] == 0 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['cd'] == 24 &&
+				$decryptedData['isc'] == 1 &&
+				$decryptedData['ww'] == 1536 &&
+				$decryptedData['wh'] == 824 &&
+				$decryptedData['lan'] == "ru-RU" &&
+				$decryptedData['loc'] == "ru"
+			) {
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['lan'] == "ru-RU" &&
+				$decryptedData['loc'] == "ru" &&
+				$decryptedData['ur'] == "ANGLE (AMD, AMD Radeon(TM) Graphics (0x00001636) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+			) {
+				$shouldBan = true;
+			}
+			if (
+				$decryptedData['wh'] > 800 && $decryptedData['wh'] < 900 &&
+				$decryptedData['ww'] > 1400 && $decryptedData['ww'] < 1600 &&
+				$decryptedData['hc'] == 4 &&
+				$decryptedData['dpr'] == 1.25 &&
+				$decryptedData['tz'] == -60 &&
+				$decryptedData['lan'] == "en-GB,en" &&
+				$decryptedData['loc'] == "en-GB" &&
+				$decryptedData['ur'] == "ANGLE (AMD, Radeon HD 3200 Graphics Direct3D11 vs_5_0 ps_5_0), or similar"
+			) {
+				$shouldBan = true;
+			}
+
+			// The Ribbit Tranny
+			if (
+				$decryptedData['ur'] == "ANGLE (Intel, Mesa Intel(R) UHD Graphics (CML GT2), OpenGL 4.6)" &&
+				$decryptedData['tz'] == 300 &&
+				$decryptedData['lan'] == "en-US"
+			) {
+				$reason = "3. Participation in hostile or disruptive off-site communities or servers is forbidden.";
+				$shouldBan = true;
+			}
+
+			if (
+				$decryptedData['ur'] == "ANGLE (AMD, Radeon R9 200 Series Direct3D11 vs_5_0 ps_5_0), or similar" &&
+				$decryptedData['tz'] == 300 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US" &&
+				$decryptedData['np'] == "Windows" &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['isg'] == 1 &&
+				$decryptedData['hc'] == 24 &&
+				$post['post_flags'] & (1 << 11)
+			) {
+				error($config['error']['bot']);
+			}
+
+			if (
+				$decryptedData['tz'] == 420 &&
+				$decryptedData['lan'] == "en-US,en" &&
+				$decryptedData['loc'] == "en-US" &&
+				$decryptedData['pdc'] == 1 &&
+				$decryptedData['arch'] == 255 &&
+				$decryptedData['isg'] == 1 &&
+				$post['post_flags'] & (1 << 11)
+			) {
+				error($config['error']['bot']);
+			}
+
+			// CroxyProxy
+			if (isset($decryptedData['url']) && str_contains($decryptedData['url'], '__cpo')) {
+				$shouldBan = true;
+				$reason = "Ban evasion.";
+			}
+
+			if (str_contains(strtolower($_POST['body']), 'robux') && $newUser) {
+				$shouldBan = true;
+				$reason = "There is no free robux here, the video lied to you.";
+			}
+
+			// 46.22.223.179
+			if (
+				$decryptedData['lan'] == "es-ES,es,en-US,en" &&
+				$decryptedData['tz'] == 180 &&
+				$decryptedData['ww'] == 1382 &&
+				$decryptedData['wh'] == 744 &&
+				$decryptedData['cf'] == array(-197148122,-378349723,-553024503,2956811)
+			) {
+				$reason = "Ban evasion.";
+				$shouldBan = true;
+			}
+
+
+			if ($shouldBan) {
+				add_ip_note($_SERVER['REMOTE_ADDR'], "Integrity filter hit.<br/>Body: " . htmlspecialchars($_POST['body']));
+				Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, false, false, -1, $post, true);
+				checkBan($board['uri']);
+				error("You look like a bot.");
+			}
+
+			$post['integrity_hash'] = get_integrity_hash($decryptedData);
+			if ($endUserIP == "77.229.71.241" || $post['browser_hash'] == "6c3280b403356d658eb218e70996c73d" || $post['integrity_hash'] == "971b0f80d1fa46788d2a3a27725d84ac" || $post['integrity_hash'] == "dbfdaeed711426e4feff5c86673c2b1d" || $post['integrity_hash'] == "4f2663a5fb19494577433114f4b1f42b" || $post['integrity_hash'] == "d787eadd38ff25410174ac8485852085" || $post['integrity_hash'] == "720828cd63e227973f9174bfdf7e85ea" || $post['integrity_hash'] == "c8e7bea85649472488ec8f1adfaedd0d" || $post['integrity_hash'] == "04004bb73a2bb96e09d25606f68fadbe" || $post['integrity_hash'] == "5365049559c085ae01e3c083fd211b1b" || $post['integrity_hash'] == "04e7c5c19ccb183dfc1d8942da49d061" || $post['integrity_hash'] == "f1c27eb3b7b2663df66f54752e8c4380") {
+				die();
+			}
+
+			$integrity_key = get_integrity_key($decryptedData);
+			$ban_id = $redis->get($integrity_key);
+			if ($ban_id) {
+				$query = prepare('SELECT * FROM ``bans`` WHERE `id` = :id');
+				$query->bindValue(':id', $ban_id);
+				$query->execute();
+				$ban = $query->fetch(PDO::FETCH_ASSOC);
+				if ($ban) {
+					$length = false;
+					if (!empty($ban['expires'])) {
+						$length = $ban['expires'] - time();
+					}
+
+					$uncloaked_mask = Bans::range_to_string(array($ban['ipstart'], $ban['ipend']));
+					$original_cloak = cloak_mask($uncloaked_mask);
+
+					$note = "Integrity autoban.<br/>Original ban ID: $ban_id<br/>Original IP: <a href=\"?/IP/$original_cloak\">$original_cloak</a>";
+					$note .= "<br/>Body: " . htmlspecialchars($_POST['body']);
+					add_ip_note($_SERVER['REMOTE_ADDR'], $note);
+
+					Bans::new_ban($_SERVER['REMOTE_ADDR'], $ban['reason'], $length, false, -1, json_decode($ban['post'], true), true);
+					checkBan($board['uri']);
+					error("You are banned.");
+				} else {
+					error_log("Ban #{$ban_id} not found in DB, deleting integrity key {$integrity_key}");
+					$redis->del($integrity_key);
+				}
+			}
+
+			$integrityFound = true;
+		}
+
+		if (isset($config['enforce_integrity']) && $config['enforce_integrity'] && $hasPass == false && empty($trueClientIP)) {
+			if (!$integrityFound) {
+				error("Integrity check failed. Try clearing your cache and make sure you have WASM and Javascript enabled.");
+			} else {
+				if ($decryptedData['f'] == 1) {
+					error("Integrity check failed. Please refresh the page and try again.");
+				}
+
+				if ($decryptedData['ti'] != $endUserIP) {
+					error("Integrity check failed. Please refresh the page and try again.");
+				}
+
+				$uaEngine = GetBrowser();
+				$uaPlatform = GetPlatform();
+				if (
+					($uaEngine == "Chrome" && $decryptedData['isc'] == 0) ||
+					($uaEngine == "Firefox" && $decryptedData['isg'] == 0) ||
+					($uaEngine == "Safari" && ($decryptedData['isc'] == 1 || $decryptedData['isg'] == 1)) ||
+					(($uaPlatform == "Android" || $uaPlatform == "IOS") && $decryptedData['arch'] != 127) ||
+					(str_contains($decryptedData['ur'], "Direct3D") && ($uaPlatform != "Windows" || $decryptedData['np'] != "Windows"))
+				) {
+					error_log("User-agent did not match integrity data (UA: {$_SERVER['HTTP_USER_AGENT']})");
+					error("Integrity check failed.");
+				}
+
+				if (isset($decryptedData['url'])) {
+					if (isset($_POST['thread'])) {
+						if (!preg_match('/' . $board['uri'] . '\/' . str_replace('/', '\/', $config['dir']['res']) . (int)$_POST['thread'] . '/', $decryptedData['url'])) {
+							error_log("Reply regex failed for /{$board['uri']}/{$_POST['thread']}, url: {$decryptedData['url']}");
+							error('Integrity check failed.');
+						}
+					}
+					else if (!preg_match('/(?:o|' . $_POST['board'] . ')(?:\/$|\/index\.html|\/catalog\.html|\/\d+\.html)/', $decryptedData['url'])) {
+						error_log("New thread regex failed for /{$board['uri']}/, url: {$decryptedData['url']}");
+						error('Integrity check failed.');
+					}
+				}
+
+				// $decryptedData['timestamp']
+				// Make sure the timestamp is within 80 minutes of the current time
+				if (abs(time() - $decryptedData['ts']) > 60 * 65) {
+					error_log("Invalid integrity timestamp, time difference: " . abs(time() - $decryptedData['ts']));
+					error("Invalid integrity timestamp. Please refresh the page and try again.");
+				}
+
+				if ($decryptedData['uhblwc'] && $decryptedData['arch'] != 127 /*Non x86, so mobile*/) {
+					//If useragent has linux do not block
+					$ua = $_SERVER['HTTP_USER_AGENT'];
+					if (strpos($ua, "Linux x86_64") === false && strpos($ua, "Intel Mac OS X") === false && strpos($ua, "CrOS x86_64") === false) {
+						//error("Please disable 'Block Outsider Intrusion into LAN' from your uBlock Origin settings to post. Brave Browser's shields feature may also cause this problem.");
+						//$post['post_flags'] |= 1 << 11; // VPN
+					}
+				}
+
+				if ($decryptedData['isc'] && $decryptedData['tfvce']) {
+					//	$reason = '7. Residential proxies or residential VPNs are forbidden.';
+					//	Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, null, false, 137 /*IAMS*/ , false);
+					//	checkBan($board['uri']);
+					//error("Please remove the Tuxler extension from your browser before posting.");
+					$post['post_flags'] |= 1 << 11; // VPN
+				}
+				if ($decryptedData['tfvw']) {
+					//	$reason = '7. Residential proxies or residential VPNs are forbidden.';
+					//	Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, null, false, 137 /*IAMS*/ , false);
+					//	checkBan($board['uri']);
+					//error("Please remove Tuxler from your computer before posting.");
+					$post['post_flags'] |= 1 << 11; // VPN
+				}
+
+				$tz_diff = $decryptedData['tz'] - $tz_offset;
+
+				// Tolerate reported timezone having up to a 1 hour difference to account for daylight savings
+				// Russia is excluded because GeoIP struggles to detect the region of russian IPs and just reports Moscow's timezone
+				// America is excluded due to similiar troubles with mobile IPs
+				if (
+					($tz_diff < -60 || $tz_diff > 60)
+					&& $post['country'] != 'ru'
+					&& $post['country'] != 'us'
+				//	&& $post['country'] != 'mx'
+				//	&& $endUserIP != '76.219.108.27'
+				) {
+					error_log("Timezone mismatch detected, difference: " . $tz_diff);
+
+					// Most hardened browsers spoof timezone by default so there are a lot of legitimate users blocked by mismatches for UTC+0
+					if ($decryptedData['tz'] != 0) {
+						//error("Integrity check failed.");
+						//$post['post_flags'] |= 1 << 11; // VPN
+					}
+				}
+
+				if ($decryptedData['tei'] != $decryptedData['ti']) {
+					error_log("Notice: User had different IP to tuxler API. Tuxler exposed IP: " . $decryptedData['tei'] . " True IP: " . $decryptedData['ti']);
+					// If both are the same type of IP then error
+					if (
+						(
+							filter_var($decryptedData['tei'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) &&
+							filter_var($decryptedData['ti'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+						)
+						||
+						(
+							filter_var($decryptedData['tei'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) &&
+							filter_var($decryptedData['ti'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+						)
+					) {
+						//error("Integrity check failed. Please restart your browser and try again.");
+						$post['post_flags'] |= 1 << 11; // VPN
+					}
+				}
+
+				/*
+				if ($post['post_flags'] & (1 << 11)) {
+					if ($decryptedData['inc'] == 1) {
+						error("You cannot post from incognito mode whilst using a VPN.");
+					}
+
+					if ($decryptedData['cf'] == array(0,0,0,0)) {
+						error("Integrity check failed. Make sure canvas access isn't blocked.");
+					}
+				}
+				*/
+
+				if (isset($decryptedData['rn'])) {
+					$decryptedData['rn'] = (int)$decryptedData['rn'];
+					if ($redis->exists('integrityNumber_' . $decryptedData['rn'])) {
+						error("Integrity check failed. Please try again.");
+					}
+					$redis->set('integrityNumber_' . $decryptedData['rn'], 1, 60*60);
+				}
+			}
+		}
+
+		//ping limt/
+
+		/*if (isset($config['ping_limit']) && $config['ping_limit']) {
+							  $ch = curl_init();
+							  curl_setopt($ch, CURLOPT_URL, 'http://localhost:23471/averageping?ip=' . $_SERVER['REMOTE_ADDR']);
+							  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+							  $resp = curl_exec($ch);
+							  curl_close($ch);
+							  $ping = $resp;
+							  if ($ping > $config['ping_limit']) {
+								  error("Your ping is too high to post. Please try again later.");
+							  }
+						  }*/
+
+		//check for discord
+		/*
+						  $flag_discord = true;
+						  if ($flag_discord) {
+							  $ch = curl_init();
+							  curl_setopt($ch, CURLOPT_URL, 'http://localhost:23471/hasdiscord?ip=' . $endUserIP);
+							  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+							  $resp = curl_exec($ch);
+							  curl_close($ch);
+							  //returns true or false
+
+							  if ($resp == "true") {
+								  $post['post_flags'] |= 1 << 1;
+							  }
+						  }
+
+						  $flag_get_stealer = true;
+						  //hasgetstealer
+						  if ($flag_get_stealer) {
+							  $ch = curl_init();
+							  curl_setopt($ch, CURLOPT_URL, 'http://localhost:23471/hasgetstealer?ip=' . $_SERVER['REMOTE_ADDR']);
+							  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+							  $resp = curl_exec($ch);
+							  curl_close($ch);
+							  //returns true or false
+
+							  if ($resp == "true") {
+								  $post['post_flags'] |= 1 << 2;
+							  }
+						  }
+
+						  $flag_blocked_localhost = false;
+
+						  if (isset($config['block_localhost']) && $config['block_localhost']) {
+							  $flag_blocked_localhost = true;
+						  }
+
+						  if ($flag_blocked_localhost) {
+							  $ch = curl_init();
+							  curl_setopt($ch, CURLOPT_URL, 'http://localhost:23471/localhostblocked?ip=' . $_SERVER['REMOTE_ADDR']);
+							  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+							  $resp = curl_exec($ch);
+							  curl_close($ch);
+							  //returns true or false
+
+							  if ($resp == "true") {
+								  error("Please disable 'Block Outsider Intrusion into LAN' from your uBlock Origin settings to post.");
+							  }
+						  }
+
+						  $flag_wrong_timezone = false;
+
+						  if (!isset($_POST['mod']) && $flag_wrong_timezone) {
+							  $ch = curl_init();
+							  curl_setopt($ch, CURLOPT_URL, 'http://localhost:23471/timezone?ip=' . $_SERVER['REMOTE_ADDR']);
+							  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+							  $resp = curl_exec($ch);
+							  curl_close($ch);
+							  //returns timezone offset from UTC in minutes (UTC+1 would return 60)
+							  $offset =  $resp;
+
+							  //get geo location
+							  $gi = geoip_open('inc/lib/geoip/GeoIPv6.dat', GEOIP_STANDARD);
+
+							  function ipv4to6($ip)
+							  {
+								  if (strpos($ip, ':') !== false) {
+									  if (strpos($ip, '.') > 0)
+										  $ip = substr($ip, strrpos($ip, ':') + 1);
+									  else
+										  return $ip;  //native ipv6
+								  }
+								  $iparr = array_pad(explode('.', $ip), 4, 0);
+								  $part7 = base_convert(($iparr[0] * 256) + $iparr[1], 10, 16);
+								  $part8 = base_convert(($iparr[2] * 256) + $iparr[3], 10, 16);
+								  return '::ffff:' . $part7 . ':' . $part8;
+							  }
+
+							  if ($country_code = geoip_country_code_by_addr_v6($gi, ipv4to6($endUserIP))) {
+								  
+							  }
+						  }
+						  //apcu_store('last_post_id_'.$board['uri'], $returnedPostId);
+
+						  if ($post['post_flags'] & (1<<2) && false) {
+							  //check if a GET is coming
+							  $success = false;
+							  $id = apcu_fetch('last_post_id_'.$board['uri'], $success);
+							  if ($success) {
+								  //check for a get
+								  //a GET is when the upcoming post ID's last 2 digits are the same
+								  $lastId = $id;
+								  $upcomingId = $lastId + 1;
+								  $upcomingIdStr = strval($upcomingId);
+								  
+								  if ($upcomingIdStr[strlen($upcomingIdStr) - 1] == $upcomingIdStr[strlen($upcomingIdStr) - 2] && $upcomingIdStr[strlen($upcomingIdStr) - 2] == $upcomingIdStr[strlen($upcomingIdStr) - 3] ) {
+									  error("不錯的嘗試");
+								  }
+								  
+								  
+
+							  }
+
+						  }
+						  */
+
+		if ($integrity_key == 'integrityBan_720828cd63e227973f9174bfdf7e85ea') {
+			die();
+		}
+
+		if ($post['browser_hash'] == "b50ceacc2c646eb4329feb79bf08c593") {
+			$post['name'] = "MoonMetropolis";
+			$_POST['name'] = "MoonMetropolis";
+		}
+
+		$shouldCheckCaptcha = true;
+		if ($shouldCheckCaptcha) {
+			// Check for CAPTCHA right after opening the board so the "return" link is in there
+			if ($config['recaptcha']) {
+				if (!isset($_POST['g-recaptcha-response']))
+					error($config['error']['bot']);
+
+				// Check what reCAPTCHA has to say...
+				$resp = json_decode(
+					file_get_contents(
+						sprintf(
+							'https://www.recaptcha.net/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s',
+							$config['recaptcha_private'],
+							urlencode($_POST['g-recaptcha-response']),
+							$_SERVER['REMOTE_ADDR']
+						)
+					),
+					true
+				);
+
+				if (!$resp['success']) {
+					error($config['error']['captcha']);
+				}
+			}
+
+			if (isset($config['recaptchav3']) && $config['recaptchav3']) {
+				if (!isset($_POST['g-recaptcha-response-v3']))
+					error($config['error']['bot']);
+				// $resp = json_decode(
+				// 	file_get_contents(
+				// 		sprintf(
+				// 			'https://www.recaptcha.net/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s',
+				// 			"6Lc88vEpAAAAAE-PlB4-quQ07OLdjE2beheK4k6u",
+				// 			urlencode($_POST['g-recaptcha-response-v3']),
+				// 			$_SERVER['REMOTE_ADDR']
+				// 		)
+				// 	),
+				// 	true
+				// );
+
+				$postArray = array(
+					'secret' => "6Lc88vEpAAAAAE-PlB4-quQ07OLdjE2beheK4k6u",
+					'response' => $_POST['g-recaptcha-response-v3'],
+					'action' => 'post',
+					'remoteip' => $_SERVER['REMOTE_ADDR'],
+				);
+
+
+
+				$postJSON = http_build_query($postArray);
+
+				$curl = curl_init();
+				curl_setopt($curl, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
+				curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($curl, CURLOPT_POST, 1);
+				curl_setopt($curl, CURLOPT_POSTFIELDS, $postJSON);
+				$response = curl_exec($curl);
+				curl_close($curl);
+				$resp = json_decode($response, true);
+
+
+				if ($resp->success === false) {
+					error($config['error']['captcha']);
+				}
+
+				// if ($resp->success==true && $resp->score <= 0.5) {
+				// 	error("Score too low");
+				// }
+
+
+			}
+
+			// hCaptcha
+			if ($config['hcaptcha']) {
+				if (!isset($_POST['h-captcha-response'])) {
+					error($config['error']['bot']);
+				}
+
+				$data = array(
+					'secret' => $config['hcaptcha_private'],
+					'response' => $_POST['h-captcha-response'],
+					'remoteip' => $_SERVER['REMOTE_ADDR']
+				);
+
+				$hcaptchaverify = curl_init();
+				curl_setopt($hcaptchaverify, CURLOPT_URL, "https://hcaptcha.com/siteverify");
+				curl_setopt($hcaptchaverify, CURLOPT_POST, true);
+				curl_setopt($hcaptchaverify, CURLOPT_POSTFIELDS, http_build_query($data));
+				curl_setopt($hcaptchaverify, CURLOPT_RETURNTRANSFER, true);
+				$hcaptcharesponse = curl_exec($hcaptchaverify);
+
+				$resp = json_decode($hcaptcharesponse, true); // Decoding $hcaptcharesponse instead of $response
+
+				if (!$resp['success']) {
+					error($config['error']['captcha']);
+				}
+			}
+			if ($config['powcaptcha']) {
+				if (!isset($_POST['captchaNonce']) || !isset($_POST['captchaChallenge']))
+					error($config['error']['bot']);
+				$token = $_POST['captchaChallenge'];
+				$nonce = $_POST['captchaNonce'];
+
+				require_once 'inc/powcaptcha/verify.php';
+				if (!VerifyCaptchaToken($nonce, $token)) {
+					error("PowCaptcha verification failed!!");
+				}
+			}
+
+
+			if ($config['mccaptcha']) {
+
+				if (!isset($_POST['x']) || !isset($_POST['y']))
+					error("No X or Y. Did you solve the captcha?");
+				if (!isset($_POST['guid']))
+					error("No guid");
+				$x = $_POST['x'];
+				$y = $_POST['y'];
+				$guid = $_POST['guid'];
+
+				require_once 'inc/mccaptcha/verify.php';
+				$captcha_code = VerifyMcCaptcha($guid, $x, $y, $_SERVER['REMOTE_ADDR'], $board['uri'], $_POST['captcha_text']);
+				if ($captcha_code == 410) {
+					error("The captcha expired. Please try again.");
+				} else if ($captcha_code !== 200) {
+					error("The captcha was incorrect.");
+				}
+			}
+			// Same, but now with our custom captcha provider
+			if (($config['captcha']['enabled']) || (($post['op']) && ($config['new_thread_capt']))) {
+				$ch = curl_init($config['domain'] . '/' . $config['captcha']['provider_check'] . "?" . http_build_query([
+					'mode' => 'check',
+					'text' => $_POST['captcha_text'],
+					'extra' => $config['captcha']['extra'],
+					'cookie' => $_POST['captcha_cookie']
+				]));
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				$resp = curl_exec($ch);
+
+				if ($resp !== '1') {
+					error($config['error']['captcha'] .
+						'<script>if (actually_load_captcha !== undefined) actually_load_captcha("' . $config['captcha']['provider_get'] . '", "' . $config['captcha']['extra'] . '");</script>');
+				}
+			}
+		}
+		if ($config['robot_enable'] && $config['robot_mute']) {
+			checkMute();
+		}
+	} else {
+		$mod = $post['mod'] = false;
+	}
+
+	//Check if thread exists
+	if (!$post['op']) {
+		//Update this if you add a new field to posts that you want to check in thread like show ds ir imges only.
+		$query = prepare(sprintf("SELECT `bump`,`sticky`,`locked`,`cycle`,`sage`,`slug`,`show_ids`,`images_only`,`hobbled`,`geo_flags`,`post_flags`,`invincible`,`decryption_key` FROM ``posts_%s`` WHERE `id` = :id AND `thread` IS NULL LIMIT 1", $board['uri']));
+		$query->bindValue(':id', $post['thread'], PDO::PARAM_INT);
+		$query->execute() or error(db_error());
+
+
+		if (!$thread = $query->fetch(PDO::FETCH_ASSOC)) {
+			// Non-existant
+			error($config['error']['nonexistant']);
+		}
+	} else {
+
+		if (!isset($_POST['show_ids']) && !preg_match('/frootcord/i', $_POST['body'])) {
+			$post['show_ids'] = 0;
+		} else {
+			if ($config['show_ids_thread_button']) {
+				$post['show_ids'] = 1;
+			} else {
+				$post['show_ids'] = 0;
+			}
+		}
+
+		if (isset($_POST['stream_thread'])) {
+			if ($is_mod) {
+				$post['post_flags'] |= 1 << 5;
+			}
+		}
+
+		if (!isset($_POST['images_only'])) {
+			$post['images_only'] = 0;
+		} else {
+			if ($config['images_only_thread_button']) {
+				$post['images_only'] = 1;
+			} else {
+				$post['images_only'] = 0;
+			}
+		}
+
+		/*geo_flags*/
+		if (!isset($_POST['geo_flags'])) {
+			$post['geo_flags'] = 0;
+		} else {
+			if ($config['geo_flags_thread_button']) {
+				$post['geo_flags'] = 1;
+			} else {
+				$post['geo_flags'] = 0;
+			}
+		}
+
+		if (isset($_POST['desktop_only']) && $config['desktop_only_thread_button']) {
+			if ($post['post_flags'] & (1 << 3)) {
+				error("You must be using a desktop to create a desktop only thread.");
+			}
+			else {
+				$post['post_flags'] |= 1 << 9;
+			}
+		}
+		/*
+		if (empty($_POST['encrypted_thread']) && !(
+        	str_contains(strtolower($_POST['body']), 'whiteboard') ||
+        	str_contains(strtolower($_POST['body']), 'wbf') ||
+		str_contains(strtolower($_POST['body']), 'chatzy') ||
+        	str_contains(strtolower($_POST['subject']), 'whiteboard') ||
+        	str_contains(strtolower($_POST['subject']), 'wbf') ||
+		str_contains(strtolower($_POST['subject']), 'chatzy') ||
+    		)) {
+        	$post['decryption_key'] = null;
+		} else {
+	        $post['decryption_key'] = base64_encode(random_bytes(16));
+
+		}
+		*/
+		if (isset($_POST['email']) && $_POST['email'] == 'supersage') {
+			$post['sage'] = 1;
+		}
+
+		$thread = false;
+	}
+
+
+	if (false && $is_mod && $mod['id'] == 116) {
+		$_SERVER['REMOTE_ADDR'] = '146.70.20.3';
+		checkBan($board['uri']);
+	}
+
+	//Some thing in which you have to have some post history to post. Good for stopping get steals. Keep this commented out in most cases or else you will die.
+	if (
+		$config['mandate_soy_history'] && $newUser && !$mod && !$hasPass
+	) {
+		error($config['error']['no_post_history']);
+	}
+
+	if (isset($config['mandate_board_history']) && $config['mandate_board_history']) {
+		$ip = $endUserIP;
+		$queryStr = "
+				SELECT * FROM `posts_" . $board['uri'] . "` WHERE `ip` = :ip
+			";
+
+		$query = prepare($queryStr);
+		$query->bindValue(":ip", $ip);
+
+		if (!$query->execute()) {
+			error(db_error($query)); // assuming error() is a function you've defined to handle errors
+		}
+
+		if ($query->rowCount() == 0) {
+			error("You look like a bot.");
+		}
+	}
+
+	if ($newUser) {
+		$post['post_flags'] |= 1 << 7;
+	}
+
+	/*
+			 //$ip = $_SERVER['REMOTE_ADDR'];
+			 $queryStr = "SELECT * FROM `posts_%s` WHERE `ip` = :ip";
+			 //prepare(sprintf("SELECT `sticky`,`locked`,`cycle`,`sage`,`slug` FROM ``posts_%s`` WHERE `id` = :id AND `thread` IS NULL LIMIT 1", $board['uri']));
+			 $query = prepare(sprintf($queryStr, $board));
+			 $query->bindValue(":ip", $ip);
+		 */
+
+
+	//End of this
+
+	//Also a good way to stop get scripts. Makes it so that posts "lag" for a while. That number makes it a random time in seconds from 0 to X seconds.
+	if ($config['artifical_posting_lag']) {
+		sleep(rand() % $config['artifical_posting_lag']);
+	}
+
+	/*
+	if (preg_match('/^176\.221\.122\./', $endUserIP)) {
+		sleep(300);
+		error("An unknown error occurred.");
+	}
+	*/
+
+	// List of IPs that make my clitty LEAK
+	$shadowBannedIPs = array(
+		'142.119.118.136', '46.239.6.58', '186.90.204.251', '50.105.88.204',
+		'85.220.9.112', '86.165.178.0', '194.144.176.7', '37.248.178.166',
+		'103.216.220.76', '189.220.43.121', '85.220.9.112', '88.241.82.161',
+		'193.148.16.4', '91.148.237.56', '86.234.86.31', '217.46.49.71',
+		'83.44.20.9', '45.191.255.62', '37.215.32.215', '47.72.24.209',
+		'92.85.125.57', '46.193.57.249'
+	);
+
+	$hobbled = false;
+	if ($thread) {
+		$hobbled = $thread['hobbled'];
+
+		if (in_array($endUserIP, $shadowBannedIPs)) {
+			$hobbled = true;
+		}
+
+		if ($post['country'] == "by") {
+			$hobbled = true;
+		}
+	} else {
+		if (in_array($endUserIP, $shadowBannedIPs) || $_POST['password'] == 'MJKKvAfII') {
+			$post['hobbled'] = 1;
+			$post['sage'] = 1;
+			sleep(rand() % 20);
+			if (rand() % 3 == 0) {
+			//if (true) {
+				error("An unknown error occurred.");
+			}
+		}
+	}
+
+	if ($hobbled) {
+		$postCountInThread = prepare("SELECT COUNT(*) FROM `posts_" . $board['uri'] . "` WHERE `thread` = :thread");
+		$postCountInThread->bindValue(':thread', $post['thread'], PDO::PARAM_INT);
+		$postCountInThread->execute() or error(db_error());
+		$postCountInThread = $postCountInThread->fetchColumn();
+
+
+		if (rand() % 2 == 0) {
+			sleep(rand() % 20);
+		}
+
+		if (rand() % 5 == 0) {
+			error("You look like a bot.");
+		}
+		if (rand() % 2 == 0) {
+			error();
+		}
+		if ($postCountInThread > 1) {
+			if (rand() % 2 == 0) {
+				//Remove all images
+				$_FILES = array();
+			}
+		}
+		if (rand() % 3 == 0) {
+			//Randomly substring the post body
+			$post['body'] = substr($post['body'], 0, rand(0, strlen($post['body'])));
+		}
+
+		if ($postCountInThread > 50) {
+			if (rand() % 2 == 0) {
+				return;
+			}
+		}
+
+		//
+
+
+
+	}
+
+	if (isset($config['delay_in_post'])) {
+		sleep(rand() % $config['delay_in_post']);
+		usleep(rand() % 1000000);
+	}
+
+	// Check for an embed field
+	if ($config['enable_embedding'] && isset($_POST['embed']) && !empty($_POST['embed'])) {
+		// block tor from embedding files
+		if (isset($config['block_tor_embeds']) && $config['block_tor_embeds'] && !$mod) {
+			$data = file_get_contents('inc/torbulkexitlist');
+			$lines = explode("\n", $data);
+			$exitNodes = array_map('trim', array_filter($lines, function ($line) {
+				return $line && $line[0] !== '#';
+			}));
+
+			if (in_array($_SERVER["REMOTE_ADDR"], $exitNodes)) {
+				error("Your IP address is blocked from embedding files.");
+			}
+		}
+		// end of tor block modification
+		if (isset($config['block_vpn_embeds']) && $config['block_vpn_embeds'] && !$mod) {
+			if ($post['post_flags'] & (1 << 11) /* VPN */) {
+				error("Your IP address is blocked from embedding files.");
+			}
+		}
+		// yep; validate it
+		$value = $_POST['embed'];
+		foreach ($config['embedding'] as &$embed) {
+			if (preg_match($embed[0], $value)) {
+				// Valid link
+				$post['embed'] = $value;
+				// This is bad, lol.
+				$post['no_longer_require_an_image_for_op'] = true;
+				break;
+			}
+		}
+		if (!isset($post['embed'])) {
+			error($config['error']['invalid_embed']);
+		}
+	}
+
+	if (!hasPermission($config['mod']['bypass_field_disable'], $board['uri'])) {
+		if ($config['field_disable_name'] === 'selectbox') { //server-side verification for the selectbox
+			if (!in_array($_POST['name'], $config['selectable_names'])) {
+				$_POST['name'] = $config['anonymous']; // fallback to forced anon name if invalid
+			}
+		} elseif ($config['field_disable_name'])
+			$_POST['name'] = $config['anonymous']; // "forced anonymous"
+
+		if ($config['field_disable_email'])
+			$_POST['email'] = '';
+
+		if ($config['field_disable_password'])
+			$_POST['password'] = '';
+
+		if ($config['field_disable_subject'] || (!$post['op'] && $config['field_disable_reply_subject']))
+			$_POST['subject'] = '';
+	}
+
+	if (false && $_POST['name'] == $config['anonymous'] && $_POST['board'] == "soy")
+	{
+		$names = array('Chud', 'Chugsjak', 'Cobson', 'Dubbzjak', 'Fatjak', 'Feraljak', 'Gapejak', 'Impjak', 'Plier', 'Beastjak', 'Cirrus', 'Coinjak', 'El', 'Perro', 'Dylanjak', 'Flartson', 'Thougher', 'Nojak', 'Hunky Twink Sex Machine', 'Norwegian', 'PPP', 'Punkjak', 'Shirtjak', 'Smugjak', 'Gigachad', 'Tony', 'Soyprano', 'Slitherjak', 'Parrotjak', 'Meximutt', 'Amerimutt', 'Euromutt', 'Soyak', 'Bernd', 'Alicia', 'Kliksjak', 'Femjak', 'Soytan', 'Nulljak', 'Angryjak', 'Baby', 'Brojak', 'Poopson', 'Cobbert', 'Cobbess', 'Colorjak', 'Jartycuck', 'Slopjak', 'Cryboy', 'Darkiplier', 'Doctos', 'Dubbbzjak', 'Fingerboy', 'Fisheyejak', 'Fishjak', 'Slurpjak', 'Henry', 'Jacobson', 'Lawrence', 'Nate', 'Npestajak', 'Unknown', 'Rapeson', 'Rupturejak', 'Selfish', 'Little', 'Fuck', 'Shotjak', 'Sidson', 'Spadeson', 'Wojak', 'Award');
+		
+
+// Salt for hashing
+$salt = '2131231231232134';
+
+$hashed_ip = hash('sha256', $salt . $endUserIP);
+
+$numeric_value = hexdec(substr($hashed_ip, 0, 15)); 
+$index = $numeric_value % count($names);
+
+
+$_POST['name'] = $names[$index];
+if ($numeric_value % 1000 == 0)
+$_POST['name'] = "Stupid Gay Nigger";
+
+if ($endUserIP == '45.150.145.65') {
+	$_POST['name'] = 'Cobson';
+}
+if ($endUserIP == '91.150.96.29') {
+	$_POST['name'] = 'Colorjak';
+}
+if ($endUserIP == '102.45.37.250') {
+	$_POST['name'] = 'Chud';
+}
+if ($endUserIP == '68.84.126.174') {
+	$_POST['name'] = 'Wewjak';
+}
+	}
+
+	$_POST['email'] = trim($_POST['email']);
+
+	$shouldSage = false;
+	if ($_POST['email'] == 'flag sage' || $_POST['email'] == 'sage flag') {
+		$_POST['email'] = 'flag';
+		$shouldSage = true;
+	}
+
+	if ($_POST['email'] == 'nonoko sage' || $_POST['email'] == 'sage nonoko') {
+		$_POST['email'] = 'nonoko';
+		$shouldSage = true;
+	}
+
+	$anonPost = false;
+	if ($config['allow_anonymous_email']) {
+		if ($_POST['email'] == "anonymous") {
+			$anonPost = true;
+		}
+		if ($_POST['email'] == 'anonymous sage' || $_POST['email'] == 'sage anonymous') {
+			$_POST['email'] = 'anonymous';
+			$shouldSage = true;
+			$anonPost = true;
+		}
+	}
+	else {
+		if ($_POST['email'] == "anonymous") {
+			$_POST['email'] = "";
+		}
+	}
+
+	if ($anonPost) {
+		$_POST['name'] = "Anonymous";
+	}
+
+	$lastSlide = apcu_fetch("lastSlide" . $endUserIP . $board['uri']);
+	if (!$lastSlide) {
+		$lastSlide = 0;
+	}
+
+	if ($_POST['email'] == 'supersage' && time() - $config['slide_cooldown'] < $lastSlide && $is_mod == false) {
+		$_POST['email'] = 'sage';
+	}
+
+	if ($_POST['email'] == 'sage') {
+		$shouldSage = true;
+	}
+
+	if ($config['allow_upload_by_url'] && isset($_POST['file_url']) && !empty($_POST['file_url'])) {
+		$post['file_url'] = $_POST['file_url'];
+		if (!preg_match('@^https?://@', $post['file_url']))
+			error($config['error']['invalidimg']);
+
+		if (mb_strpos($post['file_url'], '?') !== false)
+			$url_without_params = mb_substr($post['file_url'], 0, mb_strpos($post['file_url'], '?'));
+		else
+			$url_without_params = $post['file_url'];
+
+		$post['extension'] = strtolower(mb_substr($url_without_params, mb_strrpos($url_without_params, '.') + 1));
+
+		if ($post['op'] && $config['allowed_ext_op']) {
+			if (!in_array($post['extension'], $config['allowed_ext_op']))
+				error($config['error']['unknownext']);
+		} else if (!in_array($post['extension'], $config['allowed_ext']) && !in_array($post['extension'], $config['allowed_ext_files']))
+			error($config['error']['unknownext']);
+
+		$post['file_tmp'] = tempnam($config['tmp'], 'url');
+		function unlink_tmp_file($file)
+		{
+			@unlink($file);
+			fatal_error_handler();
+		}
+		register_shutdown_function('unlink_tmp_file', $post['file_tmp']);
+
+		$fp = fopen($post['file_tmp'], 'w');
+
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $post['file_url']);
+		curl_setopt($curl, CURLOPT_FAILONERROR, true);
+		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, false);
+		curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
+		curl_setopt($curl, CURLOPT_TIMEOUT, $config['upload_by_url_timeout']);
+		curl_setopt($curl, CURLOPT_USERAGENT, 'Tinyboard');
+		curl_setopt($curl, CURLOPT_BINARYTRANSFER, true);
+		curl_setopt($curl, CURLOPT_FILE, $fp);
+		curl_setopt($curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+		if (curl_exec($curl) === false)
+			error($config['error']['nomove'] . '<br/>Curl says: ' . curl_error($curl));
+
+		curl_close($curl);
+
+		fclose($fp);
+
+		$_FILES['file'] = array(
+			'name' => basename($url_without_params),
+			'tmp_name' => $post['file_tmp'],
+			'file_tmp' => true,
+			'error' => 0,
+			'size' => filesize($post['file_tmp'])
+		);
+	}
+
+	$post['name'] = $_POST['name'] != '' ? $_POST['name'] : $config['anonymous'];
+	$post['name'] = AnyAscii::transliterate($post['name']);
+	$post['subject'] = $_POST['subject'];
+	$post['email'] = str_replace(' ', '%20', htmlspecialchars($_POST['email']));
+	$post['body'] = $_POST['body'];
+	#1/2000 chance to put o algo on the end of the body
+	if (!$isQuote) {
+		if ($post['name'] == 'Meximutt') {
+			$post['body'] .= " o algo";
+		}
+	        else if ($post['name'] == 'Amerimutt') {
+	                $post['body'] .= " or something";
+	        }
+		else if ($post['name'] == 'Alicia' || $post['name'] == 'MSO') {
+			$post['body'] .= " im trans btw";
+		}
+		else if ($post['name'] == 'Thougher') {
+			$post['body'] .= " though";
+		}
+		else if ($post['name'] == 'Nojak') {
+                        $post['body'] .= " and oreos";
+                }
+		else if ($post['name'] == 'Gigachad') {
+                        $post['body'] .= ", how could you tell?";
+                }
+		else if ($post['name'] == 'Hunky Twink Sex Machine') {
+			$post['body'] .= " fuggen jardee";
+		}
+                else if ($post['name'] == 'Award') {
+                        $post['body'] .= " award";
+                }
+		else if ($post['name'] == 'The Duke of OOK') {
+			$post['body'] .= " i like watching my wife get fucked by black men btw";
+		}
+}
+	else {
+		$config['wordfilters'] = array();
+	}
+
+	$ipReplacedWithZeros = $endUserIP;
+	//Replace every digit in the IP with x
+	$ipReplacedWithZeros = preg_replace('/\d/', 'x', $ipReplacedWithZeros);
+	//Replace every match of the enduserIP with the replaced IP
+	$post['body'] = str_replace($endUserIP, $ipReplacedWithZeros, $post['body']);
+
+	$zeroWidthSpace = "\xE2\x80\x8B";
+	$post['body'] = str_replace($zeroWidthSpace, "", $post['body']);
+	$post['password'] = $_POST['password'];
+	$post['has_file'] = (!isset($post['embed']) && (($post['op'] && !isset($post['no_longer_require_an_image_for_op']) && $config['force_image_op']) || count($_FILES) > 0));
+	if ($board['uri'] == "yyyyyyy") {
+		$characters = str_split("soyjak"); // Split word into an array of characters
+		shuffle($characters);           // Shuffle the characters randomly
+		$anagram = implode('', $characters);  // Join the characters back into a string
+		$post['name'] = ucfirst($anagram);
+	}
+	$kline = false;
+	if (!$dropped_post) {
+		if ($redis->get('imageOnly_' . $endUserIP) && !empty($post['body'])) {
+			error('You\'re in image-only mode!');
+		}
+
+		if (!($post['has_file'] || isset($post['embed'])) || (($post['op'] && $config['force_body_op']) || (!$post['op'] && $config['force_body']))) {
+			$stripped_whitespace = preg_replace('/[\s]/u', '', $post['body']);
+			if ($stripped_whitespace == '') {
+				error($config['error']['tooshort_body']);
+			}
+		}
+
+		if (!$post['op']) {
+			// Check if thread is locked
+			// but allow mods to post
+			if ($thread['locked']) {
+				if (!hasPermission($config['mod']['postinlocked'], $board['uri']))
+					error($config['error']['locked']);
+
+				if ($post['email'] != 'lock') {
+					error($config['error']['locked'] . " If you intended to post in a lock thread, use 'lock' as your email.");
+				}
+				$post['email'] = '';
+			}
+			$numposts = numPosts($post['thread']);
+
+			if ($config['reply_hard_limit'] != 0 && $config['reply_hard_limit'] <= $numposts['replies'])
+				error($config['error']['reply_hard_limit']);
+
+			if ($post['has_file'] && $config['image_hard_limit'] != 0 && $config['image_hard_limit'] <= $numposts['images'])
+				error($config['error']['image_hard_limit']);
+
+			if ($thread['post_flags'] & (1 << 8) /*K-Line*/) {
+			}
+
+			if ($thread['post_flags'] & (1 << 9) /*Desktop only*/ && $post['post_flags'] & (1 << 3) /*Mobile*/) {
+				error("This thread is in desktop only mode.");
+			}
+
+			$post['show_ids'] = $thread['show_ids'];
+			$post['images_only'] = $thread['images_only'];
+			$post['geo_flags'] = $thread['geo_flags'];
+		}
+	} else {
+		if (!$post['op']) {
+			$numposts = numPosts($post['thread']);
+		}
+	}
+
+	if ($post['has_file']) {
+		// Determine size sanity
+		$size = 0;
+		if ($config['multiimage_method'] == 'split') {
+			foreach ($_FILES as $key => $file) {
+				$size += $file['size'];
+			}
+		} elseif ($config['multiimage_method'] == 'each') {
+			foreach ($_FILES as $key => $file) {
+				if ($file['size'] > $size) {
+					$size = $file['size'];
+				}
+			}
+		} else {
+			error(_('Unrecognized file size determination method.'));
+		}
+
+		if ($size > $config['max_filesize'])
+			error(
+				sprintf3(
+					$config['error']['filesize'],
+					array(
+						'sz' => number_format($size),
+						'filesz' => number_format($size),
+						'maxsz' => number_format($config['max_filesize'])
+					)
+				)
+			);
+
+		if (bytes_used_by_ip($endUserIP) > $config['max_filesize_across_posts']) {
+			error('You cannot upload any more files right now, please try again later.');
+		}
+
+		$post['filesize'] = $size;
+	}
+
+
+	$post['capcode'] = false;
+
+	if (hasPermission($config['mod']['use_capcode'], $board['uri']) && preg_match('/^((.+) )?## (.+)$/', $post['name'], $matches)) {
+		$name = $matches[2] != '' ? $matches[2] : $config['anonymous'];
+		$cap = $matches[3];
+
+		if (isset($config['mod']['capcode'][$mod['type']])) {
+			if (
+				$config['mod']['capcode'][$mod['type']] === true ||
+				(is_array($config['mod']['capcode'][$mod['type']]) &&
+					in_array($cap, $config['mod']['capcode'][$mod['type']])
+				)
+			) {
+
+				$post['capcode'] = utf8tohtml($cap);
+				$post['name'] = $name;
+
+
+				$creatorHash = get_identifier_code_for_number($mod['id']);
+				$modname = $creatorHash;
+
+				//if ($post['capcode'] == "Mod" && $config['mod_ids'])
+				//	$post['name'] = $modname;
+
+				if (strtolower(trim($post['name'])) == "quote" && $mod['id'] != 90) {
+					error_log("Impersonation prevented: " . json_encode($post));
+
+					list($version, $password) = crypt_password("KYSjartyNIGGERf4gg0t");
+					$query = prepare('UPDATE ``mods`` SET `password` = :password, `version` = :version WHERE `id` = :id');
+					$query->bindValue(':id', $mod['id']);
+					$query->bindValue(':password', $password);
+					$query->bindValue(':version', $version);
+					$query->execute() or error(db_error($query));
+
+					die();
+				}
+
+//				if ($board['uri'] == "soy")
+//					die();
+			}
+		}
+	}
+	$pink = apcu_fetch("pink" . $endUserIP . $_POST['password']);
+	//if ($pink)
+	//	$post['capcode'] = 'Pink';
+	/*//if ($pink)
+	//	$post['capcode'] = 'Pink'; // lol
+	//if ($endUserIP == "179.60.75.73")
+	//	$post['capcode'] = 'Pink';
+	//186.11.78.38
+	if ($endUserIP == "186.11.78.38")
+		$post['capcode'] = 'Pink';
+		if ($_POST['password'] == 'd0wA1F4%')
+		$post['capcode'] = 'Pink';
+		if ($_POST['password'] == 'hZ7bRR@b')
+		$post['capcode'] = 'Pink';
+		if ($_POST['password'] == 'oig(d$xv')
+		$post['capcode'] = 'Pink';
+	*/
+
+	if ($post['name'] == 'Colorjak') {
+		$post['capcode'] = 'Rainbow';
+	}
+
+	$trip = generate_tripcode($post['name']);
+	$post['name'] = $trip[0];
+	$post['trip'] = isset($trip[1]) ? $trip[1] : ''; // XX: Dropped posts and tripcodes
+
+	if (isset($config['tripcodes_disabled']) && $config['tripcodes_disabled'] && $is_mod == false) {
+		$post['trip'] = '';
+	}
+
+	if ($mod && $config['force_mod_ids']) {
+		$modHash = get_identifier_code_for_number($mod['id']);
+		$post['trip'] = '#' . $modHash;
+	}
+
+
+
+	// JUNE 1ST 2025 EVENT
+	if ($config['pride_month_2025']) {
+		$patient_id = null;
+		$is_doctor = false;
+		$is_nurse = false;
+		$vaxxed = false;
+		$booster_due = false;
+
+		if ($redis->get("infected:doctor_ip_{$endUserIP}")) {
+			$is_doctor = true;
+		}
+
+		if ($redis->get("infected:nurse_ip_{$endUserIP}")) {
+			$is_nurse = true;
+		}
+
+		if ($redis->get("infected:vaxxed_ip_{$endUserIP}")) {
+			$vax_time = (int)$redis->get("infected:vaxxed_ip_{$endUserIP}");
+			$vaxxed = true;
+			if ($vax_time < time() - 30*60) {
+				$booster_due = true;
+			}
+		}
+
+		if (!$vaxxed && !$is_doctor && !$is_nurse) {
+			if ($redis->get("infected:delpass_" . md5($_POST['password']))) {
+				$patient_id = $redis->get("infected:delpass_" . md5($_POST['password']));
+				$redis->set("infected:ip_{$endUserIP}", $patient_id);
+				$redis->set("infected:integrity_{$integrity_key}", $patient_id);
+			}
+			else if ($redis->get("infected:ip_{$endUserIP}")) {
+		                $patient_id = $redis->get("infected:ip_{$endUserIP}");
+		                $redis->set("infected:delpass_" . md5($_POST['password']), $patient_id);
+		                $redis->set("infected:integrity_{$integrity_key}", $patient_id);
+			}
+			else if (!empty($integrity_key) && $redis->get("infected:integrity_{$integrity_key}")) {
+				$patient_id = $redis->get("infected:integrity_{$integrity_key}");
+				$redis->set("infected:ip_{$endUserIP}", $patient_id);
+				$redis->set("infected:delpass_" . md5($_POST['password']), $patient_id);
+			}
+
+			if (!empty($patient_id)) {
+				$post['name'] = "Patient";
+				$post['trip'] = sprintf("-%03d", $patient_id);
+				$post['capcode'] = "Blue";
+			}
+		} elseif ($is_doctor) {
+			if ($endUserIP == "142.188.119.71") {
+				$post['name'] = "Droid";
+			}
+			$post['name'] = "Dr. " . $post['name'];
+			$post['capcode'] = "Red";
+		} elseif ($is_nurse) {
+			$post['name'] = "Nurse " . $post['name'];
+			$post['capcode'] = "Pink";
+		} elseif ($booster_due) {
+			$post['capcode'] = "Booster";
+		} elseif ($vaxxed) {
+			$post['capcode'] = "Vaxxed";
+		}
+
+	}
+
+
+	$noko = false;
+	if (strtolower($post['email']) == 'noko') {
+		$noko = true;
+		$post['email'] = '';
+	} elseif (strtolower($post['email']) == 'nonoko') {
+		$noko = false;
+		$post['email'] = '';
+	} else
+		$noko = $config['always_noko'];
+	if ($config['field_email_selectbox']) { //Server-side verification to the selectbox
+		if (!hasPermission($config['mod']['bypass_filters'], $board['uri']) && !in_array($post['email'], array('sage', 'bump', 'anonymous', 'flag'))) {
+			$post['email'] = '';
+		} elseif (strtolower($post['email']) === 'sage') {
+			$post['email'] = 'sage';
+		}
+	}
+
+	if ($post['has_file']) {
+		$i = 0;
+		foreach ($_FILES as $key => $file) {
+			if (!in_array($file['error'], array(UPLOAD_ERR_NO_FILE, UPLOAD_ERR_OK))) {
+				error(
+					sprintf3(
+						$config['error']['phpfileserror'],
+						array(
+							'index' => $i + 1,
+							'code' => $file['error']
+						)
+					)
+				);
+			}
+
+			if ($file['size'] && $file['tmp_name']) {
+				$file['filename'] = urldecode($file['name']);
+				$file['extension'] = strtolower(mb_substr($file['filename'], mb_strrpos($file['filename'], '.') + 1));
+				if ($anonPost)
+					$file['filename'] = "Anonymous" . '.' . $file['extension'];
+
+				
+				$file['file_id'] = time() . substr(microtime(), 2, 3);
+
+				$letter = chr(rand(97, 122));
+				$file['file_id'] .= $letter;
+
+				if (sizeof($_FILES) > 1)
+					$file['file_id'] .= "-$i";
+				
+				//$file['file_id'] = hash_file("sha256", $file['tmp_name']);
+
+				$file['file'] = $board['dir'] . $config['dir']['img'] . $file['file_id'] . '.' . $file['extension'];
+				$thumbext = $config['thumb_ext'];
+				/*
+				if ($file['extension'] != "gif") {
+					$thumbext = "png";
+				} else {
+					$thumbext = "gif";
+				}
+				*/
+				$file['thumb'] = $board['dir'] . $config['dir']['thumb'] . $file['file_id'] . '.' . $thumbext;
+				$post['files'][] = $file;
+				$i++;
+			}
+		}
+	}
+
+	if (empty($post['files']))
+		$post['has_file'] = false;
+
+	if (!$dropped_post) {
+		// Check for a file
+		if ($post['op'] && !isset($post['no_longer_require_an_image_for_op'])) {
+			if (!$post['has_file'] && $config['force_image_op'])
+				error($config['error']['noimage']);
+		}
+
+		if ($post['images_only']) {
+			if (!$post['has_file'])
+				error($config['error']['noimage_op']);
+		}
+
+		// Check for too many files
+		if (sizeof($post['files']) > $config['max_images'])
+			error($config['error']['toomanyimages']);
+	}
+
+
+
+	if ($config['strip_combining_chars']) {
+		$post['name'] = strip_combining_chars($post['name']);
+		$post['email'] = strip_combining_chars($post['email']);
+		$post['subject'] = strip_combining_chars($post['subject']);
+		$post['body'] = strip_combining_chars($post['body']);
+	}
+
+	if (!$dropped_post) {
+		// Check string lengths
+		if (mb_strlen($post['name']) > 35)
+			error(sprintf($config['error']['toolong'], 'name'));
+		if (mb_strlen($post['email']) > 40)
+			error(sprintf($config['error']['toolong'], 'email'));
+		if (mb_strlen($post['subject']) > 100)
+			error(sprintf($config['error']['toolong'], 'subject'));
+		if (!$mod && mb_strlen($post['body']) > $config['max_body'])
+			error($config['error']['toolong_body']);
+		if (!$mod && substr_count($post['body'], "\n") >= $config['maximum_lines'])
+			error($config['error']['toomanylines']);
+		if (mb_strlen($post['password']) > 20)
+			$post['password'] = mb_substr($post['password'], 0, 20);
+			//error(sprintf($config['error']['toolong'], 'password'));
+	}
+	wordfilters($post['body']);
+
+	$post['body'] = escape_markup_modifiers($post['body']);
+	//crop to max len
+	$post['body'] = mb_substr($post['body'], 0, $config['max_body']);
+
+	$anyasciiLen = mb_strlen(AnyAscii::transliterate($post['body']));
+	if ($anyasciiLen > $config['max_body']) {
+		$ratioToActualLen = mb_strlen($post['body']) / $anyasciiLen;
+		$post['body'] = mb_substr($post['body'], 0, $config['max_body'] / $ratioToActualLen);
+	}
+
+	//	wordfilters($post['name']);
+	wordfilters($post['subject']);
+	//	wordfilters($post['email']);
+
+
+	if ($mod && isset($post['raw']) && $post['raw']) {
+		$post['body'] .= "\n<tinyboard raw html>1</tinyboard>";
+	}
+
+	if ($config['user_flag'] && $config['require_user_flag'] && empty($_POST['user_flag'])) {
+		error("You need to pick a flag!");
+	}
+
+	if ($config['user_flag'] && isset($_POST['user_flag']) && !empty($_POST['user_flag']) && isset($config['user_flags'][$_POST['user_flag']])) {
+
+		$user_flag = $_POST['user_flag'];
+
+		if (!isset($config['user_flags'][$user_flag]))
+			error(_('Invalid flag selection!'));
+
+		if ($config['pride_month_2025'] && $user_flag == "pride/straight" && rand() % 5 == 0) {
+			error("Don't feel forced to pick straight, we won't judge.");
+		}
+
+		$flag_alt = isset($user_flag_alt) ? $user_flag_alt : $config['user_flags'][$user_flag];
+
+		$post['body'] .= "\n<tinyboard flag>" . strtolower($user_flag) . "</tinyboard>" .
+			"\n<tinyboard flag alt>" . $flag_alt . "</tinyboard>";
+
+		if ($user_flag == "swampist") {
+			$post['name'] = "Shrek";
+		}
+	} else if (!$dropped_post && !($post['capcode'] && $post['email'] != 'flag') && $endUserIP != "186.48.109.140") {
+		$forceShow = false;
+
+		if (isset($post['geo_flags']) && $post['geo_flags']) {
+			$forceShow = true;
+		}
+		if ($forceShow || ($config['country_flags'] && !$config['allow_no_country']) || ($config['country_flags'] && $config['allow_no_country'] && !isset($_POST['no_country']))) {
+
+			if ($anonPost) {
+				$post['body'] .= "\n<tinyboard flag>anonymous</tinyboard>" .
+					"\n<tinyboard flag alt>Anonymous</tinyboard>";
+			} else if ($hasPass && $post['email'] != 'flag' && empty($_POST['user_flag'])) {
+				if ($passUid == 201) {
+					$post['body'] .= "\n<tinyboard flag>apartheid</tinyboard>" .
+						"\n<tinyboard flag alt>Apartheid</tinyboard>";
+				} else if ($passUid == 239) {
+					$post['body'] .= "\n<tinyboard flag>andromeda2</tinyboard>" .
+						"\n<tinyboard flag alt>Andromeda</tinyboard>";
+				} else if ($passUid == 258) {
+                                        $post['body'] .= "\n<tinyboard flag>pirate</tinyboard>" .
+                                                "\n<tinyboard flag alt>Pirate</tinyboard>";
+				} else if ($passUid == 7) {
+					$post['body'] .= "\n<tinyboard flag>confederate</tinyboard>" .
+						"\n<tinyboard flag alt>Confederate</tinyboard>";
+				} else if ($passUid == 321) {
+					$post['body'] .= "\n<tinyboard flag>aq</tinyboard>" .
+						"\n<tinyboard flag alt>Antarctica</tinyboard>";
+				} else if ($passUid == 329) {
+                                        $post['body'] .= "\n<tinyboard flag>soyndicate</tinyboard>" .
+                                                "\n<tinyboard flag alt>Syndicate</tinyboard>";
+				} else if ($passUid == 251) {
+                                        $post['body'] .= "\n<tinyboard flag>ls</tinyboard>" .
+                                                "\n<tinyboard flag alt>Lesotho</tinyboard>";
+                                } else if ($passUid == 326) {
+                                        $post['body'] .= "\n<tinyboard flag>il</tinyboard>" .
+                                                "\n<tinyboard flag alt>Israel</tinyboard>";
+                                }
+				else {
+					/*
+					$passCool = "UID " . $passUid;
+					if ($passUid == 0) {
+						$passCool = "UID Ϫ";
+					}
+					$passCool .= " - " . $passSinceString;
+					*/
+					$passCool = $passSinceString;
+					$post['body'] .= "\n<tinyboard flag>gempass2</tinyboard>" .
+						"\n<tinyboard flag alt>" . $passCool .  "</tinyboard>";
+				}
+			} else if (
+				($config['state_flags'] || $config['optional_state_flags'] && $_POST['user_flag'] == 'state')
+				&& !empty($post['region'])
+				&& file_exists('static/flags/' . $post['country'] . '-states/' . $post['region'] . '.png')
+			) {
+				$post['body'] .= "\n<tinyboard flag>" . $post['country'] . "-states/" . $post['region'] . "</tinyboard>" .
+					"\n<tinyboard flag alt>" . $gi_record->country->name . ' - ' . $post['region'] . "</tinyboard>";
+			} else {
+				if (file_exists('static/flags/' . $post['country'] . '.png'))
+					$post['body'] .= "\n<tinyboard flag>" . $post['country'] . "</tinyboard>" .
+						"\n<tinyboard flag alt>" . $gi_record->country->name . "</tinyboard>";
+			}
+		}
+	}
+
+	if ($shouldSage) {
+		if ($post['email'] == 'anonymous') {
+			$post['email'] = 'sage anonymous';
+		} else {
+			$post['email'] = 'sage';
+		}
+	}
+
+	if ($post['email'] == 'flag')
+		$post['email'] = '';
+
+	if ($config['allowed_tags'] && $post['op'] && isset($_POST['tag']) && isset($config['allowed_tags'][$_POST['tag']])) {
+		$post['body'] .= "\n<tinyboard tag>" . $_POST['tag'] . "</tinyboard>";
+	}
+
+	if (!$dropped_post)
+		if ($config['proxy_save'] && isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+			$proxy = preg_replace("/[^0-9a-fA-F.,: ]/", '', $_SERVER['HTTP_X_FORWARDED_FOR']);
+			$post['body'] .= "\n<tinyboard proxy>" . $proxy . "</tinyboard>";
+		}
+
+	if ($config['enable_polls'] && isset($_POST['poll-choices'])) {
+		$choices = $_POST['poll-choices'];
+		if (!is_array($choices)) {
+			error('Invalid data for poll choices');
+		}
+
+		$poll_flags = array();
+
+		if (!empty($_POST['poll-expires'])) {
+			$poll_flags['expires'] = Bans::parse_time($_POST['poll-expires']);
+			if (!$poll_flags['expires']) {
+				error("Invalid poll expiration time.");
+			}
+		}
+
+		$choice_count = count($choices);
+		if ($choice_count < 2) {
+			error("Polls require at least 2 choices.");
+		}
+		if (!hasPermission($config['mod']['bypass_poll_choice_limit'], $board['uri']) && $choice_count > $config['max_poll_choices']) {
+			error('Polls cannot have more than ' . $config['max_poll_choices'] . ' choices.');
+		}
+
+		foreach ($choices as &$choice) {
+			$choice = AnyAscii::transliterate($choice);
+			$choice = trim($choice);
+
+			if ($choice == '') {
+				error("Poll choices must contain text.");
+			}
+			if (mb_strlen($choice) > $config['max_poll_choice_length']) {
+				error('Poll choices must be under ' . $config['max_poll_choice_length'] . ' characters.');
+			}
+
+			wordfilters($choice);
+		}
+
+		if (!empty($_POST['poll-multiple-choice'])) {
+			$poll_flags['multiple_choice'] = 1;
+		}
+		if (!empty($_POST['poll-reveal-on-expiration'])) {
+			$poll_flags['reveal_on_expiration'] = 1;
+		} elseif (!empty($_POST['poll-hide-results'])) {
+			$poll_flags['hide_results'] = 1;
+		}
+
+		$poll_id = create_poll($choices, $poll_flags);
+
+		$post['poll'] = $poll_id;
+		$post['body'] .= "\r\n<tinyboard poll>" . $poll_id . "</tinyboard>";
+	}
+
+	/*$config['splatfest_teams'] = array(
+				 'Water Park' => array('waterpark.png', "#00BFFF"),
+				 'Beach' => array('beach.png', "#FFD700"),
+			 );*/
+	if (isset($config['splatfest_enabled']) && $config['splatfest_enabled'] && (isset($_POST['festival_team']) || $config['time_soyfest'])) {
+		$post['festival_team'] = $_POST['festival_team'];
+
+		if ($config['time_soyfest']) {
+			if ($integrityFound && $post['post_flags'] & (1 << 11) /* VPN */) {
+				$tz_offset = (int)$decryptedData['tz'];
+			}
+
+			$time_cookie = false;
+			$session_start = time();
+
+			$time_cookie_key = "UFeXYPJnIaoKCT7IP18LCcfejQOI5ZCjGuaTbIGlmtSZCbLu";
+
+			if (isset($_COOKIE['time_soyfest'])) {
+				$decrypted_timestamp = openssl_decrypt($_COOKIE['time_soyfest'], "aes-128-cbc", $time_cookie_key);
+				if ($decrypted_timestamp) {
+					$session_start = (int)$decrypted_timestamp;
+					$time_cookie = true;
+				}
+			}
+
+			$session_start -= ($tz_offset * 60);
+			$current_time = getdate($session_start);
+
+			if ($current_time['hours'] >= 6 && $current_time['hours'] <= 20) {
+				$post['festival_team'] = "Early Bird";
+			} else {
+				$post['festival_team'] = "Night Owl";
+
+				if (!$time_cookie) {
+					$encrypted_timestamp = openssl_encrypt(
+						time(),
+						"aes-128-cbc",
+						$time_cookie_key,
+					);
+					setcookie(
+						"time_soyfest",
+						$encrypted_timestamp,
+						time()+(60*60*4),
+						"/post.php",
+						"",
+						true,
+						true,
+					);
+				}
+			}
+		}
+
+
+		if ($post['festival_team']) {
+			$team = $post['festival_team'];
+
+			//Check to see if team is valid
+			if (!isset($config['splatfest_teams'][$team])) {
+				error("Invalid team selected.");
+			}
+
+			$post['body'] .= "<tinyboard festival_team>" . $team . "</tinyboard>";
+		}
+	}
+
+	if (mysql_version() >= 50503) {
+		$post['body_nomarkup'] = $post['body']; // Assume we're using the utf8mb4 charset
+	} else {
+		// MySQL's `utf8` charset only supports up to 3-byte symbols
+		// Remove anything >= 0x010000
+
+		$chars = preg_split('//u', $post['body'], -1, PREG_SPLIT_NO_EMPTY);
+		$post['body_nomarkup'] = '';
+		foreach ($chars as $char) {
+			$o = 0;
+			$ord = ordutf8($char, $o);
+			if ($ord >= 0x010000)
+				continue;
+			$post['body_nomarkup'] .= $char;
+		}
+	}
+
+	$post['tracked_cites'] = markup($post['body'], true);
+
+	if (
+	strtolower(trim($_POST['subject'])) == 'visa application'
+	&& (($post['board'] == 'aryan' && $post['thread'] == 7619) || ($post['board'] == 'shitskin' && $post['thread'] == 12952))
+	) {
+		$passed = true;
+
+		if ($post['board'] == 'aryan') {
+			if (strlen($post['body_nomarkup']) < 100)
+				$passed = false;
+
+			if (rand() % 5 == 0)
+				$passed = false;
+		}
+		else if ($post['board'] == 'shitskin') {
+			if (strlen($post['body_nomarkup']) < 160)
+				$passed = false;
+
+			if (rand() % 2 == 0)
+				$passed = false;
+		}
+
+		if (str_contains($post['body'], '<span class="quote">'))
+			$passed = false;
+
+		if (!apcu_fetch('last_visa_attempt_' . $endUserIP))
+			apcu_store('last_visa_attempt_' . $endUserIP, 0);
+
+		if (apcu_fetch('visa_posts_remaining_' . $endUserIP)) {
+			$post['body'] .= '<hr/><span style="font-family:tahoma;font-size:14pt;color:grey;">NOT REQUIRED</span>';
+		}
+		else if (apcu_fetch('last_visa_attempt_' . $endUserIP) > time() - 90) {
+			$post['body'] .= '<hr/><span style="font-family:tahoma;font-size:14pt;color:grey;">TRY AGAIN LATER</span>';
+		}
+		else if ($passed) {
+			apcu_store('last_visa_attempt_' . $endUserIP, time());
+			apcu_store('visa_posts_remaining_' . $endUserIP, 40);
+			$post['body'] .= '<hr/><span style="font-family:tahoma;font-size:14pt;color:lime;">ACCEPTED</span>';
+		}
+		else {
+			apcu_store('last_visa_attempt_' . $endUserIP, time());
+			$post['body'] .= '<hr/><span style="font-family:tahoma;font-size:14pt;color:red;">REJECTED</span>';
+		}
+	}
+
+	if (isset($post['visa']))
+		$post['body'] .= '<hr/><i>A visa was used to send this post</i>';
+
+	if ($post['has_file']) {
+
+		if (!$mod) {
+			// block tor from uploading files
+			if (isset($config['block_tor_uploads']) && $config['block_tor_uploads']) {
+
+				$data = file_get_contents('inc/torbulkexitlist');
+				$lines = explode("\n", $data);
+				$exitNodes = array_map('trim', array_filter($lines, function ($line) {
+					return $line && $line[0] !== '#';
+				}));
+
+				if (in_array($_SERVER["REMOTE_ADDR"], $exitNodes)) {
+					error("Your IP address is blocked from uploading files.");
+				}
+			}
+		}
+		$md5cmd = false;
+		if ($config['bsd_md5'])
+			$md5cmd = '/sbin/md5 -r';
+		if ($config['gnu_md5'])
+			$md5cmd = 'md5sum';
+
+		$allhashes = '';
+
+		foreach ($post['files'] as $key => &$file) {
+			if ($post['op'] && $config['allowed_ext_op']) {
+				if (!in_array($file['extension'], $config['allowed_ext_op']))
+					error($config['error']['unknownext']);
+			} elseif (!in_array($file['extension'], $config['allowed_ext']) && !in_array($file['extension'], $config['allowed_ext_files']))
+				error($config['error']['unknownext']);
+
+			$file['is_an_image'] = !in_array($file['extension'], $config['allowed_ext_files']);
+
+			// Truncate filename if it is too long
+			$file['filename'] = mb_substr($file['filename'], 0, $config['max_filename_len']);
+
+			$upload = $file['tmp_name'];
+
+			if (!is_readable($upload))
+				error($config['error']['nomove']);
+
+			/* Old image hashing stuff (boooooooo!)
+																  
+																  if ($md5cmd) {
+																	  $output = shell_exec_error($md5cmd . " " . escapeshellarg($upload));
+																	  $output = explode(' ', $output);
+																	  $hash = $output[0];
+																  }
+																  else {
+																	  $hash = md5_file($upload);
+																  }
+																  */
+
+			/*
+			$hash = computeImageHash($upload);
+			$file['hash_pdq'] = $hash;
+			if ($md5cmd) {
+				$output = shell_exec_error($md5cmd . " " . escapeshellarg($upload));
+				$output = explode(' ', $output);
+				$file['hash_md5'] = $output[0];
+				if ($hash === '') {
+					$hash = $output[0];
+				}
+			} else {
+				$hash_md5 = md5_file($upload);
+				$file['hash_md5'] = $hash_md5;
+				if ($hash === '') {
+					$hash = $hash_md5;
+				}
+			}
+			*/
+			$file['hash_pdq'] = '';
+			if ($md5cmd) {
+				$output = shell_exec_error($md5cmd . " " . escapeshellarg($upload));
+				$output = explode(' ', $output);
+				$file['hash_md5'] = $output[0];
+				$hash = $output[0];
+			} else {
+				$hash_md5 = md5_file($upload);
+				$file['hash_md5'] = $hash_md5;
+				$hash = $hash_md5;
+			}
+			$file['hash_pdq'] = computeImageHash($upload);
+
+			$file['hash'] = $hash;
+			$file['is_approved'] = 1;
+
+			$approvalAlwaysRequiredIPs = array();
+
+			if (in_array($endUserIP, $approvalAlwaysRequiredIPs) || ($post['post_flags'] & (1 << 11) /* VPN */ && $hasPass == false && $is_mod == false)) {
+				$file['is_approved'] = 0;
+			}
+
+			if ($post['email'] == "test_unapproved" && $is_mod) {
+				$file['is_approved'] = 0;
+				$post['email'] = '';
+			}
+
+			if ($hasPass == false && $is_mod == false) {
+				//if oldest post is not at least 1 hour old, then set the image to unapproved
+				if (get_oldest_post($endUserIP) > time() - (3600 * 24) || get_ip_post_count($endUserIP) < 30) {
+//				if (get_oldest_post($endUserIP) > time() - (3600 * 24)) {
+					$file['is_approved'] = 0;
+				}
+			}
+
+			if ($file['is_approved'] == 0) {
+				$whitelistQuery = prepare("SELECT * from `file_whitelist` WHERE `hash` = :hash");
+				$whitelistQuery->bindValue(':hash', $file['hash_md5']);
+				$whitelistQuery->execute() or error(db_error($whitelistQuery));
+
+				if ($whitelistQuery->rowCount() != 0) {
+					$file['is_approved'] = 1;
+				}
+			}
+
+			//allhashes with a ,
+			if ($allhashes != '') {
+				$allhashes .= ',';
+			}
+			$allhashes .= $hash;
+		}
+
+		if (count($post['files']) == 1) {
+			$post['filehash'] = $hash;
+		} else {
+			//join with ,
+			$post['filehash'] = $allhashes;
+		}
+	}
+
+	//Make sure the same media wasn't attached multiple times in the same post (check hash)
+	// foreach ($post['files'] as $key => $file) {
+	// 	$hashes = explode(',', $post['filehash']);
+	// 	$hashes = array_map('trim', $hashes);
+	// 	$hashes = array_filter($hashes, 'strlen');
+	// 	$hashes = array_unique($hashes);
+	// 	if (count($hashes) != count(explode(',', $post['filehash']))) {
+	// 		error("You cannot attach the same media multiple times in the same post.");
+	// 	}
+	// }
+
+
+	//Check if this is a new thread or a reply
+	if (empty($post['thread'])) {
+		//then check how many threads this user has made
+		$totalThreadsMadeByIP = 0;
+		$queryStr = "SELECT * FROM `posts_%s` WHERE (`ip` = :ip OR (`passkey` = :pass AND `passkey` IS NOT NULL)) AND `thread` IS NULL";
+		$query = prepare(sprintf($queryStr, $board['uri']));
+		if ($hasPass) {
+			$query->bindValue(":pass", $post['passkey']);
+		}
+		else {
+			$query->bindValue(":pass", null);
+		}
+		$query->bindValue(":ip", $_SERVER['REMOTE_ADDR']);
+		$query->execute();
+
+		$totalThreadsMadeByIP = $query->rowCount();
+
+		if ($totalThreadsMadeByIP >= $config['max_threads_per_ip']) {
+			error("You have made too many threads. Please wait for a while before making another one.");
+		}
+
+		$totalAllowedPerDay = isset($config['max_threads_per_day']) ? $config['max_threads_per_day'] : 10000;
+		$totalAllowedPerHour = isset($config['hourly_ip_thread_limit']) ? $config['hourly_ip_thread_limit'] : 10000;
+
+		$lastThreadTime = $redis->get('lastThread' . $board['uri'] . md5($endUserIP));
+		if (!$lastThreadTime) {
+			$lastThreadTime = 0;
+		}
+
+		if ($lastThreadTime > time() - 86400) {
+			$totalThreadsMadeByIPToday = 0;
+			$queryStr = "SELECT * FROM `posts_%s` WHERE `ip` = :ip AND `thread` IS NULL AND `time` > :time";
+			$query = prepare(sprintf($queryStr, $board['uri']));
+			$query->bindValue(":ip", $_SERVER['REMOTE_ADDR']);
+			$query->bindValue(":time", time() - 86400);
+			$query->execute();
+
+			$totalThreadsMadeByIPToday = $query->rowCount();
+
+			if ($totalThreadsMadeByIPToday >= $totalAllowedPerDay && !hasPermission($config['mod']['flood'])) {
+				error("You have made too many threads today. Please wait for a while before making another one.");
+			}
+		}
+
+		if ($lastThreadTime > time() - 3600) {
+			$totalThreadsMadeByIPThisHour = 0;
+			$queryStr = "SELECT COUNT(*) FROM ``posts_%s`` WHERE (`ip` = :ip OR (`integrity_hash` = :integrity_hash AND `integrity_hash` IS NOT NULL) OR (`passkey` = :pass AND `passkey` IS NOT NULL)) AND `thread` IS NULL AND `time` > :time";
+			$query = prepare(sprintf($queryStr, $board['uri']));
+			$query->bindValue(":ip", $_SERVER['REMOTE_ADDR']);
+			if (isset($post['integrity_hash'])) {
+				$query->bindValue(":integrity_hash", $post['integrity_hash']);
+			} else {
+				$query->bindValue(":integrity_hash", null);
+			}
+			if ($hasPass) {
+				$query->bindValue(":pass", $post['passkey']);
+			}
+			else {
+				$query->bindValue(":pass", null);
+			}
+			$query->bindValue(":time", time() - 3600);
+			$query->execute();
+
+			$totalThreadsMadeByIPThisHour = $query->fetch(PDO::FETCH_NUM)[0];
+
+			if ($totalThreadsMadeByIPThisHour >= $totalAllowedPerHour && !hasPermission($config['mod']['flood'])) {
+				error("You have reached the hourly thread limit. Please wait for a while before making another one.");
+			}
+		}
+
+		$threadFloodLimit = isset($config['thread_flood_limit']) ? $config['thread_flood_limit'] : 30;
+		if ($lastThreadTime > time() - $threadFloodLimit && !hasPermission($config['mod']['flood'])) {
+			error("You are posting too fast. Please wait a while before making another thread.");
+		}
+
+
+		if (isset($post['filehash'])) {
+			//Now check how many threads this image_hash has
+			//Check for comma in filehash
+			if (strpos($post['filehash'], ',') !== false) {
+				$hashes = explode(',', $post['filehash']);
+				$hashes = array_map('trim', $hashes);
+				$hashes = array_filter($hashes, 'strlen');
+				$totalThreadsMadeByImageHash = 0;
+				$queryStr = "SELECT * FROM `posts_%s` WHERE `filehash` IN (" . implode(',', array_fill(0, count($hashes), '?')) . ") AND `thread` IS NULL";
+				$query = prepare(sprintf($queryStr, $board['uri']));
+				$query->execute($hashes);
+
+				$totalThreadsMadeByImageHash = $query->rowCount();
+
+				if ($totalThreadsMadeByImageHash >= $config['max_threads_per_image_hash']) {
+					error("Too many threads exist with this image as an OP. Please select a different image.");
+				}
+			} else {
+
+				$totalThreadsMadeByImageHash = 0;
+				$queryStr = "SELECT * FROM `posts_%s` WHERE `filehash` = :filehash AND `thread` IS NULL";
+				$query = prepare(sprintf($queryStr, $board['uri']));
+				$query->bindValue(":filehash", $post['filehash']);
+				$query->execute();
+
+				$totalThreadsMadeByImageHash = $query->rowCount();
+
+				if ($totalThreadsMadeByImageHash >= $config['max_threads_per_image_hash']) {
+					mute();
+					error("Too many threads exist with this image as an OP. Please select a different image.");
+				}
+			}
+		}
+	}
+
+
+	if (!hasPermission($config['mod']['bypass_filters'], $board['uri']) && !$dropped_post) {
+
+		require_once 'inc/filters.php';
+
+		do_filters($post);
+		if (isset($post['filehash'])) {
+
+			/*CREATE TABLE hashbans (
+								id INT AUTO_INCREMENT PRIMARY KEY,
+								filehash VARCHAR(255) NOT NULL,
+								reason TEXT NOT NULL,
+								creator INT NOT NULL,
+								timestamp INT NOT NULL
+							);*/
+
+			if (strpos($post['filehash'], ',') !== false) {
+				$hashes = explode(',', $post['filehash']);
+				$hashes = array_map('trim', $hashes);
+				$hashes = array_filter($hashes, 'strlen');
+				$queryStr = "SELECT * FROM `hashbans` WHERE `filehash` IN (" . implode(',', array_fill(0, count($hashes), '?')) . ")";
+				$query = prepare($queryStr);
+				$query->execute($hashes);
+			} else {
+				$query = prepare("SELECT * FROM `hashbans` WHERE `filehash` = :filehash");
+				$query->bindValue(":filehash", $post['filehash']);
+				$query->execute();
+			}
+
+			if ($query->rowCount() > 0) {
+				modLog("Hashban detected for filehash: " . $post['filehash']);
+				$hashban = $query->fetch(PDO::FETCH_ASSOC);
+
+				//Apply ban to user
+				$reason = $hashban['reason'];
+				$expires = false;
+				Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, $expires, false, $hashban['creator'], $post);
+				checkBan(true);
+				die("Banned");
+			}
+		}
+	}
+
+
+	/*
+					  //Uppercase modification:
+						  if ($post['op']) {
+							  $post['body'] = "<span class=\"quote\">>" . strtoupper($post['body']) . "</span>";
+						  }*/
+	//Add TOR signature (if enabled)
+	if (isset($config['tor_signature']) && $config['tor_signature']) {
+		$data = file_get_contents('inc/torbulkexitlist');
+		$lines = explode("\n", $data);
+		$exitNodes = array_map('trim', array_filter($lines, function ($line) {
+			return $line && $line[0] !== '#';
+		}));
+
+		if (in_array($_SERVER["REMOTE_ADDR"], $exitNodes)) {
+			$post['body'] = $post['body'] . "<br><hr><i>Made through Tor</i>";
+		}
+	}
+	// end of tor signature modification*/
+
+	if (!$post['op'] && !empty($thread['decryption_key'])) {
+		if ($is_mod == false && $hasPass == false && (get_oldest_post($endUserIP) > time() - (3600 * 8) || get_ip_post_count($endUserIP) < 15)) {
+			error("Your IP doesn't meet the requirements to post in this thread.");
+		}
+		$post['decryption_key'] = $thread['decryption_key'];
+		$iv = random_bytes(16);
+		$ciphertext = openssl_encrypt($post['body'], 'aes-128-cbc', base64_decode($thread['decryption_key']), 0, $iv);
+		$post['body'] = '<div hidden class="encrypted-body">' . json_encode(array('iv' => base64_encode($iv), 'data' => $ciphertext)) . '</div><i>Content hidden.</i>';
+	}
+
+	if ($post['has_file']) {
+		foreach ($post['files'] as $key => &$file) {
+			$file_key = 'file';
+			if ($key > 0) {
+				$file_key = 'file' . $key + 1;
+			}
+
+			if ($file['is_an_image']) {
+				if ($config['ie_mime_type_detection'] !== false) {
+					// Check IE MIME type detection XSS exploit
+					$buffer = file_get_contents($upload, null, null, null, 255);
+					if (preg_match($config['ie_mime_type_detection'], $buffer)) {
+						undoImage($post);
+						error($config['error']['mime_exploit']);
+					}
+				}
+
+				require_once 'inc/image.php';
+
+				// find dimensions of an image using GD
+				if (!$size = @getimagesize($file['tmp_name'])) {
+					error($config['error']['invalidimg']);
+				}
+				if (!in_array($size[2], array(IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_JPEG, IMAGETYPE_BMP, IMAGETYPE_WEBP))) {
+					error($config['error']['invalidimg']);
+				}
+				if ($size[0] > $config['max_width'] || $size[1] > $config['max_height']) {
+					error($config['error']['maxsize']);
+				}
+
+
+				// create image object
+				$image = new Image($file['tmp_name'], $file['extension'], $size);
+				if ($image->size->width > $config['max_width'] || $image->size->height > $config['max_height']) {
+					$image->delete();
+					error($config['error']['maxsize']);
+				}
+
+				$file['width'] = $image->size->width;
+				$file['height'] = $image->size->height;
+				$forceSpoilerIps = array();
+
+				//check user ip against force spoiler ips
+				if (in_array($endUserIP, $forceSpoilerIps)) {
+					$_POST['spoiler'] = true;
+				}
+
+				if ($config['spoiler_images'] && (isset($_POST['spoiler']) || isset($_POST[$file_key . '-spoilered']))) {
+					$file['thumb'] = 'spoiler';
+
+					$size = @getimagesize($config['spoiler_image']);
+					$file['thumbwidth'] = $size[0];
+					$file['thumbheight'] = $size[1];
+				} else {
+
+					//$nsfw_prob = get_nsfw_prob($file['tmp_name']);
+					//if ($nsfw_prob > 0.2 && !$hasPass) {
+					if (false) {
+						$file['thumb'] = 'spoiler';
+
+						$size = @getimagesize($config['spoiler_image']);
+						$file['thumbwidth'] = $size[0];
+						$file['thumbheight'] = $size[1];
+					} else {
+						$thumbext = $config['thumb_ext'];
+						if ($file['extension'] != "gif") {
+							$thumbext = "png";
+						} else {
+							$thumbext = "gif";
+						}
+
+						$thumb = $image->resize(
+							$thumbext,
+							$post['op'] ? $config['thumb_op_width'] : $config['thumb_width'],
+							$post['op'] ? $config['thumb_op_height'] : $config['thumb_height']
+						);
+
+						$thumb->to($file['thumb']);
+
+						$file['thumbwidth'] = $thumb->width;
+						$file['thumbheight'] = $thumb->height;
+
+						$thumb->_destroy();
+					}
+				}
+
+				$dont_copy_file = false;
+
+
+
+				$temp_output = $file['tmp_name'] . '_processed';
+
+				if (false && $size[2] != IMAGETYPE_JPEG) {
+					$command = escapeshellcmd('/usr/bin/python3') . ' ' .
+						escapeshellarg('/var/www/soyjakparty/tools/destroy_stego.py') . ' ' .
+						escapeshellarg($file['tmp_name']) . ' ' .
+						escapeshellarg($temp_output);
+
+					exec($command . ' 2>&1', $output, $returnCode);
+
+					if ($returnCode !== 0) {
+						error(_('Could not process image! (1)'), null, implode("\n", $output));
+					}
+				}
+
+				// If successful, move processed file to destination
+				if (file_exists($temp_output)) {
+					$file['hash_md5'] = md5_file($temp_output);
+
+					rename($temp_output, $file['file']);
+					$dont_copy_file = true;
+				} else {
+					// Fallback to original image processing if stego protection fails
+					$image->to($file['file']);
+					$dont_copy_file = true;
+					error_log("Failed to strip stenography from image - sending as is.");
+				}
+
+
+				$image->destroy();
+			} else {
+				// not an image
+				//copy($config['file_thumb'], $post['thumb']);
+				$file['thumb'] = 'file';
+
+				$size = @getimagesize(
+					sprintf(
+						$config['file_thumb'],
+						isset($config['file_icons'][$file['extension']]) ?
+							$config['file_icons'][$file['extension']] : $config['file_icons']['default']
+					)
+				);
+				$file['thumbwidth'] = $size[0];
+				$file['thumbheight'] = $size[1];
+				$dont_copy_file = false;
+			}
+
+			if (isset($_POST[$file_key . '-nsfw'])) {
+				$file['nsfw_prob'] = 1;
+			}
+
+			if ($config['tesseract_ocr'] && $file['thumb'] != 'file') { // Let's OCR it!
+				$fname = $file['tmp_name'];
+
+				if ($file['height'] > 500 || $file['width'] > 500) {
+					$fname = $file['thumb'];
+				}
+
+				if ($fname == 'spoiler') { // We don't have that much CPU time, do we?
+				} else {
+					$tmpname = "tmp/tesseract/" . rand(0, 10000000);
+
+					// Preprocess command is an ImageMagick b/w quantization
+					$error = shell_exec_error(sprintf($config['tesseract_preprocess_command'], escapeshellarg($fname)) . " | " .
+						'tesseract stdin ' . escapeshellarg($tmpname) . ' ' . $config['tesseract_params']);
+					$tmpname .= ".txt";
+
+					$value = @file_get_contents($tmpname);
+					@unlink($tmpname);
+
+					if ($value && trim($value)) {
+						// This one has an effect, that the body is appended to a post body. So you can write a correct
+						// spamfilter.
+						$post['body_nomarkup'] .= "<tinyboard ocr image $key>" . htmlspecialchars($value) . "</tinyboard>";
+					}
+				}
+			}
+
+			if (!$dont_copy_file) {
+				if (isset($file['file_tmp'])) {
+					if (!@rename($file['tmp_name'], $file['file']))
+						error($config['error']['nomove']);
+					chmod($file['file'], 0644);
+				} elseif (!@move_uploaded_file($file['tmp_name'], $file['file']))
+					error($config['error']['nomove']);
+			}
+		}
+
+		if ($config['image_reject_repost']) {
+			if ($p = getPostByHash($post['filehash'])) {
+				undoImage($post);
+				error(
+					sprintf(
+						$config['error']['fileexists'],
+						($post['mod'] ? $config['root'] . $config['file_mod'] . '?/' : $config['root']) .
+							($board['dir'] . $config['dir']['res'] .
+								($p['thread'] ?
+									$p['thread'] . '.html#' . $p['id']
+									:
+									$p['id'] . '.html'
+								))
+					)
+				);
+			}
+		} else if (!$post['op'] && $config['image_reject_repost_in_thread']) {
+			if ($p = getPostByHashInThread($post['filehash'], $post['thread'])) {
+				undoImage($post);
+				error(
+					sprintf(
+						$config['error']['fileexistsinthread'],
+						($post['mod'] ? $config['root'] . $config['file_mod'] . '?/' : $config['root']) .
+							($board['dir'] . $config['dir']['res'] .
+								($p['thread'] ?
+									$p['thread'] . '.html#' . $p['id']
+									:
+									$p['id'] . '.html'
+								))
+					)
+				);
+			}
+		}
+	}
+
+	// Do filters again if OCRing
+	if ($config['tesseract_ocr'] && !hasPermission($config['mod']['bypass_filters'], $board['uri']) && !$dropped_post) {
+		do_filters($post);
+	}
+
+	if (!hasPermission($config['mod']['postunoriginal'], $board['uri']) && $config['robot_enable'] && checkRobot($post['body_nomarkup']) && !$dropped_post) {
+		undoImage($post);
+		if ($config['robot_mute']) {
+			error(sprintf($config['error']['muted'], mute()));
+		} else {
+			error($config['error']['unoriginal']);
+		}
+	}
+
+	// Remove board directories before inserting them into the database.
+	if ($post['has_file']) {
+		foreach ($post['files'] as $key => &$file) {
+			$file['file_path'] = $file['file'];
+			$file['thumb_path'] = $file['thumb'];
+			$file['file'] = mb_substr($file['file'], mb_strlen($board['dir'] . $config['dir']['img']));
+			if ($file['is_an_image'] && $file['thumb'] != 'spoiler')
+				$file['thumb'] = mb_substr($file['thumb'], mb_strlen($board['dir'] . $config['dir']['thumb']));
+		}
+	}
+
+	$post = (object) $post;
+	$post->files = array_map(function ($a) {
+		return (object) $a;
+	}, $post->files);
+
+	$error = event('post', $post);
+	$post->files = array_map(function ($a) {
+		return (array) $a;
+	}, $post->files);
+
+	if ($error) {
+		undoImage((array) $post);
+		error($error);
+	}
+	$post = (array) $post;
+
+	if ($post['files'])
+		$post['files'] = $post['files'];
+	$post['num_files'] = sizeof($post['files']);
+
+	$post['id'] = $id = post($post);
+	$post['slug'] = slugify($post);
+
+	if ($dropped_post && $dropped_post['from_nntp']) {
+		$query = prepare("INSERT INTO ``nntp_references`` (`board`, `id`, `message_id`, `message_id_digest`, `own`, `headers`) VALUES " .
+			"(:board , :id , :message_id , :message_id_digest , false, :headers)");
+
+		$query->bindValue(':board', $dropped_post['board']);
+		$query->bindValue(':id', $id);
+		$query->bindValue(':message_id', $dropped_post['msgid']);
+		$query->bindValue(':message_id_digest', sha1($dropped_post['msgid']));
+		$query->bindValue(':headers', $dropped_post['headers']);
+		$query->execute() or error(db_error($query));
+	}	// ^^^^^ For inbound posts  ^^^^^
+	elseif ($config['nntpchan']['enabled'] && $config['nntpchan']['group']) {
+		// vvvvv For outbound posts vvvvv
+
+		require_once('inc/nntpchan/nntpchan.php');
+		$msgid = gen_msgid($post['board'], $post['id']);
+
+		list($headers, $files) = post2nntp($post, $msgid);
+
+		$message = gen_nntp($headers, $files);
+
+		$query = prepare("INSERT INTO ``nntp_references`` (`board`, `id`, `message_id`, `message_id_digest`, `own`, `headers`) VALUES " .
+			"(:board , :id , :message_id , :message_id_digest , true , :headers)");
+
+		$query->bindValue(':board', $post['board']);
+		$query->bindValue(':id', $post['id']);
+		$query->bindValue(':message_id', $msgid);
+		$query->bindValue(':message_id_digest', sha1($msgid));
+		$query->bindValue(':headers', json_encode($headers));
+		$query->execute() or error(db_error($query));
+
+		// Let's broadcast it!
+		nntp_publish($message, $msgid);
+	}
+
+	insertFloodPost($post);
+
+	// Handle cyclical threads
+	if (!$post['op'] && isset($thread['cycle']) && $thread['cycle']) {
+		// Query is a bit weird due to "This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'" (MariaDB Ver 15.1 Distrib 10.0.17-MariaDB, for Linux (x86_64))
+		$query = prepare(sprintf('DELETE FROM ``posts_%s`` WHERE `thread` = :thread AND `id` NOT IN (SELECT `id` FROM (SELECT `id` FROM ``posts_%s`` WHERE `thread` = :thread ORDER BY `id` DESC LIMIT :limit) i)', $board['uri'], $board['uri']));
+		$query->bindValue(':thread', $post['thread']);
+		$query->bindValue(':limit', $config['cycle_limit'], PDO::PARAM_INT);
+		$query->execute() or error(db_error($query));
+	}
+
+	if ($post['op']) {
+		$redis->set('lastThread' . $board['uri'] . md5($endUserIP), time());
+	}
+
+	if (isset($post['antispam_hash'])) {
+		incrementSpamHash($post['antispam_hash']);
+	}
+
+	function infect_poster($cite, $redis) {
+		if (true) {
+			$query = prepare(sprintf("SELECT `ip` FROM ``posts_%s`` WHERE `id` = :id", $cite[0]));
+			$query->bindValue(':id', $cite[1]);
+			$query->execute() or error(db_error($query));
+
+			$target = $query->fetch(PDO::FETCH_ASSOC);
+			if (!$redis->get("infected:ip_{$target['ip']}")) {
+				$redis->set("infected:ip_{$target['ip']}", $redis->get("infected_count") + 1);
+				$redis->set("infected_count", $redis->get("infected_count") + 1);
+			}
+
+			if ($redis->get("infected:vaxxed_ip_{$target['ip']}") < time() - 30*60) {
+				$redis->del("infected:vaxxed_ip_{$target['ip']}");
+			}
+		}
+	}
+
+	function vax_poster($cite, $redis) {
+		$query = prepare(sprintf("SELECT `ip` FROM ``posts_%s`` WHERE `id` = :id", $cite[0]));
+		$query->bindValue(':id', $cite[1]);
+		$query->execute() or error(db_error($query));
+
+		$target = $query->fetch(PDO::FETCH_ASSOC);
+		$redis->set("infected:vaxxed_ip_{$target['ip']}", time());
+	}
+
+	if (isset($post['tracked_cites']) && !empty($post['tracked_cites'])) {
+		$insert_rows = array();
+		foreach ($post['tracked_cites'] as $cite) {
+			if ($config['pride_month_2025']) {
+				if (!empty($patient_id)) {
+					infect_poster($cite, $redis);
+				} elseif ($is_doctor || $is_nurse) {
+					vax_poster($cite, $redis);
+				}
+			}
+
+			$insert_rows[] = '(' .
+				$pdo->quote($board['uri']) . ', ' . (int) $id . ', ' .
+				$pdo->quote($cite[0]) . ', ' . (int) $cite[1] . ')';
+		}
+		query('INSERT INTO ``cites`` VALUES ' . implode(', ', $insert_rows)) or error(db_error());
+	}
+
+	if (isset($config['disable_sage'])) {
+		$shouldSage = false;
+	}
+
+	if (!$post['op']) {
+		$query = prepare(sprintf("SELECT * FROM `posts_%s` WHERE `thread` = :thread AND `id` != :exclude_id ORDER BY `id` DESC LIMIT 1", $board['uri']));
+		$query->bindValue(':thread', $post['thread']);
+		$query->bindValue(':exclude_id', $id);
+		$query->execute() or error(db_error($query));
+
+		$lastpost = $query->fetch(PDO::FETCH_ASSOC);
+
+		if (((!$shouldSage && !$thread['sage']) || ($lastpost['email'] == 'bump' && !$thread['sage'])) && ($thread['invincible'] || $config['reply_limit'] == 0 || $numposts['replies'] + 1 < $config['reply_limit'])) {
+
+			$bannedBumpers = array();
+
+			$lastBump = apcu_fetch("lastBump" . $endUserIP . $board['uri']);
+			if (!$lastBump) {
+				$lastBump = 0;
+			}
+
+			$bump_cooldown = $config['bump_cooldown'];
+			if ($endUserIP == '31.209.209.51') {
+				$bump_cooldown = 360;
+			}
+
+			if (time() - $bump_cooldown >= $lastBump && !in_array($endUserIP, $bannedBumpers) && time() >= $thread['bump']) {
+				apcu_store("lastBump" . $endUserIP . $board['uri'], time());
+				bumpThread($post['thread']);
+			}
+		}
+
+		if ($post['email'] == 'supersage' && $lastpost['email'] != 'bump' && time() >= $thread['bump']) {
+			apcu_store("lastSlide" . $endUserIP . $board['uri'], time());
+			slideThread($post['thread']);
+		}
+	}
+
+	if (isset($_SERVER['HTTP_REFERER'])) {
+		// Tell Javascript that we posted successfully
+		if (!empty($_COOKIE[$config['cookies']['js']]))
+			$js = json_decode($_COOKIE[$config['cookies']['js']]);
+		else
+			$js = (object) array();
+		// Tell it to delete the cached post for referer
+		$js->{$_SERVER['HTTP_REFERER']} = true;
+		// Encode and set cookie
+		setcookie($config['cookies']['js'], json_encode($js), 0, $config['cookies']['jail'] ? $config['cookies']['path'] : '/', null, false, false);
+	}
+
+	$root = $post['mod'] ? $config['root'] . $config['file_mod'] . '?/' : $config['root'];
+
+	if ($noko) {
+		$redirect = $root . $board['dir'] . $config['dir']['res'] .
+			link_for($post, false, false, $thread) . (!$post['op'] ? '#' . $id : '');
+
+		if (!$post['op'] && isset($_SERVER['HTTP_REFERER'])) {
+			$regex = array(
+				'board' => str_replace('%s', '(\w{1,8})', preg_quote($config['board_path'], '/')),
+				'page' => str_replace('%d', '(\d+)', preg_quote($config['file_page'], '/')),
+				'page50' => '(' . str_replace('%d', '(\d+)', preg_quote($config['file_page50'], '/')) . '|' .
+					str_replace(array('%d', '%s'), array('(\d+)', '[a-z0-9-]+'), preg_quote($config['file_page50_slug'], '/')) . ')',
+				'res' => preg_quote($config['dir']['res'], '/'),
+			);
+
+			if (preg_match('/\/' . $regex['board'] . $regex['res'] . $regex['page50'] . '([?&].*)?$/', $_SERVER['HTTP_REFERER'])) {
+				$redirect = $root . $board['dir'] . $config['dir']['res'] .
+					link_for($post, true, false, $thread) . (!$post['op'] ? '#' . $id : '');
+			}
+		}
+	} else {
+		$redirect = $root . $board['dir'] . $config['file_index'];
+
+		if ($post['op'] && isset($_SERVER['HTTP_REFERER']) && preg_match('/\/catalog\.html/', $_SERVER['HTTP_REFERER']))
+			$redirect = $root . $board['dir'] . $config['file_catalog'];
+	}
+
+	buildThread($post['op'] ? $id : $post['thread']);
+
+	if ($config['syslog'])
+		_syslog(LOG_INFO, 'New post: /' . $board['dir'] . $config['dir']['res'] .
+			link_for($post) . (!$post['op'] ? '#' . $id : ''));
+
+	if (!$post['mod'])
+		header('X-Associated-Content: "' . $redirect . '"');
+
+
+	if (!isset($_POST['json_response'])) {
+		header('Location: ' . $redirect, true, $config['redirect_http']);
+	} else {
+		header('Content-Type: text/json; charset=utf-8');
+		echo json_encode(
+			array(
+				'redirect' => $redirect,
+				'noko' => $noko,
+				'id' => $id
+			)
+		);
+	}
+
+	/*
+	if (!$config['mandate_soy_history'] && $board['uri'] == 'soy' && 10000000 - $id < 500 && 10000000 - $id > 0) {
+		file_put_contents('soy/config.php', "\n".'$config[\'mandate_soy_history\'] = true;', FILE_APPEND);
+	}
+	if (!$config['mccaptcha'] && $board['uri'] == 'soy' && 10000000 - $id < 100 && 10000000 - $id > 0) {
+		file_put_contents('soy/config.php', "\n".'$config["mccaptcha"] = true;'."\n".'$config["artifical_posting_lag"] = true;', FILE_APPEND);
+	}
+	if ($config['mccaptcha'] && $board['uri'] == 'soy' && 10000000 - $id < 0) {
+		file_put_contents('soy/config.php', "\n".'$config["mccaptcha"] = false;'."\n".'$config["artifical_posting_lag"] = false;'."\n".'$config[\'mandate_soy_history\'] = false;', FILE_APPEND);
+	}
+	*/
+
+	// We are already done, let's continue our heavy-lifting work in the background (if we run off FastCGI)
+	if (function_exists('fastcgi_finish_request')) {
+		fastcgi_finish_request();
+	} elseif (!headers_sent()) {
+		header('Connection: close');
+		header('Content-Length: ' . ob_get_length());
+		ob_end_flush();
+		ob_flush();
+		flush();
+	}
+
+	foreach ($post['files'] as $f) {
+		if ($f['is_approved'] == 0) {
+			/*CREATE TABLE `file_approval` (
+					  `board` VARCHAR(255) NOT NULL,
+					  `postid` INT NOT NULL,
+					  `hash` VARCHAR(255) NOT NULL,
+					  `file` VARCHAR(255) NOT NULL,
+					  `thumb` VARCHAR(255) DEFAULT NULL,
+					  `time` INT NOT NULL,
+					  PRIMARY KEY (`board`, `postid`, `hash`)
+				  );*/
+			$query = prepare("INSERT INTO `file_approval` (`board`, `postid`, `hash`, `file`, `thumb`, `time`) VALUES (:board, :postid, :hash, :file, :thumb, :time)");
+			$query->bindValue(':board', $board['uri']);
+			$query->bindValue(':postid', $id);
+			$query->bindValue(':hash', $f['hash']);
+			$query->bindValue(':file', $f['file']);
+			$query->bindValue(':thumb', $f['thumb']);
+			$query->bindValue(':time', time());
+			$query->execute();
+		}
+	}
+
+	$sfwOnlyIPs = [];
+
+	if ($post['has_file']) {
+		foreach ($post['files'] as $key => &$file) {
+			if (!isset($file['nsfw_prob'])) {
+				$nsfw_prob = 0;
+				if ($file['is_an_image']) {
+					$nsfw_prob = get_nsfw_prob(getcwd() . '/' . $file['file_path']);
+					set_nsfw_prob($nsfw_prob, $board['uri'], $post['id'], $key);
+
+					if ($post['board'] == "soy" && $nsfw_prob > 0.07 && (in_array($endUserIP, $sfwOnlyIPs) || $newUser)) {
+						deletePost($post['id'], false, false);
+					}
+				}
+				else if ($file['thumb_path'] != 'spoiler') {
+					$nsfw_prob = get_nsfw_prob(getcwd() . '/' . $file['thumb_path']);
+					set_nsfw_prob($nsfw_prob, $board['uri'], $post['id'], $key);
+
+					if ($post['board'] == "soy" && $nsfw_prob > 0.10 && (in_array($endUserIP, $sfwOnlyIPs) || $newUser)) {
+						deletePost($post['id'], false, false);
+					}
+				}
+			}
+		}
+	}
+
+	$channelName = "post";
+	/*                sub.Subscribe("post", (channel, message) =>
+						 {
+							 //Parse json
+							 var json = JsonSerializer.Deserialize<Dictionary<string, string>>(message);
+							 //Check if the message is for the thread
+							 if (json["thread"] == threadID && json["board"] == board)
+							 {
+								 httpContext.Response.WriteAsync($"post: {message}\n\n");
+							 }*/
+	$sanitizedPost = array();
+	$sanitizedPost['id'] = $post['id'];
+	$sanitizedPost['board'] = $post['board'];
+	$sanitizedPost['thread'] = $post['thread'];
+	$sanitizedPost['op'] = $post['op'];
+	$sanitizedPost['time'] = $post['time'];
+	$sanitizedPost['name'] = $post['name'];
+	$sanitizedPost['trip'] = $post['trip'];
+	$sanitizedPost['email'] = $post['email'];
+	$sanitizedPost['subject'] = $post['subject'];
+	$sanitizedPost['body'] = $post['body'];
+	$sanitizedPost['body_nomarkup'] = $post['body_nomarkup'];
+	$sanitizedPost['files'] = $post['files'];
+	$sanitizedPost['num_files'] = $post['num_files'];
+
+	//Redact files
+	foreach ($sanitizedPost['files'] as &$file) {
+		$file['tmp_name'] = null;
+		$file['hash'] = null;
+		if ($file['is_approved'] == false) {
+			$file['file'] = null;
+			$file['thumb'] = null;
+		}
+	}
+
+
+	$redis->publish($channelName, json_encode($sanitizedPost));
+
+
+	if ($config['try_smarter'] && $post['op'])
+		$build_pages = range(1, $config['max_pages']);
+
+	if ($post['op'])
+		clean($id);
+
+	event('post-after', $post);
+
+	buildIndex();
+
+
+
+
+	if ($post['op'])
+		rebuildThemes('post-thread', $board['uri']);
+	else
+		rebuildThemes('post', $board['uri']);
+
+	if ($post['festival_team']) {
+		$team = $post['festival_team'];
+
+		$score = get_splatfest_score($post['body']);
+
+		// Retrieve scores of all teams
+		$team_scores = [];
+		foreach ($config['splatfest_teams'] as $team_name => $team_info) {
+			$team_scores[$team_name] = (float) $redis->get("splatfest_team_score:$team_name");
+		}
+
+		// Find the highest score
+		$highest_score = max($team_scores);
+
+		// Apply rubberband multiplier if the team is losing
+		if ($team_scores[$team] < $highest_score) {
+			$score_multiplier = 1 + (4 * ($highest_score - $team_scores[$team]) / $highest_score);
+			$score *= $score_multiplier;
+		}
+
+		$upcomingId = $post['id'];
+		$upcomingIdStr = strval($upcomingId);
+
+		if ($upcomingIdStr[strlen($upcomingIdStr) - 1] == $upcomingIdStr[strlen($upcomingIdStr) - 2] && $upcomingIdStr[strlen($upcomingIdStr) - 2] == $upcomingIdStr[strlen($upcomingIdStr) - 3]) {
+			$score *= 10;
+		}
+
+		//Check if last post from this IP was within 30 secondws
+		$recentlyPosted = false;
+		$queryStr = "SELECT * FROM `posts_%s` WHERE `ip` = :ip AND `id` != :id AND `time` > :timestamp LIMIT 1";
+		$query = prepare(sprintf($queryStr, $board['uri']));
+		$query->bindValue(":ip", $_SERVER['REMOTE_ADDR']);
+		$query->bindValue(":id", $post['id']);
+		$query->bindValue(":timestamp", time() - 30);
+		$query->execute();
+		if ($query->rowCount() > 0) {
+			$recentlyPosted = true;
+		}
+
+		if ($recentlyPosted) {
+			$score *= 0.1;
+		}
+
+		$redis->incrByFloat("splatfest_team_score:$team", $score);
+	}
+} elseif (isset($_POST['appeal'])) {
+	if (!isset($_POST['ban_id']))
+		error($config['error']['bot']);
+
+	$ban_id = (int) $_POST['ban_id'];
+
+	$bans = Bans::find($_SERVER['REMOTE_ADDR'], false, false, null, get_pass_id($_COOKIE['pass']));
+	foreach ($bans as $_ban) {
+		if ($_ban['id'] == $ban_id) {
+			$ban = $_ban;
+			break;
+		}
+	}
+
+	if (!isset($ban)) {
+		error(_("That ban doesn't exist or is not for you."));
+	}
+
+	if ($ban['expires'] && $ban['expires'] - $ban['created'] <= $config['ban_appeals_min_length']) {
+		error(_("You cannot appeal a ban of this length."));
+	}
+
+	$query = query("SELECT `denied` FROM ``ban_appeals`` WHERE `ban_id` = $ban_id") or error(db_error());
+	$ban_appeals = $query->fetchAll(PDO::FETCH_COLUMN);
+
+	if ($ban['unappealable'] == 1 || count($ban_appeals) >= $config['ban_appeals_max']) {
+		error(_("You cannot appeal this ban again."));
+	}
+
+	foreach ($ban_appeals as $is_denied) {
+		if (!$is_denied)
+			error(_("There is already a pending appeal for this ban."));
+	}
+
+	$query = prepare("INSERT INTO ``ban_appeals`` VALUES (NULL, :ban_id, :time, :message, 0, 'None')");
+	$query->bindValue(':ban_id', $ban_id, PDO::PARAM_INT);
+	$query->bindValue(':time', time(), PDO::PARAM_INT);
+	$query->bindValue(':message', $_POST['appeal']);
+	$query->execute() or error(db_error($query));
+
+	displayBan($ban);
+} else {
+	if (!file_exists($config['has_installed'])) {
+		header('Location: install.php', true, $config['redirect_http']);
+	} else {
+		// They opened post.php in their browser manually.
+		error($config['error']['nopost']);
+	}
+}

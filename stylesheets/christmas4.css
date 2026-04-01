@@ -1,0 +1,149 @@
+h2 {
+	color: #16bf00;
+}
+
+.options_tab_icon.active {
+	color: #16bf00;
+}
+
+span.public_ban {
+	display: block;
+	color: #00efff;
+	font-weight: bold;
+	margin-top: 15px;
+}
+
+a, a:visited {
+    color: #6c6cd9;
+}
+
+.boardlist {
+    background-color:#45DA59!important;
+}
+
+table.modlog tr th {
+	background: #45DA59;
+}
+
+.intro span.subject {
+	color: #D42020;
+	font-weight: bold;
+}
+
+#options_div,
+#alert_div {
+	background-color: #D6E6F0;
+	border: 1px solid black;
+	display: inline-block;
+	position: relative;
+	margin-top: 20px;
+	color: black;
+}
+
+div.ban {
+	background: #D6E6F0;
+	border: 1px solid #45DA59;
+	max-width: 700px;
+	margin: 30px auto;
+        color: black;
+}
+
+
+div.ban h2 {
+	background: #45DA59;
+	color: black;
+	font-size: 12pt;
+}
+
+body {
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3)), /* black overlay */
+        url("https://soybooru.com/_images/ebf3d0075bef6cb829847097c0ab5cc5/149074%20-%20SoyBooru.png"),
+        url("https://files.catbox.moe/e08npn.gif"),
+        linear-gradient(to bottom, #000099, #000000);
+
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    background-size: cover, cover, cover, cover;
+    background-attachment: fixed, fixed, fixed, fixed;
+    background-position: center, center, center, center;
+
+    color: #FFFFFF;
+}
+
+
+
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+.desktop-style div.boardlist:nth-child(1) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-top: 0;
+    z-index: 30;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .15);
+    border-bottom: 1px solid;
+    background-color: #FFA1A1;
+    color: red
+}
+
+div.post.reply.highlighted {a
+     background: #2CBED8;;
+}
+
+div.banner {
+    background-color: #009a02;
+}
+
+div.boardlist a {
+    color: #004705;
+    font-weight: bold;
+}
+
+div.boardlist {
+	margin-top: 3px;
+
+	color: #025f0f;
+	font-size: 9pt;
+}
+
+div.pages.top {
+    background: #DA4545;
+}
+
+div.post.reply {
+  color: #000000;
+   background: #D6E6F0;
+    border-right: 2px solid #99A4AD;
+    border-bottom: 2px solid #99A4AD;
+}
+
+div.pages {
+    background: #DA4545;
+    color: #004705;
+}
+
+form table tr th{
+    background:#45DA59;
+    color: #000000
+}
+
+h1 {
+    color: #D82C2C;
+}
+
+.name {
+    color:#005F96 !important;
+} 
+
+.name:before{
+    content: 'Frosty '; }  
+}
+
+:nth-child(1 of a.post_no):before {
+    content:"Elf "
+}

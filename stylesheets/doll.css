@@ -1,0 +1,160 @@
+div.post.reply.highlighted {
+
+	background: #F9DCD6;
+}
+img.banner, img.board_image {
+content: url("https://soyjak.st/static/banners/87.png");
+        display: block;
+        border: 1px solid #2E790E;
+        margin: 12px auto 0 auto;;
+}
+* {font-family: "Comic Sans MS", "Comic Sans", cursive}
+div.post {
+  background: url("https://soybooru.com/_images/537acc462911a9671554a0eb1f7c8224/120781%20-%20SoyBooru.gif") no-repeat center center;  
+background-size: 100% 100%; /* Stretches the image to cover the entire .post */
+  border-radius: 15px;
+  border: 2px solid #E50000;
+  padding: 10px;
+  color: #0000ff;
+  box-shadow: 0 0 15px #DBBA33;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 24pt;
+}
+div.post.reply {
+  background: url("https://soybooru.com/_images/c89c135befd9beccd168feb55ebad043/92545%20-%20SoyBooru.gif") no-repeat center center;  
+background-size: 100% 100%; /* Stretches the image to cover the entire .post */
+border: 2px solid #E50000;
+  padding: 7px;
+  color: #0000ff;
+  font-family: "Lucida Console", "Courier New", monospace;
+  font-size: 24pt;
+}
+body {
+    background: #511F16; 
+    background-image: url("https://soybooru.com/_images/b53f9894a62523585f39a54810c168b0/47691%20-%20SoyBooru.png");
+    background-size: cover;
+    background-attachment: fixed;
+    color: #0000ff;
+   .bl {
+    text-decoration: none;
+    color: #9C2F2F;
+   }
+ 
+   .box.middle {
+    background: #B6562A;
+    color: #0000ff;
+    border: 1px solid #B6562A;
+    width: inherit;
+   }
+ 
+   .box.middle h2 {
+    background: #0000ff;
+    color: #B6562A;
+   }
+ 
+}
+.name,
+a {
+  background-color: #0000ff;  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none; /* Optional: Remove underline */
+}
+.intro span.subject {
+ color: #ff2121;
+}
+td#upload_selection {
+background: linear-gradient(#ffadd9,#ff1493); border: 6px ridge #ff1492;}
+form table tr th{
+  background: linear-gradient(#ffadd9,#ff1493); border: 6px ridge #ff1492;}
+div.dropzone-wrap {
+background: linear-gradient(#ffadd9,#ff1493); border: 6px ridge #ff1492;}
+input,
+textarea {
+  background: linear-gradient(#ffadd9,#ff1493); border: 6px ridge #ff1492;  border: 2px solid #ff006a!important;
+  color: #F9DCD6;
+}
+header div.subtitle,
+h1 {background: linear-gradient(#ffadd9,#ff1493);  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+div.banner {
+ background-color: #004CFF;
+color: #F9DCD6;
+ font-size: 12pt;
+ font-weight: bold;
+ text-align: center;
+ margin: 1em 0;
+}
+div.boardlist, div.pages {
+    border: 2px solid transparent; /* Needed for fallback */
+    border-radius: 35px;
+    padding: 5px;
+    background: linear-gradient(#ffadd9,#ff1493);color: blue
+}
+label:not(:has(span.capcode)) span.name {
+  background: linear-gradient(#ffadd9,#ff1493);
+  color: transparent !important;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+boardlist {
+ color: blue;
+}
+span.omitted {
+ display: block;
+ margin-top: 1em;
+ color: #d500ff;
+}
+body::before {
+    opacity: 0.8;
+    content: "";
+    /* Required for ::before to work */
+    position: fixed;
+    bottom: 0px;
+    /* Position from the bottom */
+    right: -87px;
+    /* Position from the right */
+    width: 260px;
+    /* Width of the GIF */
+    height: 230px;
+    /* Height of the GIF */
+    background-image: url('https://soybooru.com/_images/5f3dddbc9c2ee3fa1784398c1e28e63d/85344%20-%20SoyBooru.gif');
+    /* The URL of your GIF */
+    background-size: contain;
+    /* Resize background to fit the container */
+    background-repeat: no-repeat;
+    /* Don't repeat the GIF */
+    z-index: 1000;
+    /* Make sure it appears above other elements */
+    pointer-events: none;
+}
+
+.name:after{
+  content: '## LITTLE BUDY';
+  display: inline-block;
+  color: #FFAAD8;
+  text-shadow: 0 0 8px #FF1A96;
+  margin-left: .25em;
+}
+h1::before {
+    content: "caca poopie ";
+}
+body:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image:
+    url("https://soybooru.com/_images/5f3dddbc9c2ee3fa1784398c1e28e63d/85344%20-%20SoyBooru.gif"),
+    url("https://soybooru.com/_images/f68731993d0b1a5ec692bbf0faf2ce18/44757%20-%20SoyBooru.gif");
+  background-repeat: no-repeat;
+  background-position: 100% 100%, bottom left; /* Original image and the GIF in bottom-right corner */
+  background-size: 150px, 150px; /* First image size remains 150px, the GIF is smaller (50px) */
+  pointer-events: none; /* Prevent interaction with the background images */
+  z-index: -1; /* Ensure it stays behind other content */
+}

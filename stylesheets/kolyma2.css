@@ -1,0 +1,232 @@
+a.post-btn {
+  display: none !important;
+}
+a.post_quote {
+  display: none !important;
+}
+a#subscribe-button {
+  display: none !important;
+}
+img#board-banner {
+  display: none !important;
+}
+span.unimportant {
+  display: none !important;
+}
+a.filename-download-link {
+  display: none !important;
+}
+
+
+img.board_image {
+    display: block;
+    border: 1px solid #a9a9a9;
+    margin: 1em auto; /* Adjusted margin to add space above and below */
+    max-width: 100%; /* Ensure responsiveness */
+}
+img.banner, img.board_image {
+content: url("https://soyjakwiki.org/images/1/17/Banner55.png");
+        display: block;
+        border: 1px solid #2E790E;
+        margin: 12px auto 0 auto;;
+}
+a#expand-all-images {
+  display: none !important;
+}
+a.hide-thread-link {
+    display: inline-block;        /* needed to set width/height */
+    width: 12px;                  /* set icon size */
+    height: 12px;
+    text-indent: -9999px;         /* hide original text */
+    overflow: hidden;
+    background: url('https://soyjak.st/test/src/1757984159880d-2.png') no-repeat center center;
+    background-size: contain;     /* scale the image to fit */
+}
+
+
+body:before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image:
+    url("https://soyjak.st/test/src/1757988406934v.png"),
+    url("https://soyjak.st/test/src/1757987106550f.png");
+  background-repeat: no-repeat;
+  background-position: 100% 100%, bottom left; /* Original image and the GIF in bottom-right corner */
+  background-size: 150px, 150px; /* First image size remains 150px, the GIF is smaller (50px) */
+  pointer-events: none; /* Prevent interaction with the background images */
+  z-index: -1; /* Ensure it stays behind other content */
+}
+
+body {
+	background: linear-gradient(180deg,rgba(154, 0, 0, 1) 0%, rgba(120, 0, 0, 1) 100%);
+color: #D1AE36;
+	font-family: sans-serif;
+	font-size: 12px;
+}
+input,
+textarea {
+  border: 1px solid #D1AE36
+}
+
+
+.pages.top {
+  background-color: #000000;
+  color: #FDD73A!important;
+}
+
+.pages {
+  background-color: #000 !important;
+  color: #FDD73A!important;
+}
+
+div.post.reply {
+  background: #AD161C;
+  border: #DBBA33 2px solid;
+}
+
+.name,
+a {
+  color: #FDD73A!important;
+}
+
+
+.name {
+  position: relative;
+}
+
+
+div.subtitle {
+  color: #ffcd00!important;
+}
+
+.boardlist {
+  background: #AD161C!important;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  color: #FDD73A!important;
+}
+
+
+
+
+
+input,
+textarea {
+  background: #AD161C;
+  color: #FDD73A;
+}
+
+textarea {
+  background: #AD161C;
+  color: #FDD73A;
+}
+
+
+
+#options_div {
+  background-color: #800000;
+}
+
+.options_tab_icon.active {
+  color: #D3B033;
+}
+
+.file-hint {
+  color: #D3B033!important;
+}
+
+form table tr th {
+  background: #AD161C;
+}
+
+.dropzone {
+  color: #8B0000;
+}
+
+.dragover {
+  background: #FDD73A!important;
+}
+.intro span.subject {
+	color: #fffe00;
+	font-weight: bold;
+}
+
+a.post_no {
+	text-decoration: underline;
+	margin: 0;
+	padding: 0;
+}
+.intro time,
+p.intro a.ip-link,
+p.intro a.capcode {
+        text-decoration: underline;
+	direction: ltr;
+	unicode-bidi: embed;
+}
+div.post.reply div.body a:link:hover, div.post.reply div.body a:visited:hover {
+	color: #AD161C
+}
+.intro a.email, p.intro a.email span.name, p.intro a.email:hover, p.intro a.email:hover span.name {
+	color: #FDD73A !important;
+}
+a.post_no:hover {
+	color: #FCE37E !important;
+	text-decoration: underline overline;
+}
+input[type="text"], textarea, select {
+	background: #7B0000;
+	color: #CCCCCC;
+	border: #666666 1px solid;
+	padding-left: 5px;
+	padding-right: -5px;
+	font-size: 10pt;
+}
+div.boardlist {
+	margin-top: 3px;
+
+	color: #520303;
+	font-size: 9pt;
+}
+
+span.omitted {
+	color: #FCE37E !important;
+}
+input,
+textarea {
+  border: 2px solid #ffcd03!important;
+  color: #DBBA33;
+}
+div.banner {
+	background-color: #590000;
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+        color: #990301;
+}
+hr {
+	border: none;
+	border-top: 1px solid #ffd80c;
+	height: 0;
+	clear: left;
+}
+
+div.dropzone-wrap {
+background: linear-gradient(180deg,rgba(154, 0, 0, 1) 0%, rgba(120, 0, 0, 1) 100%);
+
+}
+
+div.post.reply.highlighted {
+	background: #7F1016;
+}

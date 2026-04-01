@@ -1,9 +1,16 @@
 {% if mod|hasPermission(config.mod.show_sensitive) %}
-	<p><a href="/mod.php?/search/posts/{{ ip }}">View entire post history</a></p>
-	<p><a href="https://search.censys.io/hosts/{{ ip }}" rel="nofollow noreferrer" target="_blank">View IP on Censys</a></p>
-	<p><a href="https://ipinfo.io/{{ ip }}" rel="nofollow noreferrer" target="_blank">View IP on IPInfo</a></p>
+	{% if raw_ip %}
+		<p><a href="https://ipinfo.io/{{ raw_ip }}" rel="nofollow noreferrer" target="_blank">{{ raw_ip }}</a></p>
+		<p><a href="/mod.php?/search/posts/{{ raw_ip }}">View entire post history</a></p>
+	{% else %}
+		<p><form action="" method="post" style="margin:0">
+			<input type="hidden" name="token" value="{{ security_token }}">
+			<input type="hidden" name="uncloak_ip" value="1">
+			<input type="submit" value="Uncloak IP">
+		</form></p>
+	{% endif %}
 	{% if integrity_data %}
-		<p><a href="/mod.php?/integrity-search/{{ ip }}">Search for IPs with similar integrity data</a></p>
+		<p><a href="/mod.php?/integrity-search/{{ ip|cloak_ip }}">Search for IPs with similar integrity data</a></p>
 		<p><a href="javascript:void(0);" id="reveal-integrity" onclick="document.querySelector('#integrity').hidden = false; document.querySelector('#reveal-integrity').remove();">Show integrity data</a></p>
 		<table id="integrity" hidden>
 			<tbody>
@@ -24,9 +31,9 @@
 <p>VPN: {% if vpn_status == "true" %}Yes{% else %}No{% endif %}</p>
 {% if mod|hasPermission(config.mod.flag_vpn) %}
 	{% if vpn_status == "true" %}
-	<p><a href="/mod.php?/unflag-vpn/{{ ip }}">Unflag as a VPN</a></p>
+	<p><a href="/mod.php?/unflag-vpn/{{ ip|cloak_ip }}">Unflag as a VPN</a></p>
 	{% else %}
-	<p><a href="/mod.php?/flag-vpn/{{ ip }}">Flag as a VPN</a></p>
+	<p><a href="/mod.php?/flag-vpn/{{ ip|cloak_ip }}">Flag as a VPN</a></p>
 	{% endif %}
 {% endif %}
 {% for board_posts in posts %}

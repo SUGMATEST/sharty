@@ -1,0 +1,239 @@
+/* Soyanniversary 2 theme (5 years edition) */
+@font-face {
+    font-family: "W95Font";
+    src: url("https://files.catbox.moe/3zux6n.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+label:not(:has(span.capcode)) span.name {
+  color:#C6B519 !important;
+}
+
+form table tr th{
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+}
+
+div.boardlist {
+  border-radius: 35px;
+  border: 2px solid #8B8000;
+  opacity: 1;
+  font-family: "W95Font", monospace;
+  font-size: 5px
+  color: #fff786;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+}
+
+div.post {
+  color: #EFE757;
+  background: linear-gradient(0deg,rgba(235, 187, 74, 1) 0%, rgba(247, 238, 139, 1) 100%);
+  border: 2px solid #8B8000;
+  font-family: "W95Font", monospace;
+  padding: 20px;
+  font-size: 16px
+}
+
+body {
+    cursor: url('/test/src/1726202249613s.png'), auto;
+}
+
+div.post.reply {
+  color: #000;
+  background: linear-gradient(0deg,rgba(235, 187, 74, 1) 0%, rgba(247, 238, 139, 1) 100%);
+  border: 1px solid #8B8000;
+  padding: 5px;
+  font-family: "W95Font", monospace;
+  font-size: 16px
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    background: #A0D1FF;
+    background-image: url('/static/anniversary/background.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: bottom;
+    background-size: cover;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  body {
+    background-image: linear-gradient(#8f862cd9 200px, transparent 500px), linear-gradient(transparent 200px, #FFF054 1000px), url(https://soyjak.st/test/src/1757802978970s.png);
+    background-size: 620px;
+    background-repeat: repeat;
+  }
+}
+
+div.post.reply.highlighted {
+  background: linear-gradient(0deg,rgba(199, 174, 117, 1) 0%, rgba(189, 179, 68, 1) 100%);
+
+}
+
+
+
+div.pages.top {
+  opacity: 0.75;
+  background: #ffd045;
+}
+
+div.pages {
+  opacity: 0.75;
+  background: #83BDD5;
+}
+
+h1 {
+  color: #FFF054; 
+  opacity: 0.75;
+  border: 0.2px solid #A39835;
+  padding: 5px;
+  width="800%";
+  font-family: "W95Font", monospace;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 86%,#C4B454 95%, #8B8000 100%);
+  width: fit-content;
+  margin: auto;
+}
+img#board-banner,
+img:not(.icon, .flag) {
+  position: relative;
+  border: 3px solid #FFD700;
+  padding: 10px;
+  background: linear-gradient(45deg, #D4A017, #FFD700, #D4A017);
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.5),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.4),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+
+
+
+div#news {
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+div.blotter {
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  width: fit-content;
+  margin: auto;
+}
+
+div.mix {
+  border: 1px solid #111111;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 22%,#F8DE7E 28%,#FBEC5D 60%,#FADA5E 71%,#FBEC5D 90%,#C4B454 95%, #8B8000 100%);
+  box-shadow: 5px 5px 8px rgba(0, 0, 0, 15);
+}
+
+body, div.post, div.post.reply, div.post.reply.highlighted, div#news, div.blotter, div.mix, div.subtitle {
+  color: #000000 !important;
+}
+
+a {
+  cursor: url('https://soyjak.st/test/src/1757807585287g.png') 10 10, pointer;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  bottom: -48px;
+  right: -63px;
+  width: 280px;
+  height: 280px;
+  background-image: url('https://soyjak.st/test/src/1757807204125f.gif');
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+
+div.banner {
+	background-color: #E8D533;
+        color #000000:
+	font-size: 12pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 1em 0;
+}
+
+
+td#upload_selection {
+background: linear-gradient(0deg,rgba(186, 166, 119, 1) 0%, rgba(217, 191, 113, 1) 25%, rgba(228, 207, 91, 1) 50%, rgba(237, 215, 50, 1) 75%, rgba(255, 239, 66, 1) 100%);
+}
+
+/* options.js */
+#options_div, #alert_div {
+	background: #FFF054;
+}
+.options_tab_icon {
+	color: #000000;
+}
+.options_tab_icon.active {
+	color: #FFCC00;
+}
+textarea {
+  border: 2px solid #066BC1!important;
+}
+hr {
+	border: none;
+	border-top: 1px solid #AA9F38;
+	height: 0;
+	clear: left;
+}
+div.subtitle {
+  color: #FFF054; 
+  opacity: 0.75;
+  border: 0.2px solid #A39835;
+  padding: 5px;
+  width="800%";
+  font-family: "W95Font", monospace;
+  background: linear-gradient(to bottom, #8B8000 0%,#ffd045 10%,#FFFF00 1%,#F8DE7E 1%,#FBEC5D 30%,#FADA5E 51%,#FBEC5D 86%,#C4B454 95%, #8B8000 100%);
+  width: fit-content;
+  margin: auto;
+}
+width: 100px;
+margin: auto;}
+
+a.post_no:hover {
+	color: #FFF17C;
+	text-decoration: underline overline;
+}
+input,
+textarea {
+  background: #9E9334;
+  border: 2px solid #DBBA33!important;
+  color: #DBBA33;
+.name,
+}
+span.omitted {
+	display: block;
+	margin-top: 1em;
+	color: #877E2C;
+}
+div.dropzone-wrap {
+background: linear-gradient(0deg,rgba(186, 166, 119, 1) 0%, rgba(217, 191, 113, 1) 25%, rgba(228, 207, 91, 1) 50%, rgba(237, 215, 50, 1) 75%, rgba(255, 239, 66, 1) 100%);
+}
+.name,
+a {
+  color: #b29c41!important;
+}
+
+div.boardlist {
+	margin-top: 3px;
+
+	color: #fffa56;
+	font-size: 9pt;
+}
+
+div.post.reply div.body a:link:hover, div.post.reply div.body a:visited:hover {
+	color: #B2A63A;
+}
+a.post_no:hover {
+	color: #FFF177!important;
+	text-decoration: underline overline;
+}

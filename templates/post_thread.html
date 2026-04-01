@@ -200,18 +200,18 @@
 		<img class="icon" title="Loop" src="{{ config.image_loop }}" alt="loop" />
 	{% endif %}
 	{% if index %}
-		<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post) }}">[{% trans %}Reply{% endtrans %}]</a>
+		<a class="reply-link" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post) }}">[{% trans %}Reply{% endtrans %}]</a>
 	{% endif %}
 	{% if isnoko50 %}
-		<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post) }}">[{% trans %}View All{% endtrans %}]</a>
+		<a class="last-x-link" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post) }}">[{% trans %}View All{% endtrans %}]</a>
 	{% endif %}
 	{% if hasnoko50 and not isnoko50 %}
 		{% set lastcount = config.noko50_count %}
-		<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, true) }}">[{% trans %}Last 1 Post{% plural lastcount %}Last {{ count }} Posts{% endtrans %}]</a>
+		<a class="last-x-link" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, true) }}">[{% trans %}Last 1 Post{% plural lastcount %}Last {{ count }} Posts{% endtrans %}]</a>
 	{% endif %}
 	{% if pages > 1 %}
 		{%for page in range(0, pages - 1)%}
-			<a href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]
+			<a class="thread-page-link" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]
 			</a>
 		{%endfor%}
 	{%endif%}
@@ -260,7 +260,7 @@
         {% if pages > 1 %}
 		<div>
                 {%for page in range(0, pages - 1)%}
-                        <a style="margin-right: 5px;" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]</a>
+                        <a class="thread-page-link" style="margin-right: 5px;" href="{{ post.root }}{{ board.dir }}{{ config.dir.res }}{{ link_for(post, false, false, false, page) }}">[{{ page+1 }}]</a>
 		{%endfor%}
 		</div>
         {%endif%}

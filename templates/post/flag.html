@@ -1,4 +1,4 @@
-{% if (post.mod and post.mod|hasPermission(config.mod.show_sensitive, board.uri) and post.country) or (config.display_flags and post.modifiers.flag) %}
+{% if (post.mod and post.mod|hasPermission(config.mod.show_sensitive, board.uri) and post.country and false) or (config.display_flags and post.modifiers.flag) %}
 	 <img
 		{% if config.country_flags_condensed %}
 			 class="flag flag-{{ post.modifiers.flag|default(post.country) }}" src="{{ config.image_blank }}"

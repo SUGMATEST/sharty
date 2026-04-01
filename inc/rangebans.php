@@ -164,6 +164,18 @@ $config['filters'][] = array(
             if (str_contains(strtolower($stringWithoutSpaces), "bu5t")) {
                 return true; // Match found, return true
             }
+            if (str_contains(strtolower($stringWithoutSpaces), "skibidifarms")) {
+                return true; // Match found, return true
+            }
+            if (str_contains(strtolower($stringWithoutSpaces), "transchan")) {
+                return true; // Match found, return true
+            }
+	    if (str_contains(strtolower($stringWithoutSpaces), "sy26getjFV")) {
+                return true; // Match found, return true
+            }
+            if (str_contains(strtolower($stringWithoutSpaces), "deadnigger")) {
+                return true; // Match found, return true
+            }
             else {
                 return false; // No match, return false
             }
@@ -955,7 +967,6 @@ $config['filters'][] = array(
 );
 
 
-//known 'p hashes
 $config['filters'][] = array(
     'condition' => array(
         'custom' => function ($post) {
@@ -984,6 +995,8 @@ $config['filters'][] = array(
                         'e4e0f0f0f0e0c0c0',
                         'fefaf8f0f0c080c0',
 			'c3c700afe23421a7138a0414f0f455b5',
+                        '484481030a82333d7669948b0d17d154',
+                        'c0e79d6d96a9fd2c0e345359a53e9d19',
                     )
                 )
             )
@@ -995,7 +1008,7 @@ $config['filters'][] = array(
     'action' => 'ban',
     'add_note' => true,
     'all_boards' => true,
-    'reason' => 'Do not upload illegal content (3).'
+    'reason' => '1. - You WILL NOT upload, post, request, or link to illegal content.'
 );
 
 $config['filters'][] = array(
@@ -1078,76 +1091,7 @@ $config['filters'][] = array(
 $config['filters'][] = array(
     'condition' => array(
         'custom' => function ($post) {
-
             $transliterated = AnyAscii::transliterate($post['body']);
-            if (preg_match('/gor23xya/i', $transliterated))
-                return true;
-            if (preg_match('/grove5kk6/i', $transliterated))
-                return true;
-            if (preg_match('/gor78arx/i', $transliterated))
-                return true;
-            if (preg_match('/ezsigedup32/i', $transliterated))
-                return true;
-            if (preg_match('/ezsignedip32232/i', $transliterated))
-                return true;
-            if (preg_match('/__rapecel/i', $transliterated))
-                return true;
-            if (preg_match('/_rapecel/i', $transliterated))
-                return true;
-            if (preg_match('/hacktheman123/i', $transliterated))
-                return true;
-            if (preg_match('/hacktheman/i', $transliterated))
-                return true;
-            if (preg_match('/discorrd.gg/i', $transliterated))
-                return true;
-
-            if (preg_match('/wWFReEF/i', $transliterated))
-                return true;
-            if (preg_match('/6qk5MADa/i', $transliterated))
-                return true;
-            if (preg_match('/tyny.to/i', $transliterated))
-                return true;
-            if (preg_match('/How to anonymously buy, acid, ketamine, and cocaine/i', $transliterated))
-		return true;
-            if (str_contains(strtolower($transliterated), 'gg\kiwifarms'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), 'deadnigger.baby'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'deadnigger dot baby'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), 'panchan.org'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), '.gg/sharty'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), '7iv86'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'ratlh'))
-		return true;
-
-            if (str_contains(strtolower($transliterated), 'chud.win'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'reportgod.group'))
-                return true;
-
-
-            if (str_contains(strtolower($transliterated), 'nolimitspedia'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), 'raidz'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), 'reportgod.group'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'clayparty'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'reportgod.group'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'reportgod.group'))
-                return true;
             $spaces_removed = str_replace(' ', '', $transliterated);
             $spaces_removed = str_replace('-', '', $spaces_removed);
             $spaces_removed = str_replace('.', '', $spaces_removed);
@@ -1159,54 +1103,16 @@ $config['filters'][] = array(
             $spaces_removed = str_replace('$', '', $spaces_removed);
             $spaces_removed = str_replace('+', '', $spaces_removed);
             $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $spaces_removed);
+		$spaces_removed = str_replace('0', 'o', $spaces_removed);
+		$spaces_removed = str_replace('1', 'i', $spaces_removed);
+		$spaces_removed = str_replace('3', 'e', $spaces_removed);
+		$spaces_removed = str_replace('4', 'a', $spaces_removed);
+		$spaces_removed = str_replace('5', 's', $spaces_removed);
+		$spaces_removed = str_replace('dot', '', $spaces_removed);
 
-            if (str_contains(strtolower($transliterated), 'clayparty'))
-                return true;
-
-            if (str_contains(strtolower($transliterated), 'discordalwayswin'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'fileditchstuff'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'skibidifarms'))
-                return true;
-
-            // if (str_contains(strtolower($spaces_removed), 'youworthless'))
-            //     return true;
-
-             /*
-             $archiveSubStrCount = 0;
-             $archiveSubStrCount += substr_count(strtolower($spaces_removed), 'archive.is');
-             if ($archiveSubStrCount >= 8)
-                 return true;
-             */
-
-                 //cord.gg
-            if (substr_count(strtolower($spaces_removed), 'cordgg') > 5)
-                return true;
-
-            if (str_contains(strtolower($spaces_removed), 'gg/kiwifarms'))
-                return true;
-            if (str_contains(strtolower($transliterated), '|kiwifarms'))
-                return true;
             if (str_contains(strtolower($transliterated), 'nofile.org'))
                 return true;
             if (str_contains(strtolower($transliterated), 'telegra.ph'))
-                return true;
-            if (str_contains($transliterated, 'VRgKHY7'))
-		return true;
-            if (str_contains($transliterated, 'AjNXADg3'))
-                return true;
-            if (str_contains($transliterated, 'zmxr7HxZZx'))
-                return true;
-            if (str_contains($transliterated, 'Ek5EmugH'))
-                return true;
-            if (str_contains($transliterated, 'uYExFJr'))
-                return true;
-            if (str_contains($transliterated, 'SSGNsaGN'))
-                return true;
-            if (str_contains($transliterated, 'p8Sz8XfEwj'))
-                return true;
-            if (str_contains($transliterated, '4mzTpEzt'))
                 return true;
 
             if (str_contains(strtolower($transliterated), 'fuck collection'))
@@ -1217,93 +1123,57 @@ $config['filters'][] = array(
                 return true;
             if (str_contains(strtolower($transliterated), 'goto.now'))
                 return true;
-            if (str_contains(strtolower($transliterated), '/qafe'))
-                return true;
-            if (str_contains(strtolower($transliterated), '/affy'))
-                return true;
-            if (str_contains(strtolower($transliterated), '/affu'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'sord.gg/'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'juso.ga'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'welcome! site:'))
-                return true;
-            if (str_contains(strtolower($transliterated), 'afterparty.soy'))
-                return true;
 
-            if (str_contains(strtolower($spaces_removed), 'slashaffy'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), '/affy'))
-                return true;
-            //gg/sharty
-            if (str_contains(strtolower($spaces_removed), 'gg/sharty'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'slashsharty'))
-                return true;
-
-            //DISCORD.GG
-            if (str_contains(strtolower($spaces_removed), '/snarty'))
-                return true;
-            ///dznartu
-            if (str_contains(strtolower($spaces_removed), '/dznartu'))
+            if (str_contains(strtolower($transliterated), "'ecker"))
                 return true;
 
             //Remove all alphanumerics
             $spaces_removed = preg_replace('/[^A-Za-z0-9]/', '', $spaces_removed);
 
-            if (str_contains(strtolower($spaces_removed), 'slashaffy'))
-                return true;
-                if (str_contains(strtolower($spaces_removed), 'slashaffu'))
-                    return true;
-                    if (str_contains(strtolower($spaces_removed), 'ggaffy'))
-                        return true;
-                        if (str_contains(strtolower($spaces_removed), 'ggaffu'))
-                            return true;
-            if (str_contains(strtolower($spaces_removed), 'slashqway'))
-                return true;
-                if (str_contains(strtolower($spaces_removed), 'slashqwau'))
-                    return true;
-                    if (str_contains(strtolower($spaces_removed), 'oshiat'))
-                        return true;
-                        if (str_contains(strtolower($spaces_removed), 'spammerbu5t'))
-                            return true;
-                            if (str_contains(strtolower($spaces_removed), 'pw0cna'))
-                                return true;
-                                if (str_contains(strtolower($spaces_removed), 'hisclittie'))
-                                    return true;
-            if (str_contains(strtolower($spaces_removed), 'slashsharty'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'slashshartu'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'dzhartu'))
-                return true;
-            //afterparty won
-            if (str_contains(strtolower($spaces_removed), 'afterpartywon'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'afterpartywon'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'afterpartysoy'))
-                return true;
-            //?ft?rparty.soy
-            if (str_contains(strtolower($spaces_removed), 'hqway'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'hqwau'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'dotgg'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'kordd'))
-                return true;
-        
-            if (str_contains(strtolower($spaces_removed), 'afterrartu'))
-                return true;
-            if (str_contains(strtolower($spaces_removed), 'afterrarty'))
-                return true;
-
             if (str_contains(strtolower($spaces_removed), 'pomftv'))
                 return true;
 
-            if (str_contains(strtolower($spaces_removed), 'meta4changay'))
+            if (str_contains(strtolower($spaces_removed), 'meta4chan'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'owovg'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'awoocf'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'jassy'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'jaksoyparty'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'partyjakst'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'fridaynightfunkinparty'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'cunnysoy'))
+                return true;
+	/*
+            if (str_contains(strtolower($spaces_removed), 'sextort'))
+                return true;
+	*/
+
+            if (str_contains(strtolower($spaces_removed), 'suicideitcom'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'kiwifarmsfun'))
+                return true;
+
+            if (str_contains(strtolower($spaces_removed), 'gofileio'))
+                return true;
+
+//            if (str_contains(strtolower($spaces_removed), 'kiwi st'))
+//                return true;
+
+            if (str_contains(strtolower($spaces_removed), '4fuckorg'))
                 return true;
 
             if (preg_match('/goon\d*bot/i', $spaces_removed))
@@ -1379,6 +1249,9 @@ $config['filters'][] = array(
             if (str_contains(strtolower($transliterated), 'invite/i=10'))
                 return true;
 
+            if (str_contains(strtolower($transliterated), 'ovz6yw'))
+                return true;
+
             if (str_contains(strtolower($spaces_removed), 'wormholeapp'))
                 return true;
 
@@ -1441,47 +1314,24 @@ $config['filters'][] = array(
     'reason' => 'Ban evasion.'
 );
 
-
-$config['filters'][] = array(
-    'condition' => array(
-        'custom' => function ($post) {
-            if ($post['trip'] == '!HfcFT7uveA') {
-                return true;
-            }
-            if (str_contains($post['body'], 'DESTROY ALL NIGGER RAPE GANGS EFFECTIVE IMMEDIATELY')) {
-                return true;
-            }
-            else if (strtolower($post['name']) == 'toonsoy') {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-    ),
-    'action' => 'ban',
-    'add_note' => true,
-    'all_boards' => true,
-    'reason' => 'Ban evasion.'
-);
-
-
 $config['filters'][] = array(
     'condition' => array(
         'custom' => function ($post) {
             $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
             $spaces_removed = preg_replace('/[^a-z0-9]/', '', $transliterated);
             $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
             $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            $spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
             $spaces_removed = str_replace('dot', '', $spaces_removed);
 
             if (preg_match('/georgegameseducate.com/i', $transliterated)) {
                 return true;
             }
             if (preg_match('/georgegameseducate.com/i', $post['subject'])) {
-                return true;
-            }
-            if (preg_match('/\/transexual/i', $transliterated)) {
                 return true;
             }
             if (preg_match('/jaksoyparty/i', $spaces_removed)) {
@@ -1517,9 +1367,6 @@ $config['filters'][] = array(
             if (preg_match('/nPHE7M5M/i', $transliterated)) {
                 return true;
             }
-            if (preg_match('/shemmytv/i', $spaces_removed)) {
-                return true;
-            }
             if (preg_match('/thatsnutsonline/i', $spaces_removed)) {
                 return true;
             }
@@ -1529,28 +1376,40 @@ $config['filters'][] = array(
             if (preg_match('/88nusoicaca88/i', $spaces_removed)) {
                 return true;
             }
-            if (preg_match('/kuzzywin/i', $spaces_removed)) {
+            if (preg_match('/skibidifarms/i', $spaces_removed)) {
                 return true;
             }
-            if (preg_match('/thrembochan/i', $spaces_removed)) {
+            if (preg_match('/soyjakkersnet/i', $spaces_removed)) {
+		return true;
+	    }
+            if (preg_match('/kuzzywin/i', $spaces_removed)) {
                 return true;
             }
             if (preg_match('/basedjakcom/i', $spaces_removed)) {
                 return true;
             }
-            
-            if (isset($post['files'])) {
-                foreach ($post['files'] as $file) {
-                    if (preg_match('/kuzzy/i', $file['filename'])) {
-                        return true;
-                    }
-                }
+            if (preg_match('/soyjakkingsoy/i', $spaces_removed)) {
+                return true;
             }
-            
+            if (preg_match('/fellasfarm/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/rochanchannel/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/D2YDNm4f2Q/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/xttZZmQ/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/vwqvZa6v/i', $spaces_removed)) {
+                return true;
+            }
             if (preg_match('/glowjakparty/i', $spaces_removed)) {
                 return true;
             }
-            if (preg_match('/cobsoy/i', $spaces_removed)) {
+            if (preg_match('/zelligpartysoy/i', $spaces_removed)) {
                 return true;
             }
             if (preg_match('/doordashknocks/i', $spaces_removed)) {
@@ -1560,6 +1419,21 @@ $config['filters'][] = array(
                 return true;
             }
             if (preg_match('/dDTeTXRN/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/ownsthisshittysite/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/86174190162/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/86174110122/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/deadniggershop/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/tiaraabanquets/i', $spaces_removed)) {
                 return true;
             }
             if ($post['password'] == '59ENoMnT') {
@@ -1587,7 +1461,16 @@ $config['filters'][] = array(
     'condition' => array(
         'custom' => function ($post) {
             $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
+            $transliterated = str_replace('(', 'c', $transliterated);
             $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $transliterated);
+            $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
+            $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            $spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
+            $spaces_removed = str_replace('dot', '', $spaces_removed);
 
             if (preg_match('/anthrofoo/i', $spaces_removed)) {
                 return true;
@@ -1596,9 +1479,6 @@ $config['filters'][] = array(
                 return true;
             }
             if (preg_match('/gemjakparty/i', $spaces_removed)) {
-                return true;
-            }
-            if (preg_match('/WITH 4CHAN FRENS/i', $spaces_removed)) {
                 return true;
             }
             if (preg_match('/8PK2Aa6Wmr/i', $spaces_removed)) {
@@ -1628,6 +1508,9 @@ $config['filters'][] = array(
             if (preg_match('/SRGqF5Y5/i', $spaces_removed)) {
                 return true;
             }
+            if (preg_match('/vwE9wYTXzh/i', $spaces_removed)) {
+                return true;
+            }
             if (preg_match('/webredirectorg/i', $spaces_removed)) {
                 return true;
             }
@@ -1640,10 +1523,117 @@ $config['filters'][] = array(
             if (preg_match('/gunslol/i', $spaces_removed)) {
                 return true;
             }
-            if (preg_match('/\.space/i', $transliterated)) {
+            if (preg_match('/librechan/i', $spaces_removed)) {
                 return true;
             }
-
+            if (preg_match('/gigachadsfit/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/joyjakst/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/67chanst/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigachade/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gempartysoy/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/intcultureparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/joyjackparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/soyjakclub/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/czchan/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/nojanniesallowedonline/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/trinititeparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigachadparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigachadst/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/ruzlycomtr/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/ctws/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/shemmylol/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/geckoxyz/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gordyrfgd/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigaboorucom/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigachadsflt/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/glgachadsfit/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/niggaparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gigabooru/i', $spaces_removed)) {
+                return true;
+            }
+	    if(preg_match('/gigachadsf1t/i',$spaces_removed)) {
+		return true;
+	    }
+            if (preg_match('/glgachadsflt/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/soyjaktycoon/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/chudwin/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/chudjakparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/chvdwin/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/8chanclub/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/8chanmoe/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/8kuntop/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/reinchanorg/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/kptfukbyzg/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/kernung/i', $spaces_removed)) {
+                return true;
+            }
+	    if (preg_match('/gempartyst/i', $spaces_removed)) {
+		return true;
+	    }
             else {
                 return false;
             }
@@ -1667,4 +1657,175 @@ $config['filters'][] = array(
     ),
     'action' => 'reject',
     'message' => 'Spam detected. Post discarded.'
+);
+
+
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function ($post) {
+            $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
+            $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $transliterated);
+            $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
+            $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            $spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
+            $spaces_removed = str_replace('dot', '', $spaces_removed);
+
+            if (preg_match('/foodist/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/jassy/i', $spaces_removed)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => 'Filter evasion.',
+    'expires' => 60 * 5
+);
+
+
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function ($post) {
+            $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
+            $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $transliterated);
+            $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
+            $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            $spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
+            $spaces_removed = str_replace('dot', '', $spaces_removed);
+
+            if (preg_match('/foodist/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/jassy/i', $spaces_removed)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => 'Filter evasion.',
+    'expires' => 60 * 5
+);
+
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function ($post) {
+            if (str_contains($post['body_nomarkup'], "[thumb]")) {
+		return true;
+	    }
+
+            $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
+            $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $transliterated);
+            $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
+            $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            $spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
+            $spaces_removed = str_replace('dot', '', $spaces_removed);
+
+            if (preg_match('/catboxmoe/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/pomf2lainla/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/gyotc/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/uguuse/i', $spaces_removed)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => 'External filehosts are forbidden.',
+    'expires' => 60 * 15
+);
+
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function ($post) {
+            $transliterated = strtolower(AnyAscii::transliterate($post['body']));
+            $transliterated = str_replace('@', 'a', $transliterated);
+            $transliterated = str_replace('$', 's', $transliterated);
+            $spaces_removed = preg_replace('/[^a-zA-Z0-9]/', '', $transliterated);
+            $spaces_removed = str_replace('0', 'o', $spaces_removed);
+            $spaces_removed = str_replace('1', 'i', $spaces_removed);
+            $spaces_removed = str_replace('3', 'e', $spaces_removed);
+            //$spaces_removed = str_replace('4', 'a', $spaces_removed);
+            $spaces_removed = str_replace('5', 's', $spaces_removed);
+            $spaces_removed = str_replace('dot', '', $spaces_removed);
+
+            if (preg_match('/charty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/4rty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/4arty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/4chanparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/4cuckorg/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/nusoiparty/i', $spaces_removed)) {
+                return true;
+            }
+            if (preg_match('/netsuba/i', $spaces_removed)) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => '3. Advertising for imageboards, discord servers, telegram channels, crypto projects, etc. is not permitted.',
+    'expires' => 60 * 60 * 12
+);
+
+$config['filters'][] = array(
+    'condition' => array(
+        'custom' => function ($post) {
+            if ($post['trip'] == "!uFrn/9DZFY") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    ),
+    'action' => 'ban',
+    'add_note' => true,
+    'all_boards' => true,
+    'reason' => 'Ban evasion.'
 );

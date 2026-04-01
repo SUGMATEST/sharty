@@ -172,6 +172,13 @@ elseif (isset($_GET['id'])) {
 
         $voted = $query->fetch(PDO::FETCH_NUM)[0] != 0;
 
+	/*
+	include_once "proxycheck.io.php.function.php";
+	if (vpn_check($_SERVER["REMOTE_ADDR"], false) && isset($_COOKIE['pass']) && $pass_id < 329) {
+		$voted = true;
+	}
+	*/
+
         echo Element(
             $config['file_poll_vote'],
             array(

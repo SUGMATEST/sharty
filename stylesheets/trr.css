@@ -1,0 +1,85 @@
+body {
+    background: #D6FFD5;
+}
+a:link, a:visited, .intro a.email span.name {
+    color: #117743;
+}
+a.hover {
+    color: #117743;
+}
+a.post_no {
+    color: #2E790E;
+}
+div.post.reply {
+    background: #A8EAA6;
+    border-color: #92D195;
+}
+div.post.reply.highlighted {
+    background: #98E2A4;
+    border-color: #92D195;
+}
+div.post.reply div.body a {
+    color: green;
+}
+.intro span.subject {
+    color: #009807;
+}
+form table tr th {
+    background-color: #8ACF52;
+    color: #2E790E;
+    font-weight: 700;
+    border: 1px solid #2E790E;
+    padding: 0 5px;
+    font-size:10pt
+}
+div.ban h2 {
+    background: #8ACF52;
+    color: inherit;
+}
+div.ban {
+    border-color: #2E790E;
+}
+div.ban p {
+    color: black;
+}
+div.pages {
+    background: #A8EAA6;
+    border-color: #92D195;
+}
+div.pages a.selected {
+    color: #2E790E;
+}
+header div.subtitle,h1 {
+  color: #2E790E;
+  text-align: center;
+}
+hr {
+    border: none;
+    border-top: 1px solid #2E790E;
+    height: 0;
+}
+div.boardlist {
+    color: #2E790E;
+}
+div.boardlist a {
+    color: #2E790E;
+}
+table.modlog tr th {
+    background: #8ACF52;
+}
+
+/* options.js */
+#options_div, #alert_div {
+    background: #D6FFD5;
+}
+
+.desktop-style div.boardlist:nth-child(1) {
+    background-color: #D6FFD5;
+}
+img.banner, img.board_image {
+content: url("https://www.soyjak.st/jager/src/1756833582550y.jpg");
+        display: block;
+        border: 1px solid #2E790E;
+        margin: 12px auto 0 auto;;
+}
+body {     background-image: url("https://www.soyjak.st/jager/src/1756835501935h.webp");     background-position: bottom right;     background-repeat: no-repeat;     background-attachment: fixed;

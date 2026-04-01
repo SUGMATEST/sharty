@@ -126,7 +126,8 @@ class Tinyboard extends Twig\Extension\AbstractExtension
 			new Twig\TwigFunction('link_for', 'link_for'),
 			new Twig\TwigFunction('ip_id', 'twig_get_ip_id'),
 			new Twig\TwigFunction('ip_color_code', 'twig_get_ip_colorcode'),
-			new Twig\TwigFunction('white_or_black_color', 'twig_white_or_black_color')
+			new Twig\TwigFunction('white_or_black_color', 'twig_white_or_black_color'),
+			new Twig\TwigFunction('get_identifier_code_for_number', 'get_identifier_code_for_number')
 		);
 	}
 	
@@ -256,7 +257,7 @@ function twig_get_ip_colorcode($ip, $extra = 0) {
 	//ChatGPT award
 	// Calculate the MD5 hash
 
-	$ipn = $ip  . "s9gu34hg934hgy394uhgy3";
+	$ipn = $ip  . "hE0IO4d2ItbeZKZzd1sjETyhZ1eJpy5O";
 	if ($extra != 0){
 		$ipn = $ipn . $extra;
 	}

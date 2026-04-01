@@ -1,0 +1,19 @@
+body {
+    background-image: url(https://soyjak.st/test/src/1759364696240t.png);
+    background-repeat: no-repeat;
+    background-position: left -250px top -10px;
+    background-size: 700px;
+    background: #EEF2F
+    font-family: arial, helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+@media screen and (max-width: 696px) {
+    .desktop-style body {
+        background-size:250px;
+        background-position: left -100px top 50px;
+    }
+}

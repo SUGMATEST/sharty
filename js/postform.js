@@ -105,13 +105,6 @@ function showCaptchas() {
 
 	button.style.display = "none";
 
-
-	var texts = document.getElementsByClassName("captcha_text");
-
-	for (var i = 0; i < texts.length; i++) {
-		texts[i].required = true;
-	}
-
 	getCaptcha();
 
 }

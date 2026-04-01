@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-	if (event.request.url.endsWith(".html") || event.request.url.endsWith("/")) {
+	if (event.request.url.startsWith("/") && (event.request.url.endsWith(".html") || event.request.url.endsWith("/"))) {
 	  event.respondWith(
 	    fetch(event.request)
 	      .then(response => {

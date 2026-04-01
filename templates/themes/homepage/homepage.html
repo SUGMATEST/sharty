@@ -4,9 +4,9 @@
 <head>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 	<title>{{ settings.title }}</title>
-	<meta name="description" content="Soyjak.party, (or just the party) is an imageboard dedicated to the creation, posting, and sharing of soyjaks." />
+	<meta name="description" content="soyjak.party, (or just the party) is an imageboard dedicated to the creation, posting, and sharing of soyjaks." />
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
-	<link rel="stylesheet" media="screen" href="{{ config.root }}{{ settings.css }}?v5"/>
+	<link rel="stylesheet" media="screen" href="{{ config.root }}{{ settings.css }}?v6"/>
 	{% if config.font_awesome %}<link rel="stylesheet" href="{{ config.root }}{{ config.font_awesome_css }}">{% endif %}
 	<link rel="stylesheet" media="screen" href="{{ config.url_stylesheet }}?v25">
 	<script type="text/javascript" src="/js/mobile-style.js?v2"></script>
@@ -15,28 +15,10 @@
 	{% endapply %}
 	{{ boardlist.top }}
 	{% apply spaceless %}
-	<center><img src="/static/front-page//soyberg.png" height="100px" alt="RIP Dr. Soyberg"></center>
+	<center><img src="/static/front-page/soyberg.png" height="100px" alt="RIP Dr. Soyberg"></center>
 	<h1>{{ settings.title }}</h1>
 	<div class="subtitle">{{ settings.subtitle }}</div>
-
 	<div class="box-wrap">
-		<div class="box middle">
-			<h2>About</h2>
-			<ul style="text-align: center; margin-top: 8px;">
-				<li>Soyjak.party, (or just "the party") is an imageboard dedicated to the creation, posting, and sharing of soyjaks. As the site has grown, it has expanded to encompass many other topics as well.</li>
-				<br/>
-				<li>Please read the <a href="/rules.html">rules</a> before posting.</li>
-				<br/>
-				<style>.sister-sites > a { margin: 4pt; }</style>
-				<li class="sister-sites">
-					<b>Other Soysphere sites</b><br/>
-					<a href="https://booru.soyjak.st">Soybooru</a>
-					<a href="https://wiki.soyjak.st">Soyjak Wiki</a>
-					<a href="https://soysylum.org/Main_Page">The Soysylum</a>
-					<a href="https://t.me/thedailyjak">Dailyjak</a>
-				</li>
-			</ul>
-		</div>
 		<div class="box middle">
 			<h2>News</h2>
 			{% endapply %}
@@ -58,6 +40,26 @@
 			{% apply spaceless %}
 		</div>
 		<div class="box middle">
+			<h2>About</h2>
+			<ul style="text-align: center; margin-top: 8px;">
+				<li>soyjak.party, (or just "the party") is an imageboard dedicated to the creation, posting, and sharing of soyjaks. As the site has grown, it has expanded to encompass many other topics as well.</li>
+				<br/>
+				<li>Please read the <a href="/rules.html">rules</a> before posting.</li>
+				<br/>
+				<b>The Dailyjak</b>
+				<div id="dailyjak-container" style="height:380px; display: block; margin-left: auto; margin-right: auto; max-width: 100%; margin-top: 4px; margin-bottom: 0;">
+					<script async src="https://dailyjak.soyjak.st/embed.js?v2"></script>
+				</div>
+				<br/>
+				<style>.sister-sites > a { margin: 4pt; }</style>
+				<li class="sister-sites">
+					<b>Other Soysphere sites</b><br/>
+					<a href="https://soybooru.com">Soybooru</a>
+					<a href="https://soyjakwiki.org">Soyjak Wiki</a>
+				</li>
+			</ul>
+		</div>
+		<div class="box middle">
 			<table>
 				<tr>
 					<th><h2>Board</h2></th>
@@ -77,38 +79,42 @@
 				{% endfor %}
 			</table>
 		</div>
-		<div class="box left">
-			<h2>Recent Images</h2>
-			<ul>
-				{% for post in recent_images %}
-					<li>
-						<a href="{{ post.link }}">
-							<img loading="lazy" src="{{ post.src }}" style="width:{{ post.thumbwidth }}px;height:{{ post.thumbheight }}px" alt="">
-						</a>
-					</li>
-				{% endfor %}
-			</ul>
+		<div class="wrapper">
+			<div class="box left">
+				<h2>Recent Images</h2>
+				<ul>
+					{% for post in recent_images %}
+						<li>
+							<a href="{{ post.link }}">
+								<img loading="lazy" src="{{ post.src }}" style="width:{{ post.thumbwidth }}px;height:{{ post.thumbheight }}px" alt="">
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="box left">
+				<h2>Statistics</h2>
+				<ul>
+					<li>Total posts: {{ stats.total_posts }}</li>
+					<li>Unique posters: {{ stats.unique_posters }}</li>
+					<li>Active content: {{ stats.active_content|filesize }}</li>
+				</ul>
+			</div>
 		</div>
-		<div class="box right">
-			<h2>Latest Posts</h2>
-			<ul>
-				{% for post in recent_posts %}
-					<li>
-						<strong>{{ post.board_name }}</strong>: 
-						<a href="{{ post.link }}">
-							{{ post.snippet }}
-						</a>
-					</li>
-				{% endfor %}
-			</ul>
-		</div>
-		<div class="box left">
-			<h2>Statistics</h2>
-			<ul>
-				<li>Total posts: {{ stats.total_posts }}</li>
-				<li>Unique posters: {{ stats.unique_posters }}</li>
-				<li>Active content: {{ stats.active_content|filesize }}</li>
-			</ul>
+		<div class="wrapper">
+			<div class="box right">
+				<h2>Latest Posts</h2>
+				<ul>
+					{% for post in recent_posts %}
+						<li>
+							<strong>{{ post.board_name }}</strong>: 
+							<a href="{{ post.link }}">
+								{{ post.snippet }}
+							</a>
+						</li>
+					{% endfor %}
+				</ul>
+			</div>
 		</div>
 	</div>
 
