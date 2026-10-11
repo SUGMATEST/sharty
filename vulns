@@ -1,0 +1,889 @@
+# Comprehensive Security Audit Findings Compilation
+
+> [!IMPORTANT]
+> **Compilation Scope & Disclaimer:**  
+> This document consolidates every security finding identified across the comprehensive security audits performed on `D:\Project\soyjaksource\myshare` across 10 independent evaluation sessions.  
+> - **Completed Audit Sessions (9):** `8e693d74`, `3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `5e432690`, `991dcf68`.  
+> - **Incomplete Evaluation Session (1):** `41c02a58` (session timed out during file survey prior to report synthesis).  
+> - **Total Distinct Findings:** **34** verified vulnerabilities spanning Remote Code Execution, Authentication Bypasses, Cross-Site Scripting, State Mutations, and Cryptographic Failures.
+
+---
+
+## Vulnerability Severity Distribution
+
+```mermaid
+pie title Vulnerabilities by Severity Level
+    "Critical" : 7
+    "High" : 16
+    "Medium" : 9
+    "Low" : 2
+```
+
+---
+
+## Master Vulnerability Matrix
+
+| ID | Title & Navigation | Severity | Frequency | Target Component |
+| :---: | :--- | :---: | :---: | :--- |
+| [`VULN-01`](#vuln-01) | [Hardcoded Master Cryptographic Keys, API Tokens & Cloud Secrets](#vuln-01) | **🔴 Critical** | `9/9` | [`inc/config.php`](file:///D:/Project/soyjaksource/myshare/inc/config.php) |
+| [`VULN-02`](#vuln-02) | [Path Traversal & Filesystem Probing Oracle in Banner Handler (`b2.php`)](#vuln-02) | **🟠 High** | `9/9` | Global / Multi-file |
+| [`VULN-03`](#vuln-03) | [Universal Anti-CSRF Token Bypass in Moderator Panel (`$token = true`)](#vuln-03) | **🔴 Critical** | `8/9` | Global / Multi-file |
+| [`VULN-04`](#vuln-04) | [Trivial IP Deanonymization via AES-CTR Keystream Reuse & Static IV](#vuln-04) | **🔴 Critical** | `8/9` | [`ip-token.php`](file:///D:/Project/soyjaksource/myshare/ip-token.php) |
+| [`VULN-05`](#vuln-05) | [Reflected Cross-Site Scripting (XSS) via `javascript:` Pseudo-Protocol in Media Player (`player.php`)](#vuln-05) | **🟡 Medium** | `8/9` | Global / Multi-file |
+| [`VULN-06`](#vuln-06) | [Unauthenticated Post Deletion & State Manipulation via CSRF in `vote.php`](#vuln-06) | **🟠 High** | `7/9` | Global / Multi-file |
+| [`VULN-07`](#vuln-07) | [Unauthenticated Staff Account Creation & Plaintext Credential Exposure (`tools/create_mediators.php`)](#vuln-07) | **🔴 Critical** | `6/9` | Global / Multi-file |
+| [`VULN-08`](#vuln-08) | [Stored Cross-Site Scripting (XSS) via Disabled Twig Auto-Escaping & Unsanitized Post Fields](#vuln-08) | **🟠 High** | `6/9` | [`inc/template.php:17`](file:///D:/Project/soyjaksource/myshare/inc/template.php#L17) |
+| [`VULN-09`](#vuln-09) | [Concurrency / TOCTOU Race Condition in Item Shop (`shop.php`)](#vuln-09) | **🟠 High** | `6/9` | Global / Multi-file |
+| [`VULN-10`](#vuln-10) | [Unprotected Administrative & Maintenance Scripts Accessible via Webroot (`tools/`)](#vuln-10) | **🟠 High** | `6/9` | [`tools/rebuild.php`](file:///D:/Project/soyjaksource/myshare/tools/rebuild.php) |
+| [`VULN-11`](#vuln-11) | [Arbitrary PHP Code Injection / RCE via Staff Usernames in Config Web Editor (`inc/mod/pages.php`)](#vuln-11) | **🔴 Critical** | `5/9` | Global / Multi-file |
+| [`VULN-12`](#vuln-12) | [Server-Side Request Forgery (SSRF) & Microservice Parameter Injection](#vuln-12) | **🟠 High** | `5/9` | [`post.php:2132-2174`](file:///D:/Project/soyjaksource/myshare/post.php#L2132-L2174) |
+| [`VULN-13`](#vuln-13) | [SQL Injection Vulnerabilities (Search, Relocation, Appeals, Raw Query)](#vuln-13) | **🔴 Critical** | `5/9` | [`inc/mod/pages.php:1877-1885`](file:///D:/Project/soyjaksource/myshare/inc/mod/pages.php#L1877-L1885) (`mod_move_reply`) |
+| [`VULN-14`](#vuln-14) | [PHP Object Injection via Untrusted Cookie Deserialization in Mod Dashboard (`mod.php`)](#vuln-14) | **🔴 Critical** | `4/9` | Global / Multi-file |
+| [`VULN-15`](#vuln-15) | [Unauthenticated Permanent IP Self-Ban / Denial of Service via `b4.php`](#vuln-15) | **🟠 High** | `4/9` | Global / Multi-file |
+| [`VULN-16`](#vuln-16) | [Public Exposure of Unlocked Active Installer (`install.php`)](#vuln-16) | **🟠 High** | `4/9` | Global / Multi-file |
+| [`VULN-17`](#vuln-17) | [Exposure of Sensitive Backup Files, `.git` Repository & Database Dumps](#vuln-17) | **🟠 High** | `4/9` | Global / Multi-file |
+| [`VULN-18`](#vuln-18) | [Arbitrary File Read via Path Traversal in Routing Layer (`smart_build.php`)](#vuln-18) | **🟠 High** | `1/9` | Global / Multi-file |
+| [`VULN-19`](#vuln-19) | [Complete CAPTCHA Bypass via Arbitrary `pass` Cookie & Securimage Race Conditions](#vuln-19) | **🟠 High** | `3/9` | Global / Multi-file |
+| [`VULN-20`](#vuln-20) | [Command Argument Injection via `escapeshellcmd` & Reverse DNS Metacharacters](#vuln-20) | **🟡 Medium** | `2/9` | Global / Multi-file |
+| [`VULN-21`](#vuln-21) | [Verbose Production Error Display & Information Disclosure (`display_errors`)](#vuln-21) | **🟡 Medium** | `2/9` | Global / Multi-file |
+| [`VULN-22`](#vuln-22) | [Unrestricted Open Redirects via Referer & Query Parameters (`mod.php`, `vote.php`)](#vuln-22) | **🟡 Medium** | `2/9` | Global / Multi-file |
+| [`VULN-23`](#vuln-23) | [Authorization Bypass in Thread Decryption Endpoint (`decrypt.php`)](#vuln-23) | **🟠 High** | `2/9` | Global / Multi-file |
+| [`VULN-24`](#vuln-24) | [IPv4/IPv6 Range Ban Logic Flaw Causing Broad Collateral Bans](#vuln-24) | **🟠 High** | `1/9` | Global / Multi-file |
+| [`VULN-25`](#vuln-25) | [Hardcoded Backdoor for IP Address Obfuscation (`inc/functions.php`)](#vuln-25) | **🟡 Medium** | `1/9` | Global / Multi-file |
+| [`VULN-26`](#vuln-26) | [Unencrypted HTTP Transmission of Visitor IP Addresses & API Keys](#vuln-26) | **🟠 High** | `2/9` | Global / Multi-file |
+| [`VULN-27`](#vuln-27) | [Callable Execution from Board Config via Shop Effects (`shop.php`)](#vuln-27) | **🟠 High** | `1/9` | Global / Multi-file |
+| [`VULN-28`](#vuln-28) | [Unauthenticated LiveKit Voice Chat Token Issuance & Participant Spoofing (`voice.php`)](#vuln-28) | **🟠 High** | `1/9` | Global / Multi-file |
+| [`VULN-29`](#vuln-29) | [Algorithmic Denial of Service via Full-Scan SQL Search (`search.php`)](#vuln-29) | **🟡 Medium** | `1/9` | Global / Multi-file |
+| [`VULN-30`](#vuln-30) | [Excessive Error Logging of Sensitive User Credentials and Tokens](#vuln-30) | **🟡 Medium** | `1/9` | Global / Multi-file |
+| [`VULN-31`](#vuln-31) | [Hardcoded Shadow Ban IP Addresses and Password Lists in Source](#vuln-31) | **🟡 Medium** | `1/9` | Global / Multi-file |
+| [`VULN-32`](#vuln-32) | [Weak Pseudo-Random Number Generation (PRNG) for Security Tokens](#vuln-32) | **🔵 Low** | `2/9` | Global / Multi-file |
+| [`VULN-33`](#vuln-33) | [Insecure Cookie Configuration (`js` Cookie Missing Secure/HttpOnly Flags)](#vuln-33) | **🔵 Low** | `1/9` | Global / Multi-file |
+| [`VULN-34`](#vuln-34) | [Denial-of-Service Assets in Webroot (`gzip_bomb.gz`, `redis_flush.sh`)](#vuln-34) | **🟡 Medium** | `1/9` | Global / Multi-file |
+
+---
+
+## Detailed Vulnerability Findings
+
+### <a id="vuln-01"></a>[VULN-01] Hardcoded Master Cryptographic Keys, API Tokens & Cloud Secrets
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **9 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `5e432690`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-01` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-798 (Use of Hard-coded Credentials), CVSS 9.8 (Critical) |
+| **Primary Target Locations** | [`inc/config.php`](file:///D:/Project/soyjaksource/myshare/inc/config.php)<br>[`voice.php`](file:///D:/Project/soyjaksource/myshare/voice.php#L7-L11)<br>[`pass.php`](file:///D:/Project/soyjaksource/myshare/pass.php#L6)<br>[`ip-token.php`](file:///D:/Project/soyjaksource/myshare/ip-token.php#L8-L10)<br>[`post.php`](file:///D:/Project/soyjaksource/myshare/post.php#L1250)<br>[`inc/powcaptcha/powcaptcha.php`](file:///D:/Project/soyjaksource/myshare/inc/powcaptcha/powcaptcha.php#L7) |
+
+#### Technical Description & Exploit Mechanics
+
+Production secrets, API tokens, cryptographic keys, and database passwords are committed in cleartext to the repository:
+  1. **LiveKit Cloud Credentials:** Hardcoded `API_KEY` (`APInhyM9hYV6kHq`) and `API_SECRET` (`rG1lWJz676hVn9K3BfV6kHq...`) in `voice.php` allow unauthorized audio/video room creation, participant impersonation, and eavesdropping.
+  2. **HMAC Signing Secrets:** Embedded static salts (`b90558b76fc80df966023340f...`) in `pass.php` allow attackers to forge Soygem "pass" tokens, bypassing CAPTCHAs, rate limits, and proxy checks.
+  3. **Symmetric Encryption Keys:** Hardcoded 128-bit/256-bit AES keys in `ip-token.php` allow arbitrary synthesis of valid client integrity tokens.
+  4. **Third-Party API Keys & Webhooks:** Google reCAPTCHA v3 private secret keys, ProxyCheck API keys, and Discord modlog webhook URLs are embedded directly in source code.
+  5. **Default Cookie & CSRF Salts:** `inc/config.php` defaults to fixed salts (`$config['cookies']['salt']`), rendering tokens predictable across all default installations.
+
+---
+
+---
+
+### <a id="vuln-02"></a>[VULN-02] Path Traversal & Filesystem Probing Oracle in Banner Handler (`b2.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **9 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `5e432690`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-02` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-22 (Improper Limitation of a Pathname to a Restricted Directory), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+The banner redirect endpoint handles dynamic board banners by reading `$_GET['board']`:
+  ```php
+  $board = $_GET['board'] ?? 'soy';
+  $files = scandir("static/board_banners/$board", SCANDIR_SORT_NONE);
+  $files = array_diff($files, ['.', '..']);
+  if (empty($files)) {
+      header("Location: /static/board_banners/default.png");
+      exit;
+  }
+  $name = $files[array_rand($files)];
+  header("Location: /static/board_banners/$board/$name", true, 303);
+  ```
+  `$board` is concatenated into filesystem paths without directory traversal (`../`) filtering or whitelist validation. An attacker passing `board=../../` can traverse above the web root. If a directory contains files, `scandir()` succeeds and redirects to `/static/board_banners/../../[filename]`, creating an oracle to enumerate server directories and file structures.
+
+---
+
+---
+
+### <a id="vuln-03"></a>[VULN-03] Universal Anti-CSRF Token Bypass in Moderator Panel (`$token = true`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **8 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `5e432690`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-03` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-352 (Cross-Site Request Forgery), CVSS 9.8 (Critical) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+In `mod.php`, anti-CSRF token verification is intentionally broken by a hardcoded variable override:
+  ```php
+  $token = true;
+  if ($token != make_secure_link_token($action)) {
+      error($config['error']['csrf']);
+  }
+  ```
+  Because comparison uses PHP loose inequality (`!=`), the boolean `true` comparison coerces the HMAC returned by `make_secure_link_token()` into a boolean (`(bool)"any_non_empty_string" === true`). Thus, `true != true` evaluates to `false`, completely bypassing token validation for any state-changing moderator action.
+
+---
+
+---
+
+### <a id="vuln-04"></a>[VULN-04] Trivial IP Deanonymization via AES-CTR Keystream Reuse & Static IV
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **8 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-04` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-329 (Generation of Predictable IV with CBC/CTR Mode), CWE-327 (Broken Crypto), CVSS 9.1 (Critical) |
+| **Primary Target Locations** | [`ip-token.php`](file:///D:/Project/soyjaksource/myshare/ip-token.php)<br>[`pass.php`](file:///D:/Project/soyjaksource/myshare/pass.php)<br>[`inc/functions.php`](file:///D:/Project/soyjaksource/myshare/inc/functions.php) |
+
+#### Technical Description & Exploit Mechanics
+
+User IP cloaking, voice chat participant mapping, and anti-bot token systems use AES-CTR encryption with a hardcoded static initialization vector (IV) or static HMAC salts:
+  $$C_1 = P_1 \oplus K_s, \quad C_2 = P_2 \oplus K_s \implies C_1 \oplus C_2 = P_1 \oplus P_2$$
+  Because the keystream $K_s$ remains identical across encryption operations, XORing two ciphertexts cancels out the keystream. Given known structure in IPv4 addresses and timestamps, an attacker can trivially recover cleartext visitor IP addresses en masse.
+
+---
+
+---
+
+### <a id="vuln-05"></a>[VULN-05] Reflected Cross-Site Scripting (XSS) via `javascript:` Pseudo-Protocol in Media Player (`player.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **8 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-05` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-79 (Improper Neutralization of Input During Web Page Generation), CVSS 6.1 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+In `player.php`, user-supplied input from `$_GET['v']` is extracted and echoed into the HTML document:
+  ```php
+  $v = @(string)$_GET['v'];
+  ...
+  <a href="<?= $v ?>" download>[Download]</a>
+  ```
+  While `htmlspecialchars()` or basic character filtering may be partially applied, URL schemes are never validated. An attacker supplying `player.php?v=javascript:alert(document.cookie)` creates an anchor link that executes arbitrary JavaScript in the victim's browser context when clicked.
+
+---
+
+---
+
+### <a id="vuln-06"></a>[VULN-06] Unauthenticated Post Deletion & State Manipulation via CSRF in `vote.php`
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **7 of 9** available audit reports (`8e693d74`, `3643eaa6`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-06` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-352 (Cross-Site Request Forgery), CWE-284 (Improper Access Control), CVSS 7.1 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+`vote.php` accepts `GET` requests (`?board=soy&id=123`) to cast deletion votes on posts:
+  ```php
+  if (isset($_GET['board']) && isset($_GET['id'])) {
+      if ($post['mediator_votes'] + 1 >= 5) {
+          modLog('Deleting post #' . $_GET['id'] . ' as it reached the voting threshold');
+          deletePost($_GET['id']);
+      } else {
+          $query = prepare(sprintf('UPDATE ``posts_%s`` SET `mediator_votes` = :votes WHERE `id` = :id', $_GET['board']));
+      }
+  }
+  ```
+  State-altering voting and post deletion occur via HTTP `GET` with no CSRF tokens. Embedding `<img src="https://example.com/vote.php?board=soy&id=123">` on external websites or within forum posts triggers automated background voting from visitors, permanently deleting threads once 5 votes are logged.
+
+---
+
+---
+
+### <a id="vuln-07"></a>[VULN-07] Unauthenticated Staff Account Creation & Plaintext Credential Exposure (`tools/create_mediators.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **6 of 9** available audit reports (`3643eaa6`, `56468d00`, `88c733dd`, `c6fa5ed1`, `a3b97157`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-07` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-306 (Missing Authentication for Critical Function), CWE-798, CVSS 10.0 (Critical) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+This maintenance script was deployed directly into the webroot without CLI-only restrictions:
+  ```php
+  require_once dirname(__FILE__) . '/../inc/bootstrap.php';
+  // Generates 100 mediator accounts with random passwords
+  // Dumps plaintext usernames and passwords directly to stdout/HTTP response
+  ```
+  Any unauthenticated remote attacker requesting `GET /tools/create_mediators.php` causes the server to insert 100 staff mediator accounts into the database and stream their plaintext credentials directly over HTTP, granting immediate administrative panel access (`mod.php`).
+
+---
+
+---
+
+### <a id="vuln-08"></a>[VULN-08] Stored Cross-Site Scripting (XSS) via Disabled Twig Auto-Escaping & Unsanitized Post Fields
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **6 of 9** available audit reports (`3643eaa6`, `6bb7274b`, `56468d00`, `c6fa5ed1`, `5e432690`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-08` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-79 (Improper Neutralization of Input During Web Page Generation), CVSS 8.8 (High) |
+| **Primary Target Locations** | [`inc/template.php:17`](file:///D:/Project/soyjaksource/myshare/inc/template.php#L17)<br>[`post.php:2223`](file:///D:/Project/soyjaksource/myshare/post.php#L2223)<br>[`templates/mod/report.html:5`](file:///D:/Project/soyjaksource/myshare/templates/mod/report.html#L5)<br>[`templates/mod/log.html:42`](file:///D:/Project/soyjaksource/myshare/templates/mod/log.html#L42) |
+
+#### Technical Description & Exploit Mechanics
+
+Twig template environment initialization explicitly disables auto-escaping:
+  ```php
+  $twig = new \Twig\Environment($loader, [
+      'autoescape' => false,
+      'cache' => $config['dir']['template_cache']
+  ]);
+  ```
+  Post subjects, report reasons, voice chat room names, and user modifier tags are inserted into templates as raw unescaped strings (e.g. `{{ log.text }}`, `{{ report.reason }}`). An unauthenticated poster can embed `<script>` payloads into public board posts, report queues, or modlogs, executing arbitrary JavaScript within staff sessions.
+
+---
+
+---
+
+### <a id="vuln-09"></a>[VULN-09] Concurrency / TOCTOU Race Condition in Item Shop (`shop.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **6 of 9** available audit reports (`3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-09` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-362 (Concurrent Execution using Shared Resource with Improper Synchronization), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+The item purchase balance validation and wallet balance updates are split across non-atomic operations:
+  ```php
+  // shop.php
+  if (get_shop_balance($_POST['password']) - $item['price'] < 0) {
+      error('You cannot afford this item.');
+  }
+  add_shop_balance($_POST['password'], $item['price'] * -1);
+
+  // inc/functions.php
+  function add_shop_balance($password, $amount) {
+      $balance = $redis->get($wallet);
+      $redis->set($wallet, $balance + $amount);
+  }
+  ```
+  Because balance checking and Redis `set()` operations are not wrapped in atomic Lua scripts, transactions (`WATCH/MULTI`), or locks, sending parallel HTTP requests allows double-spending coins to obtain unlimited shop items.
+
+---
+
+---
+
+### <a id="vuln-10"></a>[VULN-10] Unprotected Administrative & Maintenance Scripts Accessible via Webroot (`tools/`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **6 of 9** available audit reports (`3643eaa6`, `6bb7274b`, `56468d00`, `88c733dd`, `c6fa5ed1`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-10` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-306 (Missing Authentication), CWE-552, CVSS 8.6 (High) |
+| **Primary Target Locations** | [`tools/rebuild.php`](file:///D:/Project/soyjaksource/myshare/tools/rebuild.php)<br>[`tools/delete_orphans.php`](file:///D:/Project/soyjaksource/myshare/tools/delete_orphans.php)<br>[`tools/peru.php`](file:///D:/Project/soyjaksource/myshare/tools/peru.php)<br>[`tools/purge_user_info.php`](file:///D:/Project/soyjaksource/myshare/tools/purge_user_info.php) |
+
+#### Technical Description & Exploit Mechanics
+
+Scripts designed for internal maintenance fail to verify `php_sapi_name() === 'cli'` or check staff permissions:
+  1. `tools/delete_orphans.php`: Unauthenticated HTTP requests delete unlinked database records and media files.
+  2. `tools/peru.php`: Queries `SELECT DISTINCT ip FROM posts_*` and prints visitor IPs directly to the browser.
+  3. `tools/purge_user_info.php`: Overwrites database IP addresses (`0.0.0.0`), nullifies passwords and hashes, and flushes cache, allowing an attacker to wipe forensic audit trails without authentication.
+
+---
+
+---
+
+### <a id="vuln-11"></a>[VULN-11] Arbitrary PHP Code Injection / RCE via Staff Usernames in Config Web Editor (`inc/mod/pages.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **5 of 9** available audit reports (`8e693d74`, `6bb7274b`, `56468d00`, `88c733dd`, `5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-11` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-94 (Improper Control of Generation of Code), CVSS 9.1 (Critical) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+The web configuration editor serializes config updates into PHP code and writes them to disk (`file_put_contents`):
+  ```php
+  // inc/mod/pages.php
+  $config_code = "<?php\n// Generated by " . $mod['username'] . "\n" . $_POST['code'];
+  file_put_contents($config_file, $config_code);
+  shell_exec_error('php -l ' . $config_file);
+  ```
+  If an attacker creates an account with PHP delimiters in the username (e.g. `test\n*/ system($_GET['c']); /*`), or passes unescaped PHP code via `$_POST['code']` (facilitated by the CSRF bypass in Finding 3), arbitrary code is written to `inc/secrets.php` or board config files, executing on every subsequent HTTP request.
+
+---
+
+---
+
+### <a id="vuln-12"></a>[VULN-12] Server-Side Request Forgery (SSRF) & Microservice Parameter Injection
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **5 of 9** available audit reports (`8e693d74`, `6bb7274b`, `56468d00`, `88c733dd`, `5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-12` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-918 (Server-Side Request Forgery), CVSS 7.5 (High) |
+| **Primary Target Locations** | [`post.php:2132-2174`](file:///D:/Project/soyjaksource/myshare/post.php#L2132-L2174)<br>[`inc/mccaptcha/verify.php:17-19`](file:///D:/Project/soyjaksource/myshare/inc/mccaptcha/verify.php#L17-L19)<br>[`inc/powcaptcha/verify.php:20-22`](file:///D:/Project/soyjaksource/myshare/inc/powcaptcha/verify.php#L20-L22) |
+
+#### Technical Description & Exploit Mechanics
+
+1. **Upload-by-URL SSRF:** `post.php` fetches remote media via cURL without filtering loopback (`127.0.0.1`), link-local (`169.254.169.254`), or RFC 1918 private subnets (`10.0.0.0/8`, `192.168.0.0/16`), allowing port scans and access to cloud metadata endpoints.
+  2. **Socket Parameter Injection:** In `verify.php`, user tokens and IP addresses are concatenated directly into socket queries sent to local background CAPTCHA daemons without newline stripping or URL encoding, permitting HTTP parameter pollution and internal daemon command injection.
+
+---
+
+---
+
+### <a id="vuln-13"></a>[VULN-13] SQL Injection Vulnerabilities (Search, Relocation, Appeals, Raw Query)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **5 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `88c733dd`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-13` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-89 (Improper Neutralization of Special Elements used in an SQL Command), CVSS 8.8 (High/Critical) |
+| **Primary Target Locations** | [`inc/mod/pages.php:1877-1885`](file:///D:/Project/soyjaksource/myshare/inc/mod/pages.php#L1877-L1885) (`mod_move_reply`)<br>[`inc/mod/pages.php:4320-4340`](file:///D:/Project/soyjaksource/myshare/inc/mod/pages.php#L4320-L4340) (`mod_debug_sql`)<br>[`inc/mod/pages.php:267-281`](file:///D:/Project/soyjaksource/myshare/inc/mod/pages.php#L267-L281) (Staff Search Operator Precedence)<br>[`post.php:4048`](file:///D:/Project/soyjaksource/myshare/post.php#L4048)<br>[`search.php`](file:///D:/Project/soyjaksource/myshare/search.php) |
+
+#### Technical Description & Exploit Mechanics
+
+1. **Second-Order SQLi in Post Relocation:** `$_POST['board']` is formatted into table names: `sprintf('SELECT * FROM ``posts_%s`` WHERE ...', $targetBoard)`. Injecting SQL syntax breaks the backtick regex replacement in `inc/database.php`, allowing arbitrary SQL execution.
+  2. **Unchecked Raw SQL Debug Endpoint:** `mod_debug_sql()` accepts `$_POST['query']` and executes raw SQL queries directly via PDO without checking anti-CSRF tokens.
+  3. **SQL Operator Precedence Logic Flaw:** Search queries construct chained clauses: `field1 LIKE 'term1' OR field2 LIKE 'term1' AND field1 LIKE 'term2'`. Because `AND` takes precedence over `OR`, search boundaries fail and leak unintended posts.
+
+---
+
+---
+
+### <a id="vuln-14"></a>[VULN-14] PHP Object Injection via Untrusted Cookie Deserialization in Mod Dashboard (`mod.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **4 of 9** available audit reports (`6bb7274b`, `56468d00`, `a3b97157`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-14` |
+| **Severity Level** | **🔴 Critical** |
+| **Vulnerability Classification** | CWE-502 (Deserialization of Untrusted Data), CVSS 9.8 (Critical) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+The moderation dashboard retrieves session credentials from `$_COOKIE['mod_login']` and passes the value into native PHP `unserialize()` without signature verification:
+  ```php
+  $session = unserialize($_COOKIE['mod_login']);
+  ```
+  An attacker can supply serialized PHP objects to invoke magic methods (`__destruct`, `__wakeup`, `__toString`), triggering Property-Oriented Programming (POP) chains in installed libraries to achieve arbitrary remote code execution.
+
+---
+
+---
+
+### <a id="vuln-15"></a>[VULN-15] Unauthenticated Permanent IP Self-Ban / Denial of Service via `b4.php`
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **4 of 9** available audit reports (`8e693d74`, `88c733dd`, `5e432690`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-15` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-284 (Improper Access Control), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+`b4.php` functions as an unauthenticated honeypot endpoint:
+  ```php
+  if ($_SERVER['REQUEST_METHOD'] !== 'POST') die();
+  $id = $_POST['i'];
+  switch ($id) {
+      case 1: $reason = 'Residential proxies or residential VPNs are forbidden.'; break;
+  }
+  Bans::new_ban($_SERVER['REMOTE_ADDR'], $reason, null, false, 137, false);
+  ```
+  Sending `POST /b4.php` with `i=1` causes the server to issue a permanent ban (`expires = null`) against `$_SERVER['REMOTE_ADDR']`. An attacker embedding a hidden auto-submitting form can ban visiting users from the site, or ban shared gateway IPs (universities, cellular carrier CGNATs, Tor exit nodes).
+
+---
+
+---
+
+### <a id="vuln-16"></a>[VULN-16] Public Exposure of Unlocked Active Installer (`install.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **4 of 9** available audit reports (`8e693d74`, `3643eaa6`, `88c733dd`, `a3b97157`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-16` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-749 (Exposed Dangerous Method or Function), CVSS 8.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+`install.php` remains present in the public webroot. If the `.installed` lockfile is removed or unlinked, any user can execute the installer setup flow, overwrite database credentials in `inc/secrets.php`, reset administrative passwords, or inject PHP code into generated config variables.
+
+---
+
+---
+
+### <a id="vuln-17"></a>[VULN-17] Exposure of Sensitive Backup Files, `.git` Repository & Database Dumps
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **4 of 9** available audit reports (`8e693d74`, `3643eaa6`, `6bb7274b`, `c6fa5ed1`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-17` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-552 (Files or Directories Accessible to External Parties), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Editor swap/backup files (`.save`, `.old`) and database structure dumps (`install.sql`) reside directly in the webroot. Because web servers serve unknown file extensions as plain text (`text/plain`), attackers can download raw PHP source code and database structures directly over HTTP without parsing.
+
+---
+
+---
+
+### <a id="vuln-18"></a>[VULN-18] Arbitrary File Read via Path Traversal in Routing Layer (`smart_build.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-18` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-22 (Path Traversal), CVSS 8.6 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+In `smart_build.php`:
+  ```php
+  $request = $_SERVER['REQUEST_URI'];
+  $route = route($request);
+  $request = '.' . $request;
+  if (!file_exists($request)) { die_404(); }
+  $file = fopen($request, 'r');
+  fpassthru($file);
+  ```
+  When `$route` returns false, `./` is prepended to the unvalidated URI before passing it to `fpassthru()`. Traversing backwards via `/../../inc/secrets.php` reads and streams raw PHP source code and credentials to the client.
+
+---
+
+---
+
+### <a id="vuln-19"></a>[VULN-19] Complete CAPTCHA Bypass via Arbitrary `pass` Cookie & Securimage Race Conditions
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **3 of 9** available audit reports (`8e693d74`, `56468d00`, `991dcf68`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-19` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-287 (Improper Authentication), CWE-362 (Race Condition), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+1. **Premature Return in `mccaptcha_required()`:**
+     ```php
+     if (isset($_COOKIE['pass'])) {
+         return false;
+         if (verify_pass($_COOKIE['pass']) && fetch_pass($_COOKIE['pass'])) { return false; }
+     }
+     ```
+     An unconditional `return false;` precedes verification, bypassing CAPTCHAs for any client sending `Cookie: pass=anything`.
+  2. **Non-Atomic Solved Token Deletion in `securimage.php`:** A `SELECT` query checks captcha validity before a separate `DELETE` query runs. Rapid parallel submissions can replay a single solved CAPTCHA token multiple times within the race window.
+
+---
+
+---
+
+### <a id="vuln-20"></a>[VULN-20] Command Argument Injection via `escapeshellcmd` & Reverse DNS Metacharacters
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`56468d00`, `c6fa5ed1`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-20` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-88 (Improper Neutralization of Argument Delimiters), CWE-78, CVSS 6.8 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+1. `computeImageHash()` executes: `escapeshellcmd("python3 $pythonScriptPath $upload")`. Because `escapeshellcmd` does not escape spaces or command-line flags, spaces in filenames allow injecting additional command switches into Python.
+  2. `rDNS()` and `DNS()` execute `shell_exec_error('host -W 3 ' . $ip_addr)`. The hostname output from reverse DNS lookups is interpolated into subsequent shell commands without `escapeshellarg()`, allowing shell command injection via malicious DNS PTR records.
+
+---
+
+---
+
+### <a id="vuln-21"></a>[VULN-21] Verbose Production Error Display & Information Disclosure (`display_errors`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`8e693d74`, `3643eaa6`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-21` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-209 (Generation of Error Message Containing Sensitive Information), CVSS 5.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Production entrypoints execute `ini_set('display_errors', 1);`. When PHP runtime errors, PDO database timeouts, or syntax issues occur, complete stack traces, absolute server filesystem paths, and internal configuration arrays are rendered directly into HTTP responses.
+
+---
+
+---
+
+### <a id="vuln-22"></a>[VULN-22] Unrestricted Open Redirects via Referer & Query Parameters (`mod.php`, `vote.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`8e693d74`, `5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-22` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-601 (URL Redirection to Untrusted Site), CVSS 6.1 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+1. In `mod.php`: If `$_GET['status']` and `$_GET['r']` are set, the application issues `header('Location: ' . $_GET['r'])` without validating hostname allowlists.
+  2. In `vote.php`: `header('Location: ' . $_SERVER['HTTP_REFERER'])` reflects untrusted `Referer` headers directly, facilitating credential-harvesting phishing campaigns.
+
+---
+
+---
+
+### <a id="vuln-23"></a>[VULN-23] Authorization Bypass in Thread Decryption Endpoint (`decrypt.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`3643eaa6`, `6bb7274b`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-23` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-287 (Improper Authentication), CVSS 8.2 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+In `decrypt.php`:
+  ```php
+  check_login(false);
+  $is_mod = isset($_COOKIE['mod']);
+  $pass_id = get_pass_id($_COOKIE['pass']);
+  if (!$is_mod && !isset($pass_id)) {
+      // Enforce age checks, post counts, bans, integrity verification...
+  }
+  ```
+  `check_login(false)` only populates `$mod` if the session is valid, but the script checks `isset($_COOKIE['mod'])`. An attacker sending `Cookie: mod=1` sets the cookie variable, completely bypassing all posting requirements and decrypting restricted threads.
+
+---
+
+---
+
+### <a id="vuln-24"></a>[VULN-24] IPv4/IPv6 Range Ban Logic Flaw Causing Broad Collateral Bans
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`88c733dd`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-24` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-697 (Incorrect Comparison), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+MySQL range query: `WHERE (:ip >= ipstart AND :ip <= ipend)`.
+  When `:ip` is an IPv4 address (4 bytes binary) and `ipstart`/`ipend` represent an IPv6 CIDR block (16 bytes binary), MySQL performs a lexicographical byte-by-byte comparison between unequal string lengths. Any IPv4 address whose leading bytes match the prefix of an IPv6 range ban evaluates to true, resulting in broad accidental bans for unrelated IPv4 users.
+
+---
+
+---
+
+### <a id="vuln-25"></a>[VULN-25] Hardcoded Backdoor for IP Address Obfuscation (`inc/functions.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`5e432690`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-25` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-912 (Hidden Functionality / Backdoor), CVSS 5.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+A hardcoded switch statement silently replaces visitor IP address `86.174.190.162` with `5.68.21.171` before logging and database insertion:
+  ```php
+  switch ($ipobfuscationprepare) {
+      case '86.174.190.162':
+          $ipobfuscated = '5.68.21.171';
+          break;
+      default:
+          $ipobfuscated = $ipobfuscationprepare;
+          break;
+  }
+  ```
+  This backdoor corrupts moderation logging, evades audit attribution, and bypasses IP bans for that specific user.
+
+---
+
+---
+
+### <a id="vuln-26"></a>[VULN-26] Unencrypted HTTP Transmission of Visitor IP Addresses & API Keys
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`3643eaa6`, `6bb7274b`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-26` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-319 (Cleartext Transmission of Sensitive Information), CVSS 7.4 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+ProxyCheck and IP intelligence lookups query external endpoints over unencrypted HTTP:
+  ```php
+  $ch = curl_init("http://proxycheck.io/v2/" . $ip . "?key=" . $key);
+  ```
+  Network adversaries in the transmission path can eavesdrop on visitor IP addresses and capture the site's ProxyCheck API key.
+
+---
+
+---
+
+### <a id="vuln-27"></a>[VULN-27] Callable Execution from Board Config via Shop Effects (`shop.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-27` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-94 (Code Injection), CVSS 8.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+```php
+  if (is_callable($item['effect'])) {
+      $post['board'] = $board['uri'];
+      $item['effect']($post);
+  }
+  ```
+  Item effects are loaded from board config arrays. When combined with the CSRF bypass or config editor injection, an attacker can set `effect` to functions like `system` or `exec`, causing any user purchasing the item to trigger remote command execution.
+
+---
+
+---
+
+### <a id="vuln-28"></a>[VULN-28] Unauthenticated LiveKit Voice Chat Token Issuance & Participant Spoofing (`voice.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-28` |
+| **Severity Level** | **🟠 High** |
+| **Vulnerability Classification** | CWE-284 (Improper Access Control), CVSS 7.5 (High) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+`voice.php` issues signed LiveKit JWT access tokens for any requested `room` parameter without requiring authentication, CAPTCHA verification, or rate limits. Remote users can generate unlimited tokens to join, create, and eavesdrop on private voice channels.
+
+---
+
+---
+
+### <a id="vuln-29"></a>[VULN-29] Algorithmic Denial of Service via Full-Scan SQL Search (`search.php`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`3643eaa6`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-29` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-400 (Uncontrolled Resource Consumption), CVSS 5.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Search queries format input with leading wildcards: `WHERE body LIKE '%keyword%' ESCAPE '!'`. Leading wildcards bypass B-Tree indexes, forcing disk-bound full table scans across massive post tables and exhausting database connection pools.
+
+---
+
+---
+
+### <a id="vuln-30"></a>[VULN-30] Excessive Error Logging of Sensitive User Credentials and Tokens
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-30` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-532 (Insertion of Sensitive Information into Log File), CVSS 5.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Debug statements write full HTTP request headers, post deletion passwords (`error_log("password: ". $_POST['password'])`), and decrypted client integrity tokens to server error logs, exposing sensitive data to local users or through log-disclosure vulnerabilities.
+
+---
+
+---
+
+### <a id="vuln-31"></a>[VULN-31] Hardcoded Shadow Ban IP Addresses and Password Lists in Source
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-31` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-798 (Use of Hard-coded Credentials), CVSS 4.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Dozens of static IP addresses, ban hashes, and moderation bypass passwords are hardcoded in `$shadowBannedIPs` within `post.php`, leaking identifiable network attribution and moderation criteria in the codebase.
+
+---
+
+---
+
+### <a id="vuln-32"></a>[VULN-32] Weak Pseudo-Random Number Generation (PRNG) for Security Tokens
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **2 of 9** available audit reports (`8e693d74`, `3643eaa6`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-32` |
+| **Severity Level** | **🔵 Low** |
+| **Vulnerability Classification** | CWE-338 (Use of Cryptographically Weak PRNG), CVSS 3.7 (Low) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+Security tokens, participant names, and CAPTCHA challenge strings rely on non-cryptographic random generators (`rand()` and custom `XorShift` algorithms) rather than `random_bytes()`, enabling sequence prediction and token forgery.
+
+---
+
+---
+
+### <a id="vuln-33"></a>[VULN-33] Insecure Cookie Configuration (`js` Cookie Missing Secure/HttpOnly Flags)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-33` |
+| **Severity Level** | **🔵 Low** |
+| **Vulnerability Classification** | CWE-614 (Sensitive Cookie in HTTPS Session Without Secure Attribute), CVSS 3.1 (Low) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+The `js` preference cookie is issued with both `secure` and `httponly` flags explicitly disabled (`false`), allowing it to be read by client-side scripts via XSS and transmitted over plaintext HTTP connections.
+
+---
+
+---
+
+### <a id="vuln-34"></a>[VULN-34] Denial-of-Service Assets in Webroot (`gzip_bomb.gz`, `redis_flush.sh`)
+
+> [!NOTE]
+> **Audit Occurrence Disclaimer:** Found in **1 of 9** available audit reports (`8e693d74`).
+
+| Specification | Metric / Details |
+| :--- | :--- |
+| **Vulnerability Identifier** | `VULN-34` |
+| **Severity Level** | **🟡 Medium** |
+| **Vulnerability Classification** | CWE-400 (Uncontrolled Resource Consumption), CWE-552, CVSS 5.3 (Medium) |
+| **Primary Target Locations** | `Repository-wide` |
+
+#### Technical Description & Exploit Mechanics
+
+A 1MB gzip compression bomb and a shell script executing `redis-cli FLUSHALL` are stored directly in the webroot. If misconfigured web server rules execute `.sh` scripts or serve the bomb to legitimate visitors, server rate limits, active sessions, and caches can be instantly wiped.
+
+---
